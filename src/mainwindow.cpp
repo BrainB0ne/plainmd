@@ -25,6 +25,7 @@
 #include <QCryptographicHash>
 #include <QTextBlock>
 #include <QTextFragment>
+#include <QTextList>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -579,55 +580,77 @@ QString MainWindow::resolveExternalImages(const QString &markdownContent)
     return result;
 }
 
+static bool blockIsCode(const QTextBlock &block)
+{
+    bool allMonospace = true;
+    bool hasText = false;
+
+    for (QTextBlock::iterator it = block.begin(); !it.atEnd(); ++it) {
+        QTextFragment frag = it.fragment();
+        if (!frag.isValid()) continue;
+        hasText = true;
+        QString family = frag.charFormat().font().family();
+        bool isMono = frag.charFormat().font().fixedPitch() ||
+                      family.contains("mono", Qt::CaseInsensitive) ||
+                      family.contains("Courier", Qt::CaseInsensitive) ||
+                      family.contains("Consolas", Qt::CaseInsensitive) ||
+                      family.contains("Menlo", Qt::CaseInsensitive) ||
+                      family.contains("Liberation", Qt::CaseInsensitive);
+        if (!isMono) {
+            allMonospace = false;
+            break;
+        }
+    }
+    return hasText && allMonospace;
+}
+
 void MainWindow::styleCodeBlocks()
 {
     QTextDocument *doc = m_editor->document();
     if (!doc) return;
 
+    // First pass: collect code-block flags so we can group consecutive blocks.
+    QList<QTextBlock> blocks;
+    QList<bool> isCode;
+    for (QTextBlock block = doc->begin(); block != doc->end(); block = block.next()) {
+        blocks.append(block);
+        isCode.append(blockIsCode(block));
+    }
+
     QTextCursor cursor(doc);
     cursor.beginEditBlock();
 
-    for (QTextBlock block = doc->begin(); block != doc->end(); block = block.next()) {
-        // Detect code blocks: in Qt markdown output, each line of a fenced
-        // code block is a separate QTextBlock where every fragment uses a
-        // monospace font. Normal paragraphs with inline code have mixed fonts.
-        bool allMonospace = true;
-        bool hasText = false;
+    // Second pass: style each block, collapsing margins for consecutive code lines.
+    for (int i = 0; i < blocks.size(); ++i) {
+        if (!isCode[i]) continue;
 
-        for (QTextBlock::iterator it = block.begin(); !it.atEnd(); ++it) {
-            QTextFragment frag = it.fragment();
-            if (!frag.isValid()) continue;
-            hasText = true;
-            QString family = frag.charFormat().font().family();
-            bool isMono = frag.charFormat().font().fixedPitch() ||
-                          family.contains("mono", Qt::CaseInsensitive) ||
-                          family.contains("Courier", Qt::CaseInsensitive) ||
-                          family.contains("Consolas", Qt::CaseInsensitive) ||
-                          family.contains("Menlo", Qt::CaseInsensitive) ||
-                          family.contains("Liberation", Qt::CaseInsensitive);
-            if (!isMono) {
-                allMonospace = false;
-                break;
-            }
+        // Remove from list if nested inside one (prevents bullet markers)
+        if (QTextList *list = blocks[i].textList()) {
+            int idx = list->itemNumber(blocks[i]);
+            if (idx >= 0)
+                list->removeItem(idx);
         }
 
-        if (hasText && allMonospace) {
-            // Light background for the block to fit the light theme
-            QTextBlockFormat bf = block.blockFormat();
-            bf.setBackground(QColor("#f4f4f4"));
-            cursor.setPosition(block.position());
-            cursor.setBlockFormat(bf);
+        bool prevCode = (i > 0) && isCode[i - 1];
+        bool nextCode = (i + 1 < blocks.size()) && isCode[i + 1];
 
-            // Dark text for every fragment in the block
-            for (QTextBlock::iterator it = block.begin(); !it.atEnd(); ++it) {
-                QTextFragment frag = it.fragment();
-                if (!frag.isValid()) continue;
-                QTextCharFormat cf = frag.charFormat();
-                cf.setForeground(QColor("#333333"));
-                cursor.setPosition(frag.position());
-                cursor.setPosition(frag.position() + frag.length(), QTextCursor::KeepAnchor);
-                cursor.setCharFormat(cf);
-            }
+        QTextBlockFormat bf = blocks[i].blockFormat();
+        bf.setBackground(QColor("#f4f4f4"));
+        bf.setTopMargin(prevCode ? 0 : 6);
+        bf.setBottomMargin(nextCode ? 0 : 6);
+        bf.setLeftMargin(8);
+        bf.setRightMargin(8);
+        cursor.setPosition(blocks[i].position());
+        cursor.setBlockFormat(bf);
+
+        for (QTextBlock::iterator it = blocks[i].begin(); !it.atEnd(); ++it) {
+            QTextFragment frag = it.fragment();
+            if (!frag.isValid()) continue;
+            QTextCharFormat cf = frag.charFormat();
+            cf.setForeground(QColor("#333333"));
+            cursor.setPosition(frag.position());
+            cursor.setPosition(frag.position() + frag.length(), QTextCursor::KeepAnchor);
+            cursor.setCharFormat(cf);
         }
     }
 
