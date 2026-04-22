@@ -23,6 +23,8 @@
 #include <QTimer>
 #include <QRegularExpression>
 #include <QCryptographicHash>
+#include <QTextBlock>
+#include <QTextFragment>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -112,23 +114,28 @@ void MainWindow::setMarkdownStyle()
         a { color: #3498db; text-decoration: none; }
         a:hover { text-decoration: underline; }
         code {
-            background-color: #f4f4f4;
+            background-color: #f0f0f0;
+            color: #c7254e;
             padding: 2px 6px;
-            border-radius: 3px;
-            font-family: Consolas, Monaco, "Courier New", monospace;
+            border-radius: 4px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
             font-size: 0.9em;
         }
         pre {
             background-color: #f4f4f4;
-            padding: 12px;
-            border-radius: 5px;
+            color: #333333;
+            padding: 16px;
+            border-radius: 8px;
             overflow-x: auto;
+            margin: 16px 0;
             border-left: 4px solid #3498db;
         }
         pre code {
             background: none;
+            color: #333333;
             padding: 0;
             border-radius: 0;
+            font-size: 0.95em;
         }
         blockquote {
             border-left: 4px solid #3498db;
@@ -400,6 +407,7 @@ void MainWindow::loadFile(const QString &filePath)
 
     m_editor->clear();
     m_editor->setMarkdown(processedContent);
+    styleCodeBlocks();
 
     // Resolve relative image paths against the markdown file's directory
     QUrl baseUrl = QUrl::fromLocalFile(QFileInfo(filePath).absolutePath() + "/");
@@ -569,6 +577,61 @@ QString MainWindow::resolveExternalImages(const QString &markdownContent)
     }
 
     return result;
+}
+
+void MainWindow::styleCodeBlocks()
+{
+    QTextDocument *doc = m_editor->document();
+    if (!doc) return;
+
+    QTextCursor cursor(doc);
+    cursor.beginEditBlock();
+
+    for (QTextBlock block = doc->begin(); block != doc->end(); block = block.next()) {
+        // Detect code blocks: in Qt markdown output, each line of a fenced
+        // code block is a separate QTextBlock where every fragment uses a
+        // monospace font. Normal paragraphs with inline code have mixed fonts.
+        bool allMonospace = true;
+        bool hasText = false;
+
+        for (QTextBlock::iterator it = block.begin(); !it.atEnd(); ++it) {
+            QTextFragment frag = it.fragment();
+            if (!frag.isValid()) continue;
+            hasText = true;
+            QString family = frag.charFormat().font().family();
+            bool isMono = frag.charFormat().font().fixedPitch() ||
+                          family.contains("mono", Qt::CaseInsensitive) ||
+                          family.contains("Courier", Qt::CaseInsensitive) ||
+                          family.contains("Consolas", Qt::CaseInsensitive) ||
+                          family.contains("Menlo", Qt::CaseInsensitive) ||
+                          family.contains("Liberation", Qt::CaseInsensitive);
+            if (!isMono) {
+                allMonospace = false;
+                break;
+            }
+        }
+
+        if (hasText && allMonospace) {
+            // Light background for the block to fit the light theme
+            QTextBlockFormat bf = block.blockFormat();
+            bf.setBackground(QColor("#f4f4f4"));
+            cursor.setPosition(block.position());
+            cursor.setBlockFormat(bf);
+
+            // Dark text for every fragment in the block
+            for (QTextBlock::iterator it = block.begin(); !it.atEnd(); ++it) {
+                QTextFragment frag = it.fragment();
+                if (!frag.isValid()) continue;
+                QTextCharFormat cf = frag.charFormat();
+                cf.setForeground(QColor("#333333"));
+                cursor.setPosition(frag.position());
+                cursor.setPosition(frag.position() + frag.length(), QTextCursor::KeepAnchor);
+                cursor.setCharFormat(cf);
+            }
+        }
+    }
+
+    cursor.endEditBlock();
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
