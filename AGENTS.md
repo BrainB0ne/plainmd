@@ -10,16 +10,24 @@
   nmake
   ```
 - Output lands in `release\mdviewer.exe` (or `debug\` if `CONFIG += debug`).
+- After building, run `windeployqt release\mdviewer.exe` to copy required Qt DLLs and plugins into the output folder.
 
 ## Qt6 Quirks
 - `QTextEdit::setZoomFactor()` **does not exist in Qt6**. Zoom reset is done by re-setting the base font point size (see `onZoomReset()`).
 - Markdown rendering is native via `QTextEdit::setMarkdown()` (no external parser).
+- **CSS limitation**: `QTextDocument` ignores `background-color`, `border-radius`, and `padding` on block-level elements like `<pre>`. Any styling that requires block backgrounds (e.g. code blocks) must be applied **after** `setMarkdown()` via `QTextBlockFormat` / `QTextCharFormat` manipulation (see `styleCodeBlocks()`).
 
 ## Architecture
 - Single-window desktop app. Entry: `src/main.cpp` → `MainWindow`.
 - `MainWindow` owns a `QSplitter` with a `QTreeView` (file tree) and a read-only `QTextEdit` (renderer).
 - `QFileSystemModel` filters `*.md`, `*.markdown`, `*.txt`.
 - Settings (`QSettings`, IniFormat) store last folder, recent files (max 10), window geometry, and splitter state.
+- **External images**: `QtNetwork` downloads remote images to `%TEMP%\mdviewer_images\` and replaces URLs with local paths before rendering (`resolveExternalImages()`).
+- **Code block styling**: post-processed after `setMarkdown()` by iterating `QTextDocument` blocks, detecting monospace-only blocks, and applying `QTextBlockFormat` background + margins.
+
+## Resources
+- `appicon.rc` + `icon.ico` → Windows exe icon (`RC_FILE` in `.pro`).
+- `resources.qrc` + `icon.png` → runtime window icon.
 
 ## Editing Guidelines
 - Keep all source files under `src/`. Update `mdviewer.pro` `SOURCES`/`HEADERS` when adding files.
