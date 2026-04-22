@@ -617,6 +617,18 @@ void MainWindow::styleCodeBlocks()
         isCode.append(blockIsCode(block));
     }
 
+    // Expand: empty blocks between two code blocks become code too.
+    for (int i = 0; i < blocks.size(); ) {
+        if (!isCode[i]) { ++i; continue; }
+
+        int j = i + 1;
+        while (j < blocks.size() && (isCode[j] || blocks[j].text().trimmed().isEmpty())) {
+            if (!isCode[j]) isCode[j] = true;
+            ++j;
+        }
+        i = j;
+    }
+
     QTextCursor cursor(doc);
     cursor.beginEditBlock();
 
