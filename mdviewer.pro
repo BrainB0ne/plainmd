@@ -7,10 +7,12 @@ TEMPLATE = app
 
 SOURCES += \
     src/main.cpp \
-    src/mainwindow.cpp
+    src/mainwindow.cpp \
+    src/filterproxymodel.cpp
 
 HEADERS += \
-    src/mainwindow.h
+    src/mainwindow.h \
+    src/filterproxymodel.h
 
 RC_FILE = appicon.rc
 RESOURCES += resources.qrc

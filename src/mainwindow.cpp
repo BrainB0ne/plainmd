@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "filterproxymodel.h"
 
 #include <QApplication>
 #include <QFileDialog>
@@ -68,10 +69,12 @@ void MainWindow::setupFileTree()
 
     m_fileModel = new QFileSystemModel(this);
     m_fileModel->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
-    m_fileModel->setNameFilters(QStringList() << "*.md" << "*.markdown" << "*.mdx" << "*.txt");
-    m_fileModel->setNameFilterDisables(false);
 
-    m_fileTree->setModel(m_fileModel);
+    m_proxyModel = new FilterProxyModel(this);
+    m_proxyModel->setNameFilters(QStringList() << "*.md" << "*.markdown" << "*.mdx" << "*.txt");
+    m_proxyModel->setSourceModel(m_fileModel);
+
+    m_fileTree->setModel(m_proxyModel);
     m_fileTree->hideColumn(1);
     m_fileTree->hideColumn(2);
     m_fileTree->hideColumn(3);
@@ -298,7 +301,8 @@ void MainWindow::onFileTreeClicked(const QModelIndex &index)
 {
     if (!index.isValid()) return;
 
-    QString filePath = m_fileModel->filePath(index);
+    QModelIndex sourceIndex = m_proxyModel->mapToSource(index);
+    QString filePath = m_fileModel->filePath(sourceIndex);
     QFileInfo info(filePath);
 
     if (info.isFile() && isMarkdownFile(filePath)) {
@@ -418,11 +422,12 @@ void MainWindow::loadFile(const QString &filePath)
     setWindowTitle(tr("%1 - Markdown Viewer").arg(QFileInfo(filePath).fileName()));
 
     // Select the file in the tree if visible
-    if (m_fileTree && m_fileModel) {
-        QModelIndex index = m_fileModel->index(filePath);
-        if (index.isValid()) {
-            m_fileTree->setCurrentIndex(index);
-            m_fileTree->scrollTo(index);
+    if (m_fileTree && m_fileModel && m_proxyModel) {
+        QModelIndex sourceIndex = m_fileModel->index(filePath);
+        QModelIndex proxyIndex = m_proxyModel->mapFromSource(sourceIndex);
+        if (proxyIndex.isValid()) {
+            m_fileTree->setCurrentIndex(proxyIndex);
+            m_fileTree->scrollTo(proxyIndex);
         }
     }
 
@@ -435,7 +440,9 @@ void MainWindow::loadFolder(const QString &folderPath)
 
     m_currentFolder = folderPath;
     m_fileModel->setRootPath(folderPath);
-    m_fileTree->setRootIndex(m_fileModel->index(folderPath));
+    QModelIndex sourceRoot = m_fileModel->index(folderPath);
+    QModelIndex proxyRoot = m_proxyModel->mapFromSource(sourceRoot);
+    m_fileTree->setRootIndex(proxyRoot);
     m_settings.setValue("lastFolder", folderPath);
 }
 
@@ -648,10 +655,10 @@ void MainWindow::styleCodeBlocks()
 
         QTextBlockFormat bf = blocks[i].blockFormat();
         bf.setBackground(QColor("#f4f4f4"));
-        bf.setTopMargin(prevCode ? 0 : 6);
-        bf.setBottomMargin(nextCode ? 0 : 6);
-        bf.setLeftMargin(8);
-        bf.setRightMargin(8);
+        bf.setTopMargin(prevCode ? 0 : 8);
+        bf.setBottomMargin(nextCode ? 0 : 8);
+        bf.setLeftMargin(16);
+        bf.setRightMargin(16);
         cursor.setPosition(blocks[i].position());
         cursor.setBlockFormat(bf);
 

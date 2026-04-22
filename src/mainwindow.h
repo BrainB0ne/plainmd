@@ -16,6 +16,7 @@
 #include <QNetworkReply>
 #include <QTimer>
 #include <QRegularExpression>
+#include "filterproxymodel.h"
 
 class MainWindow : public QMainWindow
 {
@@ -60,6 +61,7 @@ private:
     QTextEdit *m_editor = nullptr;
     QTreeView *m_fileTree = nullptr;
     QFileSystemModel *m_fileModel = nullptr;
+    FilterProxyModel *m_proxyModel = nullptr;
     QSplitter *m_splitter = nullptr;
 
     QMenu *m_recentMenu = nullptr;
