@@ -1,0 +1,29 @@
+# Build artifacts
+release/
+debug/
+Makefile*
+.qmake.stash
+*.exe
+*.dll
+*.lib
+*.exp
+*.obj
+*.o
+
+# Qt generated files
+moc_*.cpp
+moc_*.h
+ui_*.h
+qrc_*.cpp
+
+# IDE
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
