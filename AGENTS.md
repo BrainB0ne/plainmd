@@ -20,7 +20,7 @@
 ## Architecture
 - Single-window desktop app. Entry: `src/main.cpp` → `MainWindow`.
 - `MainWindow` owns a `QSplitter` with a `QTreeView` (file tree) and a read-only `QTextEdit` (renderer).
-- `QFileSystemModel` filters `*.md`, `*.markdown`, `*.txt`.
+- `QFileSystemModel` filters `*.md`, `*.markdown`, `*.mdx`, `*.txt`.
 - Settings (`QSettings`, IniFormat) store last folder, recent files (max 10), window geometry, and splitter state.
 - **External images**: `QtNetwork` downloads remote images to `%TEMP%\mdviewer_images\` and replaces URLs with local paths before rendering (`resolveExternalImages()`).
 - **Code block styling**: post-processed after `setMarkdown()` by iterating `QTextDocument` blocks, detecting monospace-only blocks, and applying `QTextBlockFormat` background + margins.

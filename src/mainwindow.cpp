@@ -68,7 +68,7 @@ void MainWindow::setupFileTree()
 
     m_fileModel = new QFileSystemModel(this);
     m_fileModel->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
-    m_fileModel->setNameFilters(QStringList() << "*.md" << "*.markdown" << "*.txt");
+    m_fileModel->setNameFilters(QStringList() << "*.md" << "*.markdown" << "*.mdx" << "*.txt");
     m_fileModel->setNameFilterDisables(false);
 
     m_fileTree->setModel(m_fileModel);
@@ -277,7 +277,7 @@ void MainWindow::onOpenFile()
 {
     QString filePath = QFileDialog::getOpenFileName(
         this, tr("Open Markdown File"), QString(),
-        tr("Markdown Files (*.md *.markdown *.txt);;All Files (*.*)"));
+        tr("Markdown Files (*.md *.markdown *.mdx *.txt);;All Files (*.*)"));
 
     if (!filePath.isEmpty()) {
         openFile(filePath);
@@ -496,7 +496,7 @@ void MainWindow::refreshRecentFilesMenu()
 bool MainWindow::isMarkdownFile(const QString &filePath) const
 {
     QString suffix = QFileInfo(filePath).suffix().toLower();
-    return suffix == "md" || suffix == "markdown" || suffix == "txt";
+    return suffix == "md" || suffix == "markdown" || suffix == "mdx" || suffix == "txt";
 }
 
 QString MainWindow::resolveExternalImages(const QString &markdownContent)
