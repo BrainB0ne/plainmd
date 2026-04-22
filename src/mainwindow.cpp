@@ -15,6 +15,7 @@
 #include <QScreen>
 #include <QDebug>
 #include <QIcon>
+#include <QUrl>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -390,6 +391,10 @@ void MainWindow::loadFile(const QString &filePath)
 
     m_editor->clear();
     m_editor->setMarkdown(content);
+
+    // Resolve relative image paths against the markdown file's directory
+    QUrl baseUrl = QUrl::fromLocalFile(QFileInfo(filePath).absolutePath() + "/");
+    m_editor->document()->setBaseUrl(baseUrl);
 
     m_currentFile = filePath;
     setWindowTitle(tr("%1 - Markdown Viewer").arg(QFileInfo(filePath).fileName()));
