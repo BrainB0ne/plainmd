@@ -11,3 +11,6 @@ SOURCES += \
 
 HEADERS += \
     src/mainwindow.h
+
+RC_FILE = appicon.rc
+RESOURCES += resources.qrc

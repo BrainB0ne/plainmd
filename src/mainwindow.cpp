@@ -14,6 +14,7 @@
 #include <QStyle>
 #include <QScreen>
 #include <QDebug>
+#include <QIcon>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -25,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     setupToolBar();
     setAcceptDrops(true);
     setWindowTitle(tr("Markdown Viewer"));
+    setWindowIcon(QIcon(":/icon.png"));
     resize(1200, 800);
 
     QString lastFolder = m_settings.value("lastFolder").toString();
