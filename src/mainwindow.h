@@ -12,6 +12,10 @@
 #include <QSettings>
 #include <QAction>
 #include <QCloseEvent>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QTimer>
+#include <QRegularExpression>
 
 class MainWindow : public QMainWindow
 {
@@ -50,6 +54,7 @@ private:
     void refreshRecentFilesMenu();
     void setMarkdownStyle();
     bool isMarkdownFile(const QString &filePath) const;
+    QString resolveExternalImages(const QString &markdownContent);
 
     QTextEdit *m_editor = nullptr;
     QTreeView *m_fileTree = nullptr;

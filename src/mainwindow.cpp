@@ -16,6 +16,13 @@
 #include <QDebug>
 #include <QIcon>
 #include <QUrl>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QEventLoop>
+#include <QTimer>
+#include <QRegularExpression>
+#include <QCryptographicHash>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -389,8 +396,10 @@ void MainWindow::loadFile(const QString &filePath)
     QString content = stream.readAll();
     file.close();
 
+    QString processedContent = resolveExternalImages(content);
+
     m_editor->clear();
-    m_editor->setMarkdown(content);
+    m_editor->setMarkdown(processedContent);
 
     // Resolve relative image paths against the markdown file's directory
     QUrl baseUrl = QUrl::fromLocalFile(QFileInfo(filePath).absolutePath() + "/");
@@ -479,6 +488,87 @@ bool MainWindow::isMarkdownFile(const QString &filePath) const
 {
     QString suffix = QFileInfo(filePath).suffix().toLower();
     return suffix == "md" || suffix == "markdown" || suffix == "txt";
+}
+
+QString MainWindow::resolveExternalImages(const QString &markdownContent)
+{
+    QString result = markdownContent;
+
+    // Regex for Markdown images: ![alt](url) or ![alt](url "title")
+    QRegularExpression mdRe(QStringLiteral(R"(!\[[^\]]*\]\((https?://[^)\s\"]+)[^)]*\))"));
+    // Regex for HTML <img> tags: <img src="url" or <img src='url'
+    QRegularExpression htmlRe(QStringLiteral(R"(<img[^>]+src\s*=\s*["'](https?://[^"']+)["'])"));
+
+    struct Match {
+        qsizetype pos;
+        qsizetype len;
+        QString url;
+    };
+    QList<Match> matches;
+
+    auto collectMatches = [&matches](const QRegularExpression &re, const QString &text) {
+        QRegularExpressionMatchIterator it = re.globalMatch(text);
+        while (it.hasNext()) {
+            QRegularExpressionMatch m = it.next();
+            matches.append({m.capturedStart(1), m.capturedLength(1), m.captured(1)});
+        }
+    };
+
+    collectMatches(mdRe, result);
+    collectMatches(htmlRe, result);
+
+    if (matches.isEmpty()) return result;
+
+    // Sort by position descending so replacements do not shift earlier indices
+    std::sort(matches.begin(), matches.end(),
+              [](const Match &a, const Match &b) { return a.pos > b.pos; });
+
+    QString cacheDir = QDir::tempPath() + "/mdviewer_images";
+    QDir().mkpath(cacheDir);
+
+    QNetworkAccessManager nam;
+
+    for (const Match &match : matches) {
+        QString urlStr = match.url;
+        QString ext = QFileInfo(QUrl(urlStr).path()).suffix();
+        if (ext.isEmpty()) ext = "png";
+
+        QByteArray hash = QCryptographicHash::hash(urlStr.toUtf8(), QCryptographicHash::Md5).toHex();
+        QString localPath = cacheDir + "/" + QString::fromLatin1(hash) + "." + ext;
+
+        if (!QFile::exists(localPath)) {
+            QUrl imgUrl(urlStr);
+            QNetworkRequest req(imgUrl);
+            req.setHeader(QNetworkRequest::UserAgentHeader, "MarkdownViewer/1.0");
+            QNetworkReply *reply = nam.get(req);
+
+            QEventLoop loop;
+            connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+
+            QTimer timer;
+            timer.setSingleShot(true);
+            timer.setInterval(10000);
+            connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+            timer.start();
+
+            loop.exec();
+
+            if (reply->error() == QNetworkReply::NoError) {
+                QFile file(localPath);
+                if (file.open(QIODevice::WriteOnly)) {
+                    file.write(reply->readAll());
+                    file.close();
+                }
+            }
+            reply->deleteLater();
+        }
+
+        if (QFile::exists(localPath)) {
+            result.replace(match.pos, match.len, localPath);
+        }
+    }
+
+    return result;
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
