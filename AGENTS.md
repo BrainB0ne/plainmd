@@ -20,7 +20,8 @@
 ## Architecture
 - Single-window desktop app. Entry: `src/main.cpp` → `MainWindow`.
 - `MainWindow` owns a `QSplitter` with a `QTreeView` (file tree) and a read-only `QTextEdit` (renderer).
-- `QFileSystemModel` filters `*.md`, `*.markdown`, `*.mdx`, `*.txt`.
+- `QFileSystemModel` is wrapped by a custom `FilterProxyModel` that hides folders with no matching files.
+- File filter: `*.md`, `*.markdown`, `*.mdx`, `*.txt`.
 - Settings (`QSettings`, IniFormat) store last folder, recent files (max 10), window geometry, and splitter state.
 - **External images**: `QtNetwork` downloads remote images to `%TEMP%\mdviewer_images\` and replaces URLs with local paths before rendering (`resolveExternalImages()`).
 - **Code block styling**: post-processed after `setMarkdown()` by iterating `QTextDocument` blocks, detecting monospace-only blocks, and applying `QTextBlockFormat` background + margins.
@@ -28,6 +29,8 @@
 ## Resources
 - `appicon.rc` + `icon.ico` → Windows exe icon (`RC_FILE` in `.pro`).
 - `resources.qrc` + `icon.png` → runtime window icon.
+- `images.qrc` + `images/*.png` → toolbar/menu icons (Tabler Icons, MIT licensed).
+- `tabler-icons/` is in `.gitignore`; only the copied icons in `images/` are tracked.
 
 ## Editing Guidelines
 - Keep all source files under `src/`. Update `mdviewer.pro` `SOURCES`/`HEADERS` when adding files.
