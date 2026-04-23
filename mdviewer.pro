@@ -2,7 +2,7 @@ QT += core gui widgets network
 
 CONFIG += c++17
 
-TARGET = mdviewer
+TARGET = vibe-md
 TEMPLATE = app
 
 SOURCES += \

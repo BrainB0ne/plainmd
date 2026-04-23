@@ -1,16 +1,16 @@
-; MD Viewer Installer
-; Inno Setup Script for mdviewer
+; Vibe-MD Installer
+; Inno Setup Script for VibeMD
 
 [Setup]
-AppName=MD Viewer
+AppName=Vibe-MD
 AppVersion=1.0.0
-AppVerName=MD Viewer 1.0.0
-DefaultDirName={autopf64}\MD Viewer
-DefaultGroupName=MD Viewer
+AppVerName=Vibe-MD 1.0.0
+DefaultDirName={autopf64}\Vibe-MD
+DefaultGroupName=Vibe-MD
 OutputDir=.
-OutputBaseFilename=mdviewer-setup
+OutputBaseFilename=vibe-md-setup
 SetupIconFile=icon.ico
-UninstallDisplayIcon={app}\mdviewer.exe
+UninstallDisplayIcon={app}\vibe-md.exe
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
@@ -24,11 +24,11 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
-Name: "fileassoc"; Description: "Associate MD Viewer with Markdown files"; GroupDescription: "Other tasks:"
+Name: "fileassoc"; Description: "Associate Vibe-MD with Markdown files"; GroupDescription: "Other tasks:"
 
 [Files]
 ; Main executable
-Source: "release\mdviewer.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "release\vibe-md.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 ; Qt6 Core DLLs
 Source: "release\Qt6Core.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -66,22 +66,22 @@ Source: "release\styles\*"; DestDir: "{app}\styles"; Flags: ignoreversion
 ; Source: "release\translations\*"; DestDir: "{app}\translations"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\MD Viewer"; Filename: "{app}\mdviewer.exe"
-Name: "{group}\{cm:UninstallProgram,MD Viewer}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\MD Viewer"; Filename: "{app}\mdviewer.exe"; Tasks: desktopicon
+Name: "{group}\Vibe-MD"; Filename: "{app}\vibe-md.exe"
+Name: "{group}\{cm:UninstallProgram,Vibe-MD}"; Filename: "{uninstallexe}"
+Name: "{autodesktop}\Vibe-MD"; Filename: "{app}\vibe-md.exe"; Tasks: desktopicon
 
 [Registry]
 ; File associations for .md
-Root: HKA; Subkey: "Software\Classes\.md"; ValueType: string; ValueName: ""; ValueData: "MDViewer.Document"; Flags: uninsdeletevalue; Tasks: fileassoc
-Root: HKA; Subkey: "Software\Classes\MDViewer.Document"; ValueType: string; ValueName: ""; ValueData: "Markdown Document"; Flags: uninsdeletekey; Tasks: fileassoc
-Root: HKA; Subkey: "Software\Classes\MDViewer.Document\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\mdviewer.exe,0"; Tasks: fileassoc
-Root: HKA; Subkey: "Software\Classes\MDViewer.Document\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\mdviewer.exe"" ""%1"""; Tasks: fileassoc
+Root: HKA; Subkey: "Software\Classes\.md"; ValueType: string; ValueName: ""; ValueData: "VibeMD.Document"; Flags: uninsdeletevalue; Tasks: fileassoc
+Root: HKA; Subkey: "Software\Classes\VibeMD.Document"; ValueType: string; ValueName: ""; ValueData: "Markdown Document"; Flags: uninsdeletekey; Tasks: fileassoc
+Root: HKA; Subkey: "Software\Classes\VibeMD.Document\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\vibe-md.exe,0"; Tasks: fileassoc
+Root: HKA; Subkey: "Software\Classes\VibeMD.Document\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\vibe-md.exe"" ""%1"""; Tasks: fileassoc
 
 ; File associations for .markdown
-Root: HKA; Subkey: "Software\Classes\.markdown"; ValueType: string; ValueName: ""; ValueData: "MDViewer.Document"; Flags: uninsdeletevalue; Tasks: fileassoc
+Root: HKA; Subkey: "Software\Classes\.markdown"; ValueType: string; ValueName: ""; ValueData: "VibeMD.Document"; Flags: uninsdeletevalue; Tasks: fileassoc
 
 ; File associations for .mdx
-Root: HKA; Subkey: "Software\Classes\.mdx"; ValueType: string; ValueName: ""; ValueData: "MDViewer.Document"; Flags: uninsdeletevalue; Tasks: fileassoc
+Root: HKA; Subkey: "Software\Classes\.mdx"; ValueType: string; ValueName: ""; ValueData: "VibeMD.Document"; Flags: uninsdeletevalue; Tasks: fileassoc
 
 [Run]
-Filename: "{app}\mdviewer.exe"; Description: "{cm:LaunchProgram,MD Viewer}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\vibe-md.exe"; Description: "{cm:LaunchProgram,Vibe-MD}"; Flags: nowait postinstall skipifsilent

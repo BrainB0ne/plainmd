@@ -1,4 +1,4 @@
-# Agent Notes: mdviewer
+# Agent Notes: vibe-md
 
 ## Build System
 - **qmake only** — `mdviewer.pro` is the source of truth. Do not add CMake files.
@@ -9,8 +9,8 @@
   qmake mdviewer.pro
   nmake
   ```
-- Output lands in `release\mdviewer.exe` (or `debug\` if `CONFIG += debug`).
-- After building, run `windeployqt release\mdviewer.exe` to copy required Qt DLLs and plugins into the output folder.
+- Output lands in `release\vibe-md.exe` (or `debug\` if `CONFIG += debug`).
+- After building, run `windeployqt release\vibe-md.exe` to copy required Qt DLLs and plugins into the output folder.
 
 ## Qt6 Quirks
 - `QTextEdit::setZoomFactor()` **does not exist in Qt6**. Zoom reset is done by re-setting the base font point size (see `onZoomReset()`).
@@ -23,7 +23,7 @@
 - `QFileSystemModel` is wrapped by a custom `FilterProxyModel` that hides folders with no matching files.
 - File filter: `*.md`, `*.markdown`, `*.mdx`, `*.txt`.
 - Settings (`QSettings`, IniFormat) store last folder, recent files (max 10), window geometry, and splitter state.
-- **External images**: `QtNetwork` downloads remote images to `%TEMP%\mdviewer_images\` and replaces URLs with local paths before rendering (`resolveExternalImages()`).
+- **External images**: `QtNetwork` downloads remote images to `%TEMP%\vibe-md_images\` and replaces URLs with local paths before rendering (`resolveExternalImages()`).
 - **Code block styling**: post-processed after `setMarkdown()` by iterating `QTextDocument` blocks, detecting monospace-only blocks, and applying `QTextBlockFormat` background + margins.
 
 ## Resources

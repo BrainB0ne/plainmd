@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     setupMenuBar();
     setupToolBar();
     setAcceptDrops(true);
-    setWindowTitle(tr("Markdown Viewer"));
+    setWindowTitle(tr("Vibe-MD"));
     setWindowIcon(QIcon(":/icon.png"));
     resize(1200, 800);
 
@@ -346,8 +346,8 @@ void MainWindow::onZoomReset()
 
 void MainWindow::onAbout()
 {
-    QMessageBox::about(this, tr("About Markdown Viewer"),
-        tr("<h2>Markdown Viewer</h2>"
+    QMessageBox::about(this, tr("About Vibe-MD"),
+        tr("<h2>Vibe-MD</h2>"
            "<p>Version 1.1</p>"
            "<p>A simple and elegant Markdown viewer built with Qt6.</p>"
            "<p>Features:</p>"
@@ -418,7 +418,7 @@ void MainWindow::loadFile(const QString &filePath)
     m_editor->document()->setBaseUrl(baseUrl);
 
     m_currentFile = filePath;
-    setWindowTitle(tr("%1 - Markdown Viewer").arg(QFileInfo(filePath).fileName()));
+    setWindowTitle(tr("%1 - Vibe-MD").arg(QFileInfo(filePath).fileName()));
 
     // Select the file in the tree if visible
     if (m_fileTree && m_fileModel && m_proxyModel) {
@@ -538,7 +538,7 @@ QString MainWindow::resolveExternalImages(const QString &markdownContent)
     std::sort(matches.begin(), matches.end(),
               [](const Match &a, const Match &b) { return a.pos > b.pos; });
 
-    QString cacheDir = QDir::tempPath() + "/mdviewer_images";
+    QString cacheDir = QDir::tempPath() + "/vibe-md_images";
     QDir().mkpath(cacheDir);
 
     QNetworkAccessManager nam;

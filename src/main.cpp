@@ -4,8 +4,8 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    app.setApplicationName("Markdown Viewer");
-    app.setOrganizationName("mdviewer");
+    app.setApplicationName("Vibe-MD");
+    app.setOrganizationName("vibe-md");
 
     MainWindow window;
     window.show();
