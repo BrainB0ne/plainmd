@@ -29,6 +29,8 @@
 #include <QTextList>
 #include <QPrinter>
 #include <QPrintDialog>
+#include <QHelpEvent>
+#include <QToolTip>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -93,6 +95,9 @@ void MainWindow::setupEditor()
     m_editor->setReadOnly(true);
     m_editor->document()->setDocumentMargin(16);
     m_editor->setAcceptRichText(true);
+    m_editor->setMouseTracking(true);
+    m_editor->viewport()->setMouseTracking(true);
+    m_editor->viewport()->installEventFilter(this);
 
     QFont font = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
     font.setPointSize(11);
@@ -428,6 +433,8 @@ void MainWindow::loadFile(const QString &filePath)
     QString content = stream.readAll();
     file.close();
 
+    m_imageUrlMap.clear();
+
     QString processedContent = resolveFrontMatter(content);
     processedContent = resolveExternalImages(processedContent);
 
@@ -601,6 +608,7 @@ QString MainWindow::resolveExternalImages(const QString &markdownContent)
         }
 
         if (QFile::exists(localPath)) {
+            m_imageUrlMap[localPath] = urlStr;
             result.replace(match.pos, match.len, localPath);
         }
     }
@@ -768,4 +776,76 @@ void MainWindow::closeEvent(QCloseEvent *event)
     m_settings.setValue("windowState", saveState());
     m_settings.setValue("splitterState", m_splitter->saveState());
     event->accept();
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == m_editor->viewport() && event->type() == QEvent::ToolTip) {
+        QHelpEvent *helpEvent = static_cast<QHelpEvent*>(event);
+        QPoint pos = m_editor->viewport()->mapFromGlobal(helpEvent->globalPos());
+
+        QTextDocument *doc = m_editor->document();
+
+        // Scan every image fragment and test whether the mouse is inside its
+        // visual bounding rect.  cursorRect() gives us viewport coordinates for
+        // the fragment edges; the line height gives us the vertical span.
+        for (QTextBlock block = doc->begin(); block != doc->end(); block = block.next()) {
+            for (QTextBlock::iterator it = block.begin(); !it.atEnd(); ++it) {
+                QTextFragment frag = it.fragment();
+                if (!frag.isValid()) continue;
+                QTextCharFormat fmt = frag.charFormat();
+                if (!fmt.isImageFormat()) continue;
+
+                int startPos = frag.position();
+                int endPos   = startPos + frag.length();
+
+                QTextCursor c1(doc);
+                c1.setPosition(startPos);
+                QRect r1 = m_editor->cursorRect(c1);
+
+                QTextCursor c2(doc);
+                c2.setPosition(endPos);
+                QRect r2 = m_editor->cursorRect(c2);
+
+                if (!r1.isValid() || !r2.isValid()) continue;
+
+                // Horizontal span: from the left edge of the first cursor to the
+                // left edge of the second cursor.
+                QRect imgRect;
+                imgRect.setLeft(qMin(r1.left(), r2.left()));
+                imgRect.setRight(qMax(r1.left(), r2.right()));
+                imgRect.setTop(qMin(r1.top(), r2.top()));
+
+                // Vertical span: try to use the real line height so tall images
+                // are fully covered.
+                int lineHeight = r1.height();
+                QTextLayout *layout = block.layout();
+                for (int i = 0; i < layout->lineCount(); ++i) {
+                    QTextLine line = layout->lineAt(i);
+                    int lineStart = line.textStart();
+                    int lineEnd   = lineStart + line.textLength();
+                    int fragStartInBlock = startPos - block.position();
+                    if (fragStartInBlock >= lineStart && fragStartInBlock < lineEnd) {
+                        lineHeight = qMax(lineHeight, (int)line.height());
+                        break;
+                    }
+                }
+                imgRect.setBottom(imgRect.top() + lineHeight);
+
+                if (imgRect.contains(pos)) {
+                    QString imgName = fmt.toImageFormat().name();
+                    QString tooltip;
+                    if (m_imageUrlMap.contains(imgName)) {
+                        tooltip = tr("Original: %1\nCached: %2")
+                                      .arg(m_imageUrlMap[imgName], imgName);
+                    } else {
+                        tooltip = imgName;
+                    }
+                    QToolTip::showText(helpEvent->globalPos(), tooltip, m_editor);
+                    return true;
+                }
+            }
+        }
+    }
+    return QMainWindow::eventFilter(obj, event);
 }

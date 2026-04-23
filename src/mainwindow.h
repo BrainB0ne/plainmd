@@ -27,6 +27,7 @@ public:
     void openFile(const QString &filePath);
 
 protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
@@ -73,6 +74,7 @@ private:
     QString m_currentFile;
     QString m_currentFolder;
     QSettings m_settings;
+    QHash<QString, QString> m_imageUrlMap; // localPath -> originalUrl
 };
 
 #endif // MAINWINDOW_H
