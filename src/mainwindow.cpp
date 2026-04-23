@@ -837,9 +837,9 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                     QString tooltip;
                     if (m_imageUrlMap.contains(imgName)) {
                         tooltip = tr("Original: %1\nCached: %2")
-                                      .arg(m_imageUrlMap[imgName], imgName);
+                                      .arg(m_imageUrlMap[imgName], QDir::toNativeSeparators(imgName));
                     } else {
-                        tooltip = imgName;
+                        tooltip = QDir::toNativeSeparators(imgName);
                     }
                     QToolTip::showText(helpEvent->globalPos(), tooltip, m_editor);
                     return true;
