@@ -348,6 +348,7 @@ void MainWindow::onAbout()
 {
     QMessageBox::about(this, tr("About Markdown Viewer"),
         tr("<h2>Markdown Viewer</h2>"
+           "<p>Version 1.1</p>"
            "<p>A simple and elegant Markdown viewer built with Qt6.</p>"
            "<p>Features:</p>"
            "<ul>"
