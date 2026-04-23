@@ -196,13 +196,12 @@ void MainWindow::setupMenuBar()
     // File menu
     QMenu *fileMenu = menuBar->addMenu(tr("&File"));
 
-    QAction *openFileAction = new QAction(tr("&Open File..."), this);
+    QAction *openFileAction = new QAction(QIcon(":/images/file-open.png"), tr("&Open File..."), this);
     openFileAction->setShortcut(QKeySequence::Open);
-    openFileAction->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
     connect(openFileAction, &QAction::triggered, this, &MainWindow::onOpenFile);
     fileMenu->addAction(openFileAction);
 
-    QAction *openFolderAction = new QAction(tr("Open &Folder..."), this);
+    QAction *openFolderAction = new QAction(QIcon(":/images/folder-open.png"), tr("Open &Folder..."), this);
     openFolderAction->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
     connect(openFolderAction, &QAction::triggered, this, &MainWindow::onOpenFolder);
     fileMenu->addAction(openFolderAction);
@@ -215,7 +214,7 @@ void MainWindow::setupMenuBar()
 
     fileMenu->addSeparator();
 
-    QAction *exitAction = new QAction(tr("E&xit"), this);
+    QAction *exitAction = new QAction(QIcon(":/images/exit.png"), tr("E&xit"), this);
     exitAction->setShortcut(QKeySequence::Quit);
     connect(exitAction, &QAction::triggered, this, &QWidget::close);
     fileMenu->addAction(exitAction);
@@ -223,17 +222,17 @@ void MainWindow::setupMenuBar()
     // View menu
     QMenu *viewMenu = menuBar->addMenu(tr("&View"));
 
-    QAction *zoomInAction = new QAction(tr("Zoom &In"), this);
+    QAction *zoomInAction = new QAction(QIcon(":/images/zoom-in.png"), tr("Zoom &In"), this);
     zoomInAction->setShortcut(QKeySequence::ZoomIn);
     connect(zoomInAction, &QAction::triggered, this, &MainWindow::onZoomIn);
     viewMenu->addAction(zoomInAction);
 
-    QAction *zoomOutAction = new QAction(tr("Zoom &Out"), this);
+    QAction *zoomOutAction = new QAction(QIcon(":/images/zoom-out.png"), tr("Zoom &Out"), this);
     zoomOutAction->setShortcut(QKeySequence::ZoomOut);
     connect(zoomOutAction, &QAction::triggered, this, &MainWindow::onZoomOut);
     viewMenu->addAction(zoomOutAction);
 
-    QAction *zoomResetAction = new QAction(tr("&Reset Zoom"), this);
+    QAction *zoomResetAction = new QAction(QIcon(":/images/zoom-reset.png"), tr("&Reset Zoom"), this);
     zoomResetAction->setShortcut(QKeySequence(tr("Ctrl+0")));
     connect(zoomResetAction, &QAction::triggered, this, &MainWindow::onZoomReset);
     viewMenu->addAction(zoomResetAction);
@@ -241,7 +240,7 @@ void MainWindow::setupMenuBar()
     // Help menu
     QMenu *helpMenu = menuBar->addMenu(tr("&Help"));
 
-    QAction *aboutAction = new QAction(tr("&About"), this);
+    QAction *aboutAction = new QAction(QIcon(":/images/about.png"), tr("&About"), this);
     connect(aboutAction, &QAction::triggered, this, &MainWindow::onAbout);
     helpMenu->addAction(aboutAction);
 
@@ -254,25 +253,21 @@ void MainWindow::setupToolBar()
 {
     QToolBar *toolBar = addToolBar(tr("Main Toolbar"));
 
-    QAction *openAction = new QAction(style()->standardIcon(QStyle::SP_DialogOpenButton),
-                                      tr("Open File"), this);
+    QAction *openAction = new QAction(QIcon(":/images/file-open.png"), tr("Open File"), this);
     connect(openAction, &QAction::triggered, this, &MainWindow::onOpenFile);
     toolBar->addAction(openAction);
 
-    QAction *openFolderAction = new QAction(style()->standardIcon(QStyle::SP_DirOpenIcon),
-                                            tr("Open Folder"), this);
+    QAction *openFolderAction = new QAction(QIcon(":/images/folder-open.png"), tr("Open Folder"), this);
     connect(openFolderAction, &QAction::triggered, this, &MainWindow::onOpenFolder);
     toolBar->addAction(openFolderAction);
 
     toolBar->addSeparator();
 
-    QAction *zoomInAction = new QAction(style()->standardIcon(QStyle::SP_ArrowUp),
-                                        tr("Zoom In"), this);
+    QAction *zoomInAction = new QAction(QIcon(":/images/zoom-in.png"), tr("Zoom In"), this);
     connect(zoomInAction, &QAction::triggered, this, &MainWindow::onZoomIn);
     toolBar->addAction(zoomInAction);
 
-    QAction *zoomOutAction = new QAction(style()->standardIcon(QStyle::SP_ArrowDown),
-                                         tr("Zoom Out"), this);
+    QAction *zoomOutAction = new QAction(QIcon(":/images/zoom-out.png"), tr("Zoom Out"), this);
     connect(zoomOutAction, &QAction::triggered, this, &MainWindow::onZoomOut);
     toolBar->addAction(zoomOutAction);
 }
@@ -362,7 +357,8 @@ void MainWindow::onAbout()
            "<li>Recent files</li>"
            "<li>Zoom controls</li>"
            "</ul>"
-           "<p>Built with qmake and Qt6.</p>"));
+           "<p>Built with qmake and Qt6.</p>"
+           "<p>Icons by <a href='https://tabler.io/icons'>Tabler Icons</a> (MIT License).</p>"));
 }
 
 void MainWindow::onAboutQt()

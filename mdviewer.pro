@@ -15,4 +15,4 @@ HEADERS += \
     src/filterproxymodel.h
 
 RC_FILE = appicon.rc
-RESOURCES += resources.qrc
+RESOURCES += resources.qrc images.qrc

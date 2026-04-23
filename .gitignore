@@ -24,6 +24,9 @@ qrc_*.cpp
 .vscode/
 .idea/
 
+# External assets (icons are copied to images/ and embedded via qrc)
+tabler-icons/
+
 # OS
 .DS_Store
 Thumbs.db
