@@ -266,6 +266,7 @@ void MainWindow::setupMenuBar()
 void MainWindow::setupToolBar()
 {
     QToolBar *toolBar = addToolBar(tr("Main Toolbar"));
+    toolBar->setObjectName("Main Toolbar");
 
     QAction *openAction = new QAction(QIcon(":/images/file-open.png"), tr("Open File"), this);
     connect(openAction, &QAction::triggered, this, &MainWindow::onOpenFile);
