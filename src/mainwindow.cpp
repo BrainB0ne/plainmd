@@ -89,6 +89,7 @@ void MainWindow::setupEditor()
 {
     m_editor = new QTextEdit(this);
     m_editor->setReadOnly(true);
+    m_editor->document()->setDocumentMargin(16);
     m_editor->setAcceptRichText(true);
 
     QFont font = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
