@@ -27,6 +27,8 @@
 #include <QTextBlock>
 #include <QTextFragment>
 #include <QTextList>
+#include <QPrinter>
+#include <QPrintDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -208,6 +210,13 @@ void MainWindow::setupMenuBar()
 
     fileMenu->addSeparator();
 
+    QAction *printAction = new QAction(QIcon(":/images/printer.png"), tr("&Print..."), this);
+    printAction->setShortcut(QKeySequence::Print);
+    connect(printAction, &QAction::triggered, this, &MainWindow::onPrint);
+    fileMenu->addAction(printAction);
+
+    fileMenu->addSeparator();
+
     m_recentMenu = fileMenu->addMenu(tr("Recent &Files"));
     m_clearRecentAction = new QAction(tr("&Clear Recent Files"), this);
     connect(m_clearRecentAction, &QAction::triggered, this, &MainWindow::onClearRecent);
@@ -260,6 +269,10 @@ void MainWindow::setupToolBar()
     QAction *openFolderAction = new QAction(QIcon(":/images/folder-open.png"), tr("Open Folder"), this);
     connect(openFolderAction, &QAction::triggered, this, &MainWindow::onOpenFolder);
     toolBar->addAction(openFolderAction);
+
+    QAction *printAction = new QAction(QIcon(":/images/printer.png"), tr("Print"), this);
+    connect(printAction, &QAction::triggered, this, &MainWindow::onPrint);
+    toolBar->addAction(printAction);
 
     toolBar->addSeparator();
 
@@ -365,6 +378,15 @@ void MainWindow::onAbout()
 void MainWindow::onAboutQt()
 {
     QMessageBox::aboutQt(this);
+}
+
+void MainWindow::onPrint()
+{
+    QPrinter printer(QPrinter::HighResolution);
+    QPrintDialog dialog(&printer, this);
+    if (dialog.exec() == QDialog::Accepted) {
+        m_editor->print(&printer);
+    }
 }
 
 void MainWindow::openFile(const QString &filePath)

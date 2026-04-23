@@ -7,5 +7,6 @@
         <file>images/zoom-reset.png</file>
         <file>images/exit.png</file>
         <file>images/about.png</file>
+        <file>images/printer.png</file>
     </qresource>
 </RCC>

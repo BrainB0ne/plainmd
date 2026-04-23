@@ -1,10 +1,10 @@
 ; Vibe-MD Installer
-; Inno Setup Script for VibeMD
+; Inno Setup Script for Vibe-MD
 
 [Setup]
 AppName=Vibe-MD
-AppVersion=1.0.0
-AppVerName=Vibe-MD 1.0.0
+AppVersion=1.1
+AppVerName=Vibe-MD 1.1
 DefaultDirName={autopf64}\Vibe-MD
 DefaultGroupName=Vibe-MD
 OutputDir=.
@@ -34,6 +34,7 @@ Source: "release\vibe-md.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "release\Qt6Core.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "release\Qt6Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "release\Qt6Network.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "release\Qt6PrintSupport.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "release\Qt6Svg.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "release\Qt6Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
 

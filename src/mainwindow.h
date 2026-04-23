@@ -42,6 +42,7 @@ private slots:
     void onZoomReset();
     void onAbout();
     void onAboutQt();
+    void onPrint();
 
 private:
     void setupUI();
