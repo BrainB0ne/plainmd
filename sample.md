@@ -1,4 +1,4 @@
-# Markdown Viewer
+# Vibe-MD
 
 A simple and elegant **Markdown Viewer** built with **Qt6**.
 
