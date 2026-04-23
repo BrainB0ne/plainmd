@@ -56,6 +56,7 @@ private:
     void setMarkdownStyle();
     bool isMarkdownFile(const QString &filePath) const;
     QString resolveExternalImages(const QString &markdownContent);
+    QString resolveFrontMatter(const QString &markdownContent);
     void styleCodeBlocks();
 
     QTextEdit *m_editor = nullptr;

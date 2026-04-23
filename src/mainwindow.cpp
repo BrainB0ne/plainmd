@@ -406,7 +406,8 @@ void MainWindow::loadFile(const QString &filePath)
     QString content = stream.readAll();
     file.close();
 
-    QString processedContent = resolveExternalImages(content);
+    QString processedContent = resolveFrontMatter(content);
+    processedContent = resolveExternalImages(processedContent);
 
     m_editor->clear();
     m_editor->setMarkdown(processedContent);
@@ -585,6 +586,29 @@ QString MainWindow::resolveExternalImages(const QString &markdownContent)
     return result;
 }
 
+QString MainWindow::resolveFrontMatter(const QString &markdownContent)
+{
+    // Frontmatter appears at the very top of the file between --- delimiters.
+    // Qt's markdown parser hides it, so we convert it to a fenced code block
+    // with a special language tag. Our post-processor will detect it and
+    // apply a distinct background color.
+    QString result = markdownContent;
+
+    result.replace("\r\n", "\n");
+    result.replace("\r", "\n");
+
+    QRegularExpression fmRe(QStringLiteral(R"(^---\n([\s\S]*?)\n---)"));
+    QRegularExpressionMatch m = fmRe.match(result);
+    if (!m.hasMatch()) return result;
+
+    QString fmBody = m.captured(1);
+
+    // Wrap in a fenced block so Qt renders it as monospace.
+    QString replacement = QStringLiteral("```yaml\n%1\n```").arg(fmBody);
+    result.replace(m.capturedStart(), m.capturedLength(), replacement);
+    return result;
+}
+
 static bool blockIsCode(const QTextBlock &block)
 {
     bool allMonospace = true;
@@ -634,6 +658,24 @@ void MainWindow::styleCodeBlocks()
         i = j;
     }
 
+    // Detect which consecutive code region (if any) is frontmatter.
+    // Frontmatter is always the first code region and contains YAML keys.
+    bool inFrontMatterRegion = false;
+    for (int i = 0; i < blocks.size(); ++i) {
+        if (!isCode[i]) continue;
+        // Scan the first few blocks of this region for frontmatter markers.
+        bool hasTitle = false, hasDate = false;
+        int j = i;
+        while (j < blocks.size() && isCode[j] && (j - i) < 6) {
+            QString text = blocks[j].text();
+            if (text.contains("title:")) hasTitle = true;
+            if (text.contains("date:")) hasDate = true;
+            ++j;
+        }
+        inFrontMatterRegion = hasTitle && hasDate;
+        break; // only inspect the first code region
+    }
+
     QTextCursor cursor(doc);
     cursor.beginEditBlock();
 
@@ -652,7 +694,8 @@ void MainWindow::styleCodeBlocks()
         bool nextCode = (i + 1 < blocks.size()) && isCode[i + 1];
 
         QTextBlockFormat bf = blocks[i].blockFormat();
-        bf.setBackground(QColor("#f4f4f4"));
+        // Frontmatter gets a blue background; regular code blocks are gray.
+        bf.setBackground(QColor(inFrontMatterRegion ? "#e3f2fd" : "#f4f4f4"));
         bf.setTopMargin(prevCode ? 0 : 8);
         bf.setBottomMargin(nextCode ? 0 : 8);
         bf.setLeftMargin(16);
