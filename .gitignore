@@ -31,3 +31,10 @@ tabler-icons/
 # OS
 .DS_Store
 Thumbs.db
+
+# Visual Studio 2022 files
+*.aps
+*.qtvscr
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
