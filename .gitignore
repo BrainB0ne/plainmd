@@ -23,6 +23,7 @@ qrc_*.cpp
 *.qbs.user.*
 .vscode/
 .idea/
+.clangd
 
 # External assets (icons are copied to images/ and embedded via qrc)
 tabler-icons/
