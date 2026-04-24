@@ -2,8 +2,8 @@
 #define PREFERENCESDIALOG_H
 
 #include <QDialog>
-#include <QFontComboBox>
-#include <QSpinBox>
+#include <QPushButton>
+#include <QLabel>
 #include <QCheckBox>
 #include <QDialogButtonBox>
 
@@ -21,11 +21,15 @@ public:
     int fontSize() const;
     bool previewExternalImages() const;
 
+private slots:
+    void onChooseFont();
+
 private:
-    QFontComboBox *m_fontCombo = nullptr;
-    QSpinBox *m_sizeSpin = nullptr;
+    QPushButton *m_fontButton = nullptr;
+    QLabel *m_fontLabel = nullptr;
     QCheckBox *m_previewCheck = nullptr;
     QDialogButtonBox *m_buttonBox = nullptr;
+    QFont m_currentFont;
 };
 
 #endif // PREFERENCESDIALOG_H
