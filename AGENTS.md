@@ -24,6 +24,7 @@
 - File filter: `*.md`, `*.markdown`, `*.mdx`, `*.txt`.
 - Settings (`QSettings`, IniFormat) store last folder, recent files (max 10), window geometry, and splitter state.
 - **External images**: `QtNetwork` downloads remote images to `%TEMP%\vibe-md_images\` and replaces URLs with local paths before rendering (`resolveExternalImages()`).
+- **Frontmatter**: YAML frontmatter (`---` delimited) is converted to a fenced `yaml` code block before rendering so Qt displays it; `styleCodeBlocks()` highlights the first region in blue when it contains `title:` and `date:` keys (`resolveFrontMatter()`).
 - **Code block styling**: post-processed after `setMarkdown()` by iterating `QTextDocument` blocks, detecting monospace-only blocks, and applying `QTextBlockFormat` background + margins.
 
 ## Resources
@@ -40,4 +41,4 @@
 ## Runtime Notes
 - Accepts an optional file path as a command-line argument.
 - Drag-and-drop accepts files (opens) and folders (loads tree).
-- `sample.md` at the repo root is useful for quick manual verification.
+- `sample.md` and `sample-frontmatter.md` at the repo root are useful for quick manual verification.
