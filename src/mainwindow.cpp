@@ -858,6 +858,11 @@ void MainWindow::styleCodeBlocks()
         break; // only inspect the first code region
     }
 
+    QString cbFamily = m_settings.value("editor/codeBlockFontFamily", "Consolas").toString();
+    int cbSize = m_settings.value("editor/codeBlockFontSize", 11).toInt();
+    QFont codeBlockFont(cbFamily);
+    codeBlockFont.setPointSize(cbSize);
+
     QTextCursor cursor(doc);
     cursor.beginEditBlock();
 
@@ -890,6 +895,7 @@ void MainWindow::styleCodeBlocks()
             if (!frag.isValid()) continue;
             QTextCharFormat cf = frag.charFormat();
             cf.setForeground(QColor("#333333"));
+            cf.setFont(codeBlockFont);
             cursor.setPosition(frag.position());
             cursor.setPosition(frag.position() + frag.length(), QTextCursor::KeepAnchor);
             cursor.setCharFormat(cf);

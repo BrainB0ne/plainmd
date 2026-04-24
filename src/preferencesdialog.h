@@ -19,17 +19,23 @@ public:
 
     QString fontFamily() const;
     int fontSize() const;
+    QString codeBlockFontFamily() const;
+    int codeBlockFontSize() const;
     bool previewExternalImages() const;
 
 private slots:
     void onChooseFont();
+    void onChooseCodeBlockFont();
 
 private:
     QPushButton *m_fontButton = nullptr;
     QLabel *m_fontLabel = nullptr;
+    QPushButton *m_codeBlockFontButton = nullptr;
+    QLabel *m_codeBlockFontLabel = nullptr;
     QCheckBox *m_previewCheck = nullptr;
     QDialogButtonBox *m_buttonBox = nullptr;
     QFont m_currentFont;
+    QFont m_codeBlockFont;
 };
 
 #endif // PREFERENCESDIALOG_H
