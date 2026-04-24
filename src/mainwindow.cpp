@@ -232,6 +232,13 @@ void MainWindow::setupMenuBar()
 
     fileMenu->addSeparator();
 
+    QAction *prefsAction = new QAction(QIcon(":/images/settings.png"), tr("&Preferences..."), this);
+    prefsAction->setShortcut(QKeySequence(tr("Ctrl+,")));
+    connect(prefsAction, &QAction::triggered, this, &MainWindow::onPreferences);
+    fileMenu->addAction(prefsAction);
+
+    fileMenu->addSeparator();
+
     QAction *exitAction = new QAction(QIcon(":/images/exit.png"), tr("E&xit"), this);
     exitAction->setShortcut(QKeySequence::Quit);
     connect(exitAction, &QAction::triggered, this, &QWidget::close);
@@ -254,13 +261,6 @@ void MainWindow::setupMenuBar()
     zoomResetAction->setShortcut(QKeySequence(tr("Ctrl+0")));
     connect(zoomResetAction, &QAction::triggered, this, &MainWindow::onZoomReset);
     viewMenu->addAction(zoomResetAction);
-
-    // Edit menu
-    QMenu *editMenu = menuBar->addMenu(tr("&Edit"));
-    QAction *prefsAction = new QAction(tr("&Preferences..."), this);
-    prefsAction->setShortcut(QKeySequence(tr("Ctrl+,")));
-    connect(prefsAction, &QAction::triggered, this, &MainWindow::onPreferences);
-    editMenu->addAction(prefsAction);
 
     // Help menu
     QMenu *helpMenu = menuBar->addMenu(tr("&Help"));
