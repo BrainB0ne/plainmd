@@ -60,6 +60,7 @@ private:
     void setMarkdownStyle();
     bool isMarkdownFile(const QString &filePath) const;
     QString resolveExternalImages(const QString &markdownContent);
+    QString resolveRelativeImages(const QString &markdownContent, const QString &basePath);
     QString resolveFrontMatter(const QString &markdownContent);
     void styleCodeBlocks();
 

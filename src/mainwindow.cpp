@@ -464,14 +464,16 @@ void MainWindow::loadFile(const QString &filePath)
 
     QString processedContent = resolveFrontMatter(content);
     processedContent = resolveExternalImages(processedContent);
+    processedContent = resolveRelativeImages(processedContent, QFileInfo(filePath).absolutePath());
 
     m_editor->clear();
-    m_editor->setMarkdown(processedContent);
-    styleCodeBlocks();
 
     // Resolve relative image paths against the markdown file's directory
     QUrl baseUrl = QUrl::fromLocalFile(QFileInfo(filePath).absolutePath() + "/");
     m_editor->document()->setBaseUrl(baseUrl);
+
+    m_editor->setMarkdown(processedContent);
+    styleCodeBlocks();
 
     m_currentFile = filePath;
     setWindowTitle(tr("%1 - Vibe-MD").arg(QFileInfo(filePath).fileName()));
@@ -637,6 +639,49 @@ QString MainWindow::resolveExternalImages(const QString &markdownContent)
         if (QFile::exists(localPath)) {
             m_imageUrlMap[localPath] = urlStr;
             result.replace(match.pos, match.len, localPath);
+        }
+    }
+
+    return result;
+}
+
+QString MainWindow::resolveRelativeImages(const QString &markdownContent, const QString &basePath)
+{
+    QString result = markdownContent;
+    QDir baseDir(basePath);
+
+    struct Match {
+        qsizetype pos;
+        qsizetype len;
+        QString url;
+    };
+    QList<Match> matches;
+
+    // Markdown images: ![alt](url) or ![alt](url "title")
+    QRegularExpression mdRe(QStringLiteral(R"(!\[[^\]]*\]\(([^)\s\"]+)[^)]*\))"));
+    QRegularExpressionMatchIterator it = mdRe.globalMatch(result);
+    while (it.hasNext()) {
+        QRegularExpressionMatch m = it.next();
+        matches.append({m.capturedStart(1), m.capturedLength(1), m.captured(1)});
+    }
+
+    // HTML <img> tags
+    QRegularExpression htmlRe(QStringLiteral(R"(<img[^>]+src\s*=\s*["']([^"']+)["'])"));
+    it = htmlRe.globalMatch(result);
+    while (it.hasNext()) {
+        QRegularExpressionMatch m = it.next();
+        matches.append({m.capturedStart(1), m.capturedLength(1), m.captured(1)});
+    }
+
+    // Sort by position descending so replacements do not shift earlier indices
+    std::sort(matches.begin(), matches.end(),
+              [](const Match &a, const Match &b) { return a.pos > b.pos; });
+
+    for (const Match &match : matches) {
+        QUrl url(match.url);
+        if (url.scheme().isEmpty() && !QDir::isAbsolutePath(match.url)) {
+            QString absoluteUrl = QUrl::fromLocalFile(baseDir.absoluteFilePath(match.url)).toString();
+            result.replace(match.pos, match.len, absoluteUrl);
         }
     }
 
@@ -861,12 +906,17 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
                 if (imgRect.contains(pos)) {
                     QString imgName = fmt.toImageFormat().name();
+                    // Strip file:/// prefix for cleaner display
+                    QString displayName = imgName;
+                    if (displayName.startsWith("file:///")) {
+                        displayName = displayName.mid(8);
+                    }
                     QString tooltip;
                     if (m_imageUrlMap.contains(imgName)) {
                         tooltip = tr("Original: %1\nCached: %2")
-                                      .arg(m_imageUrlMap[imgName], QDir::toNativeSeparators(imgName));
+                                      .arg(m_imageUrlMap[imgName], QDir::toNativeSeparators(displayName));
                     } else {
-                        tooltip = QDir::toNativeSeparators(imgName);
+                        tooltip = QDir::toNativeSeparators(displayName);
                     }
                     QToolTip::showText(helpEvent->globalPos(), tooltip, m_editor);
                     return true;
