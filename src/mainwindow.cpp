@@ -87,6 +87,7 @@ void MainWindow::setupFileTree()
     m_fileTree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
 
     connect(m_fileTree, &QTreeView::clicked, this, &MainWindow::onFileTreeClicked);
+    connect(m_fileTree, &QTreeView::activated, this, &MainWindow::onFileTreeClicked);
     m_fileTree->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_fileTree, &QTreeView::customContextMenuRequested, this, &MainWindow::onFileTreeContextMenu);
 
