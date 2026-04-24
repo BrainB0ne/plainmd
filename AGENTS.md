@@ -1,12 +1,12 @@
 # Agent Notes: vibe-md
 
 ## Build System
-- **qmake only** — `mdviewer.pro` is the source of truth. Do not add CMake files.
+- **qmake only** — `vibe-md.pro` is the source of truth. Do not add CMake files.
 - On Windows with MSVC: you must run `vcvarsall.bat x64` before `qmake` and `nmake`, or the compiler (`cl`) will not be found.
 - Typical flow:
   ```cmd
   call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
-  qmake mdviewer.pro
+  qmake vibe-md.pro
   nmake
   ```
 - Output lands in `release\vibe-md.exe` (or `debug\` if `CONFIG += debug`).
@@ -33,7 +33,7 @@
 - `tabler-icons/` is in `.gitignore`; only the copied icons in `images/` are tracked.
 
 ## Editing Guidelines
-- Keep all source files under `src/`. Update `mdviewer.pro` `SOURCES`/`HEADERS` when adding files.
+- Keep all source files under `src/`. Update `vibe-md.pro` `SOURCES`/`HEADERS` when adding files.
 - C++17 (`CONFIG += c++17`).
 - No tests, no lint config, no CI — verify by building and running the executable.
 

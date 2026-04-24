@@ -37,5 +37,5 @@ int main(int argc, char *argv[])
 
 ## Build Instructions
 
-1. Run `qmake mdviewer.pro`
+1. Run `qmake vibe-md.pro`
 2. Run `make` (or `nmake` on Windows)
