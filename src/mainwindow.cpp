@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "filterproxymodel.h"
 #include "preferencesdialog.h"
+#include "finddialog.h"
 
 #include <QApplication>
 #include <QFileDialog>
@@ -262,6 +263,13 @@ void MainWindow::setupMenuBar()
     connect(zoomResetAction, &QAction::triggered, this, &MainWindow::onZoomReset);
     viewMenu->addAction(zoomResetAction);
 
+    viewMenu->addSeparator();
+
+    QAction *findAction = new QAction(QIcon(":/images/binoculars.png"), tr("&Find..."), this);
+    findAction->setShortcut(QKeySequence::Find);
+    connect(findAction, &QAction::triggered, this, &MainWindow::onFind);
+    viewMenu->addAction(findAction);
+
     // Help menu
     QMenu *helpMenu = menuBar->addMenu(tr("&Help"));
 
@@ -300,6 +308,12 @@ void MainWindow::setupToolBar()
     QAction *zoomOutAction = new QAction(QIcon(":/images/zoom-out.png"), tr("Zoom Out"), this);
     connect(zoomOutAction, &QAction::triggered, this, &MainWindow::onZoomOut);
     toolBar->addAction(zoomOutAction);
+
+    toolBar->addSeparator();
+
+    QAction *findAction = new QAction(QIcon(":/images/binoculars.png"), tr("Find"), this);
+    connect(findAction, &QAction::triggered, this, &MainWindow::onFind);
+    toolBar->addAction(findAction);
 }
 
 void MainWindow::onOpenFile()
@@ -429,6 +443,16 @@ void MainWindow::onPreferences()
             loadFile(m_currentFile);
         }
     }
+}
+
+void MainWindow::onFind()
+{
+    if (!m_findDialog) {
+        m_findDialog = new FindDialog(m_editor, this);
+    }
+    m_findDialog->show();
+    m_findDialog->raise();
+    m_findDialog->activateWindow();
 }
 
 void MainWindow::applyEditorFont()

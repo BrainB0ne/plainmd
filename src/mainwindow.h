@@ -19,6 +19,8 @@
 #include <QRegularExpression>
 #include "filterproxymodel.h"
 
+class FindDialog;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -47,6 +49,7 @@ private slots:
     void onAboutQt();
     void onPrint();
     void onPreferences();
+    void onFind();
 
 private:
     void setupUI();
@@ -80,6 +83,7 @@ private:
     QString m_currentFolder;
     QSettings m_settings;
     QHash<QString, QString> m_imageUrlMap; // localPath -> originalUrl
+    FindDialog *m_findDialog = nullptr;
 };
 
 #endif // MAINWINDOW_H
