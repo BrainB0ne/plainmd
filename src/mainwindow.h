@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTextEdit>
 #include <QMenuBar>
+#include <QMenu>
 #include <QToolBar>
 #include <QStatusBar>
 #include <QSplitter>
@@ -36,6 +37,7 @@ private slots:
     void onOpenFile();
     void onOpenFolder();
     void onFileTreeClicked(const QModelIndex &index);
+    void onFileTreeContextMenu(const QPoint &pos);
     void onRecentFileTriggered();
     void onClearRecent();
     void onZoomIn();

@@ -31,6 +31,8 @@
 #include <QPrintDialog>
 #include <QHelpEvent>
 #include <QToolTip>
+#include <QMenu>
+#include <QProcess>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -85,6 +87,8 @@ void MainWindow::setupFileTree()
     m_fileTree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
 
     connect(m_fileTree, &QTreeView::clicked, this, &MainWindow::onFileTreeClicked);
+    m_fileTree->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_fileTree, &QTreeView::customContextMenuRequested, this, &MainWindow::onFileTreeContextMenu);
 
     m_splitter->addWidget(m_fileTree);
 }
@@ -323,6 +327,27 @@ void MainWindow::onFileTreeClicked(const QModelIndex &index)
     if (info.isFile() && isMarkdownFile(filePath)) {
         loadFile(filePath);
     }
+}
+
+void MainWindow::onFileTreeContextMenu(const QPoint &pos)
+{
+    QModelIndex index = m_fileTree->indexAt(pos);
+    if (!index.isValid()) return;
+
+    QModelIndex sourceIndex = m_proxyModel->mapToSource(index);
+    QString filePath = m_fileModel->filePath(sourceIndex);
+    QFileInfo info(filePath);
+
+    if (!info.isFile() || !isMarkdownFile(filePath)) return;
+
+    QMenu contextMenu(this);
+    QAction *revealAction = contextMenu.addAction(QIcon(":/images/external-link.png"), tr("Reveal in Explorer"));
+    connect(revealAction, &QAction::triggered, this, [filePath]() {
+        QString path = QDir::toNativeSeparators(filePath);
+        QProcess::startDetached("explorer", QStringList() << "/select," << path);
+    });
+
+    contextMenu.exec(m_fileTree->viewport()->mapToGlobal(pos));
 }
 
 void MainWindow::onRecentFileTriggered()
