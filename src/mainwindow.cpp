@@ -409,7 +409,8 @@ void MainWindow::onAbout()
            "<li>Print support</li>"
            "</ul>"
            "<p>Built with qmake and Qt6.</p>"
-           "<p>Icons by <a href='https://tabler.io/icons'>Tabler Icons</a> (MIT License).</p>"));
+           "<p>Icons by <a href='https://tabler.io/icons'>Tabler Icons</a> "
+           "(<a href='https://github.com/tabler/tabler-icons/blob/main/LICENSE'>MIT License</a>).</p>"));
 }
 
 void MainWindow::onAboutQt()
