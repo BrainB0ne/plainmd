@@ -46,6 +46,7 @@ private slots:
     void onAbout();
     void onAboutQt();
     void onPrint();
+    void onPreferences();
 
 private:
     void setupUI();
@@ -59,10 +60,11 @@ private:
     void refreshRecentFilesMenu();
     void setMarkdownStyle();
     bool isMarkdownFile(const QString &filePath) const;
-    QString resolveExternalImages(const QString &markdownContent);
+    QString resolveExternalImages(const QString &markdownContent, bool previewEnabled);
     QString resolveRelativeImages(const QString &markdownContent, const QString &basePath);
     QString resolveFrontMatter(const QString &markdownContent);
     void styleCodeBlocks();
+    void applyEditorFont();
 
     QTextEdit *m_editor = nullptr;
     QTreeView *m_fileTree = nullptr;

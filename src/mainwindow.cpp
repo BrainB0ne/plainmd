@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "filterproxymodel.h"
+#include "preferencesdialog.h"
 
 #include <QApplication>
 #include <QFileDialog>
@@ -104,9 +105,7 @@ void MainWindow::setupEditor()
     m_editor->viewport()->setMouseTracking(true);
     m_editor->viewport()->installEventFilter(this);
 
-    QFont font = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
-    font.setPointSize(11);
-    m_editor->setFont(font);
+    applyEditorFont();
 
     setMarkdownStyle();
 
@@ -256,6 +255,13 @@ void MainWindow::setupMenuBar()
     connect(zoomResetAction, &QAction::triggered, this, &MainWindow::onZoomReset);
     viewMenu->addAction(zoomResetAction);
 
+    // Edit menu
+    QMenu *editMenu = menuBar->addMenu(tr("&Edit"));
+    QAction *prefsAction = new QAction(tr("&Preferences..."), this);
+    prefsAction->setShortcut(QKeySequence(tr("Ctrl+,")));
+    connect(prefsAction, &QAction::triggered, this, &MainWindow::onPreferences);
+    editMenu->addAction(prefsAction);
+
     // Help menu
     QMenu *helpMenu = menuBar->addMenu(tr("&Help"));
 
@@ -384,9 +390,7 @@ void MainWindow::onZoomOut()
 
 void MainWindow::onZoomReset()
 {
-    QFont font = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
-    font.setPointSize(11);
-    m_editor->setFont(font);
+    applyEditorFont();
 }
 
 void MainWindow::onAbout()
@@ -411,6 +415,28 @@ void MainWindow::onAbout()
 void MainWindow::onAboutQt()
 {
     QMessageBox::aboutQt(this);
+}
+
+void MainWindow::onPreferences()
+{
+    PreferencesDialog dlg(this);
+    dlg.loadSettings();
+    if (dlg.exec() == QDialog::Accepted) {
+        dlg.saveSettings();
+        applyEditorFont();
+        if (!m_currentFile.isEmpty()) {
+            loadFile(m_currentFile);
+        }
+    }
+}
+
+void MainWindow::applyEditorFont()
+{
+    QString family = m_settings.value("editor/fontFamily", "Segoe UI").toString();
+    int size = m_settings.value("editor/fontSize", 11).toInt();
+    QFont font(family);
+    font.setPointSize(size);
+    m_editor->setFont(font);
 }
 
 void MainWindow::onPrint()
@@ -463,8 +489,9 @@ void MainWindow::loadFile(const QString &filePath)
 
     m_imageUrlMap.clear();
 
+    bool previewExternal = m_settings.value("privacy/previewExternalImages", true).toBool();
     QString processedContent = resolveFrontMatter(content);
-    processedContent = resolveExternalImages(processedContent);
+    processedContent = resolveExternalImages(processedContent, previewExternal);
     processedContent = resolveRelativeImages(processedContent, QFileInfo(filePath).absolutePath());
 
     m_editor->clear();
@@ -564,53 +591,85 @@ bool MainWindow::isMarkdownFile(const QString &filePath) const
     return suffix == "md" || suffix == "markdown" || suffix == "mdx" || suffix == "txt";
 }
 
-QString MainWindow::resolveExternalImages(const QString &markdownContent)
+QString MainWindow::resolveExternalImages(const QString &markdownContent, bool previewEnabled)
 {
     QString result = markdownContent;
 
-    // Regex for Markdown images: ![alt](url) or ![alt](url "title")
-    QRegularExpression mdRe(QStringLiteral(R"(!\[[^\]]*\]\((https?://[^)\s\"]+)[^)]*\))"));
-    // Regex for HTML <img> tags: <img src="url" or <img src='url'
-    QRegularExpression htmlRe(QStringLiteral(R"(<img[^>]+src\s*=\s*["'](https?://[^"']+)["'])"));
-
     struct Match {
-        qsizetype pos;
-        qsizetype len;
+        qsizetype urlPos;
+        qsizetype urlLen;
         QString url;
+        qsizetype fullPos;
+        qsizetype fullLen;
+        QString altText;
     };
     QList<Match> matches;
 
-    auto collectMatches = [&matches](const QRegularExpression &re, const QString &text) {
-        QRegularExpressionMatchIterator it = re.globalMatch(text);
+    // Markdown images: ![alt](url) or ![alt](url "title")
+    QRegularExpression mdRe(QStringLiteral(R"(!\[([^\]]*)\]\((https?://[^)\s\"]+)[^)]*\))"));
+    {
+        QRegularExpressionMatchIterator it = mdRe.globalMatch(result);
         while (it.hasNext()) {
             QRegularExpressionMatch m = it.next();
-            matches.append({m.capturedStart(1), m.capturedLength(1), m.captured(1)});
+            matches.append({m.capturedStart(2), m.capturedLength(2), m.captured(2),
+                            m.capturedStart(0), m.capturedLength(0), m.captured(1)});
         }
-    };
+    }
 
-    collectMatches(mdRe, result);
-    collectMatches(htmlRe, result);
+    // HTML <img> tags
+    QRegularExpression htmlRe(QStringLiteral(R"(<img[^>]+src\s*=\s*["'](https?://[^"']+)["'])"));
+    {
+        QRegularExpressionMatchIterator it = htmlRe.globalMatch(result);
+        while (it.hasNext()) {
+            QRegularExpressionMatch m = it.next();
+            matches.append({m.capturedStart(1), m.capturedLength(1), m.captured(1),
+                            m.capturedStart(0), m.capturedLength(0), QString()});
+        }
+    }
 
     if (matches.isEmpty()) return result;
 
+    // Locate fenced code blocks so we skip image-looking syntax inside them
+    QList<QPair<qsizetype, qsizetype>> codeBlocks;
+    QRegularExpression fenceRe(QStringLiteral("```[\\s\\S]*?```"));
+    QRegularExpressionMatchIterator fenceIt = fenceRe.globalMatch(result);
+    while (fenceIt.hasNext()) {
+        QRegularExpressionMatch fm = fenceIt.next();
+        codeBlocks.append({fm.capturedStart(), fm.capturedEnd()});
+    }
+
     // Sort by position descending so replacements do not shift earlier indices
     std::sort(matches.begin(), matches.end(),
-              [](const Match &a, const Match &b) { return a.pos > b.pos; });
-
-    QString cacheDir = QDir::tempPath() + "/vibe-md_images";
-    QDir().mkpath(cacheDir);
-
-    QNetworkAccessManager nam;
+              [](const Match &a, const Match &b) { return a.urlPos > b.urlPos; });
 
     for (const Match &match : matches) {
+        // Skip anything inside a fenced code block
+        bool insideCodeBlock = false;
+        for (const auto &range : codeBlocks) {
+            if (match.fullPos >= range.first && match.fullPos < range.second) {
+                insideCodeBlock = true;
+                break;
+            }
+        }
+        if (insideCodeBlock) continue;
+        if (!previewEnabled) {
+            QString replacement = match.altText.isEmpty()
+                ? QStringLiteral("[External Image]")
+                : QStringLiteral("[%1]").arg(match.altText);
+            result.replace(match.fullPos, match.fullLen, replacement);
+            continue;
+        }
+
         QString urlStr = match.url;
         QString ext = QFileInfo(QUrl(urlStr).path()).suffix();
         if (ext.isEmpty()) ext = "png";
 
         QByteArray hash = QCryptographicHash::hash(urlStr.toUtf8(), QCryptographicHash::Md5).toHex();
-        QString localPath = cacheDir + "/" + QString::fromLatin1(hash) + "." + ext;
+        QString localPath = QDir::tempPath() + "/vibe-md_images/" + QString::fromLatin1(hash) + "." + ext;
 
         if (!QFile::exists(localPath)) {
+            QDir().mkpath(QDir::tempPath() + "/vibe-md_images");
+            QNetworkAccessManager nam;
             QUrl imgUrl(urlStr);
             QNetworkRequest req(imgUrl);
             req.setHeader(QNetworkRequest::UserAgentHeader, "MarkdownViewer/1.0");
@@ -639,7 +698,7 @@ QString MainWindow::resolveExternalImages(const QString &markdownContent)
 
         if (QFile::exists(localPath)) {
             m_imageUrlMap[localPath] = urlStr;
-            result.replace(match.pos, match.len, localPath);
+            result.replace(match.urlPos, match.urlLen, localPath);
         }
     }
 
@@ -674,11 +733,30 @@ QString MainWindow::resolveRelativeImages(const QString &markdownContent, const 
         matches.append({m.capturedStart(1), m.capturedLength(1), m.captured(1)});
     }
 
+    // Locate fenced code blocks so we skip image-looking syntax inside them
+    QList<QPair<qsizetype, qsizetype>> codeBlocks;
+    QRegularExpression fenceRe(QStringLiteral("```[\\s\\S]*?```"));
+    QRegularExpressionMatchIterator fenceIt = fenceRe.globalMatch(result);
+    while (fenceIt.hasNext()) {
+        QRegularExpressionMatch fm = fenceIt.next();
+        codeBlocks.append({fm.capturedStart(), fm.capturedEnd()});
+    }
+
     // Sort by position descending so replacements do not shift earlier indices
     std::sort(matches.begin(), matches.end(),
               [](const Match &a, const Match &b) { return a.pos > b.pos; });
 
     for (const Match &match : matches) {
+        // Skip anything inside a fenced code block
+        bool insideCodeBlock = false;
+        for (const auto &range : codeBlocks) {
+            if (match.pos >= range.first && match.pos < range.second) {
+                insideCodeBlock = true;
+                break;
+            }
+        }
+        if (insideCodeBlock) continue;
+
         QUrl url(match.url);
         if (url.scheme().isEmpty() && !QDir::isAbsolutePath(match.url)) {
             QString absoluteUrl = QUrl::fromLocalFile(baseDir.absoluteFilePath(match.url)).toString();
