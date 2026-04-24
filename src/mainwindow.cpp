@@ -566,10 +566,10 @@ void MainWindow::showWelcomePage()
         </head>
         <body>
             <h1>Vibe-MD</h1>
-            <p align="center" style="margin:2px 0;">
-                <img src=":/icon.png" width="64" height="64" alt="" title="">
+            <p align="center" style="margin:0; line-height:1.2;">
+                <img src=":/icon.png" width="64" height="64" alt="" title=""><br>
+                <span style="font-size:1em; color:#7f8c8d;">A simple and elegant Markdown viewer</span>
             </p>
-            <p align="center" class="tagline">A simple and elegant Markdown viewer</p>
 
             <h2>Get Started</h2>
             <ul>
