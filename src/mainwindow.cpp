@@ -393,7 +393,7 @@ void MainWindow::onAbout()
 {
     QMessageBox::about(this, tr("About Vibe-MD"),
         tr("<h2>Vibe-MD</h2>"
-           "<p>Version 1.1</p>"
+           "<p>Version 1.2</p>"
            "<p>A simple and elegant Markdown viewer built with Qt6.</p>"
            "<p>Features:</p>"
            "<ul>"
@@ -402,6 +402,7 @@ void MainWindow::onAbout()
            "<li>Drag and drop support</li>"
            "<li>Recent files</li>"
            "<li>Zoom controls</li>"
+           "<li>Print support</li>"
            "</ul>"
            "<p>Built with qmake and Qt6.</p>"
            "<p>Icons by <a href='https://tabler.io/icons'>Tabler Icons</a> (MIT License).</p>"));

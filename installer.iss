@@ -3,8 +3,8 @@
 
 [Setup]
 AppName=Vibe-MD
-AppVersion=1.1
-AppVerName=Vibe-MD 1.1
+AppVersion=1.2
+AppVerName=Vibe-MD 1.2
 DefaultDirName={autopf64}\Vibe-MD
 DefaultGroupName=Vibe-MD
 OutputDir=.
