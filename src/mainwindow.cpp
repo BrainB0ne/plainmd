@@ -35,6 +35,10 @@
 #include <QToolTip>
 #include <QMenu>
 #include <QProcess>
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QDialogButtonBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -54,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent)
         loadFolder(lastFolder);
     }
 
+    showWelcomePage();
     refreshRecentFilesMenu();
 }
 
@@ -409,22 +414,59 @@ void MainWindow::onZoomReset()
 
 void MainWindow::onAbout()
 {
-    QMessageBox::about(this, tr("About Vibe-MD"),
-        tr("<h2>Vibe-MD</h2>"
-           "<p>Version 1.2</p>"
-           "<p>A simple and elegant Markdown viewer built with Qt6.</p>"
-           "<p>Features:</p>"
-           "<ul>"
-           "<li>Native Qt6 markdown rendering</li>"
-           "<li>File browser sidebar</li>"
-           "<li>Drag and drop support</li>"
-           "<li>Recent files</li>"
-           "<li>Zoom controls</li>"
-           "<li>Print support</li>"
-           "</ul>"
-           "<p>Built with qmake and Qt6.</p>"
-           "<p>Icons by <a href='https://tabler.io/icons'>Tabler Icons</a> "
-           "(<a href='https://github.com/tabler/tabler-icons/blob/main/LICENSE'>MIT License</a>).</p>"));
+    QDialog dlg(this);
+    dlg.setWindowTitle(tr("About Vibe-MD"));
+    dlg.setMinimumSize(420, 420);
+
+    QVBoxLayout *layout = new QVBoxLayout(&dlg);
+
+    QLabel *title = new QLabel(tr("<h2>Vibe-MD</h2>"), &dlg);
+    title->setAlignment(Qt::AlignCenter);
+    layout->addWidget(title);
+
+    QLabel *version = new QLabel(tr("Version 1.2"), &dlg);
+    version->setAlignment(Qt::AlignCenter);
+    layout->addWidget(version);
+
+    QLabel *desc = new QLabel(tr("A simple and elegant Markdown viewer built with Qt6."), &dlg);
+    desc->setAlignment(Qt::AlignCenter);
+    desc->setWordWrap(true);
+    layout->addWidget(desc);
+
+    layout->addSpacing(8);
+
+    QLabel *featuresLabel = new QLabel(tr("Features:"), &dlg);
+    layout->addWidget(featuresLabel);
+
+    QTextEdit *featuresEdit = new QTextEdit(&dlg);
+    featuresEdit->setReadOnly(true);
+    featuresEdit->setPlainText(
+        tr("- Native Qt6 markdown rendering\n"
+           "- Markdown, MDX, and plain text support\n"
+           "- File browser sidebar\n"
+           "- Drag and drop support\n"
+           "- Recent files\n"
+           "- Zoom controls\n"
+           "- Find / Search\n"
+           "- Print support\n"
+           "- External image preview with privacy toggle\n"
+           "- Customizable editor and code-block fonts\n"
+           "- YAML frontmatter display"));
+    layout->addWidget(featuresEdit);
+
+    QLabel *icons = new QLabel(
+        tr("Icons by <a href='https://tabler.io/icons'>Tabler Icons</a> "
+           "(<a href='https://github.com/tabler/tabler-icons/blob/main/LICENSE'>MIT License</a>)"), &dlg);
+    icons->setOpenExternalLinks(true);
+    icons->setAlignment(Qt::AlignCenter);
+    icons->setWordWrap(true);
+    layout->addWidget(icons);
+
+    QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok, &dlg);
+    connect(buttons, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    layout->addWidget(buttons);
+
+    dlg.exec();
 }
 
 void MainWindow::onAboutQt()
@@ -462,6 +504,102 @@ void MainWindow::applyEditorFont()
     QFont font(family);
     font.setPointSize(size);
     m_editor->setFont(font);
+}
+
+void MainWindow::showWelcomePage()
+{
+    m_editor->clear();
+    m_currentFile.clear();
+    setWindowTitle(tr("Vibe-MD"));
+
+    QString html = R"(
+        <html>
+        <head>
+        <style>
+            body {
+                font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+                color: #444;
+                margin: 16px;
+                line-height: 1.3;
+            }
+            .center { text-align: center; }
+            h1 {
+                font-size: 2em;
+                color: #2c3e50;
+                font-weight: 300;
+                margin: 0;
+                text-align: center;
+            }
+            .tagline {
+                font-size: 1em;
+                color: #7f8c8d;
+                margin: 0 0 8px 0;
+            }
+            h2 {
+                font-size: 1em;
+                color: #34495e;
+                border-bottom: 1px solid #ecf0f1;
+                padding-bottom: 2px;
+                margin: 10px 0 4px 0;
+            }
+            .shortcut {
+                display: inline-block;
+                background: #f4f4f4;
+                border: 1px solid #ddd;
+                border-radius: 3px;
+                padding: 1px 6px;
+                font-family: Consolas, monospace;
+                font-size: 0.8em;
+                color: #555;
+            }
+            ul { padding-left: 18px; margin: 0; }
+            li { margin: 1px 0; }
+            a { color: #3498db; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+            .footer {
+                margin-top: 12px;
+                font-size: 0.85em;
+                color: #95a5a6;
+                text-align: center;
+            }
+        </style>
+        </head>
+        <body>
+            <h1>Vibe-MD</h1>
+            <p align="center" style="margin:2px 0;">
+                <img src=":/icon.png" width="64" height="64" alt="" title="">
+            </p>
+            <p align="center" class="tagline">A simple and elegant Markdown viewer</p>
+
+            <h2>Get Started</h2>
+            <ul>
+                <li><strong>Open a file</strong> — <span class="shortcut">Ctrl+O</span> or drag &amp; drop</li>
+                <li><strong>Open a folder</strong> — <span class="shortcut">Ctrl+Shift+O</span> or drag &amp; drop</li>
+                <li><strong>Search</strong> — <span class="shortcut">Ctrl+F</span></li>
+                <li><strong>Print</strong> — <span class="shortcut">Ctrl+P</span></li>
+                <li><strong>Preferences</strong> — <span class="shortcut">Ctrl+,</span></li>
+            </ul>
+
+            <h2>Supported Formats</h2>
+            <ul>
+                <li>Markdown (<span class="shortcut">.md</span>), MDX (<span class="shortcut">.mdx</span>), Plain text (<span class="shortcut">.txt</span>)</li>
+            </ul>
+
+            <h2>Tips</h2>
+            <ul>
+                <li>Click any file in the sidebar to preview it instantly</li>
+                <li>External images can be toggled in <strong>Preferences</strong> for privacy</li>
+                <li>YAML frontmatter is displayed in a styled block at the top</li>
+            </ul>
+
+            <div class="footer">
+                <p>Version 1.2</p>
+            </div>
+        </body>
+        </html>
+    )";
+
+    m_editor->setHtml(html);
 }
 
 void MainWindow::onPrint()
@@ -963,6 +1101,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
     if (obj == m_editor->viewport() && event->type() == QEvent::ToolTip) {
+        // Skip custom image tooltips on the welcome page (no file loaded)
+        if (m_currentFile.isEmpty())
+            return QMainWindow::eventFilter(obj, event);
         QHelpEvent *helpEvent = static_cast<QHelpEvent*>(event);
         QPoint pos = m_editor->viewport()->mapFromGlobal(helpEvent->globalPos());
 

@@ -68,6 +68,7 @@ private:
     QString resolveFrontMatter(const QString &markdownContent);
     void styleCodeBlocks();
     void applyEditorFont();
+    void showWelcomePage();
 
     QTextEdit *m_editor = nullptr;
     QTreeView *m_fileTree = nullptr;
