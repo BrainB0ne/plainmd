@@ -342,7 +342,7 @@ void MainWindow::onFileTreeContextMenu(const QPoint &pos)
     if (!info.isFile() || !isMarkdownFile(filePath)) return;
 
     QMenu contextMenu(this);
-    QAction *revealAction = contextMenu.addAction(QIcon(":/images/external-link.png"), tr("Reveal in Explorer"));
+    QAction *revealAction = contextMenu.addAction(QIcon(":/images/external-link.png"), tr("Show in Explorer"));
     connect(revealAction, &QAction::triggered, this, [filePath]() {
         QString path = QDir::toNativeSeparators(filePath);
         QProcess::startDetached("explorer", QStringList() << "/select," << path);
