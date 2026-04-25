@@ -659,12 +659,16 @@ void MainWindow::loadFile(const QString &filePath)
 
     m_editor->clear();
 
-    // Resolve relative image paths against the markdown file's directory
-    QUrl baseUrl = QUrl::fromLocalFile(QFileInfo(filePath).absolutePath() + "/");
-    m_editor->document()->setBaseUrl(baseUrl);
+    if (QFileInfo(filePath).suffix().toLower() == "txt") {
+        m_editor->setPlainText(content);
+    } else {
+        // Resolve relative image paths against the markdown file's directory
+        QUrl baseUrl = QUrl::fromLocalFile(QFileInfo(filePath).absolutePath() + "/");
+        m_editor->document()->setBaseUrl(baseUrl);
 
-    m_editor->setMarkdown(processedContent);
-    styleCodeBlocks();
+        m_editor->setMarkdown(processedContent);
+        styleCodeBlocks();
+    }
 
     m_currentFile = filePath;
     setWindowTitle(tr("%1 - Vibe-MD").arg(QFileInfo(filePath).fileName()));
