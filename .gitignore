@@ -41,3 +41,7 @@ Thumbs.db
 *.vcxproj.user
 vibe-md
 
+# AppImage builder
+.appimage-tools/
+*.AppImage
+
