@@ -87,7 +87,6 @@ void MainWindow::setupFileTree()
     m_proxyModel->setNameFilters(QStringList() << "*.md" << "*.markdown" << "*.mdx" << "*.txt");
     m_proxyModel->setSourceModel(m_fileModel);
 
-    m_fileTree->setModel(m_proxyModel);
     m_fileTree->hideColumn(1);
     m_fileTree->hideColumn(2);
     m_fileTree->hideColumn(3);
@@ -123,7 +122,11 @@ void MainWindow::setMarkdownStyle()
 {
     QString style = R"(
         body {
+#ifdef Q_OS_LINUX
+            font-family: "DejaVu Sans", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+#else
             font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+#endif
             font-size: 11pt;
             line-height: 1.6;
             color: #333333;
@@ -140,7 +143,7 @@ void MainWindow::setMarkdownStyle()
             color: #c7254e;
             padding: 2px 6px;
             border-radius: 4px;
-            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-family: "SFMono-Regular", "DejaVu Sans Mono", Consolas, "Liberation Mono", Menlo, Courier, monospace;
             font-size: 0.9em;
         }
         pre {
@@ -506,7 +509,12 @@ void MainWindow::onFind()
 
 void MainWindow::applyEditorFont()
 {
-    QString family = m_settings.value("editor/fontFamily", "Segoe UI").toString();
+#ifdef Q_OS_LINUX
+    const QString defaultFontFamily = QStringLiteral("DejaVu Sans");
+#else
+    const QString defaultFontFamily = QStringLiteral("Segoe UI");
+#endif
+    QString family = m_settings.value("editor/fontFamily", defaultFontFamily).toString();
     int size = m_settings.value("editor/fontSize", 11).toInt();
     QFont font(family);
     font.setPointSize(size);
@@ -524,7 +532,11 @@ void MainWindow::showWelcomePage()
         <head>
         <style>
             body {
+#ifdef Q_OS_LINUX
+                font-family: 'DejaVu Sans', 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+#else
                 font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+#endif
                 color: #444;
                 margin: 16px;
                 line-height: 1.3;
@@ -555,7 +567,7 @@ void MainWindow::showWelcomePage()
                 border: 1px solid #ddd;
                 border-radius: 3px;
                 padding: 1px 6px;
-                font-family: Consolas, monospace;
+                font-family: "DejaVu Sans Mono", Consolas, monospace;
                 font-size: 0.8em;
                 color: #555;
             }
@@ -683,7 +695,7 @@ void MainWindow::loadFile(const QString &filePath)
     setWindowTitle(tr("%1 - Vibe-MD").arg(QFileInfo(filePath).fileName()));
 
     // Select the file in the tree if visible
-    if (m_fileTree && m_fileModel && m_proxyModel) {
+    if (m_fileTree && m_fileTree->model() && m_fileModel && m_proxyModel) {
         QModelIndex sourceIndex = m_fileModel->index(filePath);
         QModelIndex proxyIndex = m_proxyModel->mapFromSource(sourceIndex);
         if (proxyIndex.isValid()) {
@@ -699,12 +711,18 @@ void MainWindow::loadFolder(const QString &folderPath)
 {
     if (!QDir(folderPath).exists()) return;
 
+    if (!m_fileTree->model()) {
+        m_fileTree->setModel(m_proxyModel);
+    }
+
     m_currentFolder = folderPath;
+    m_proxyModel->setExemptPath(folderPath);
     m_fileModel->setRootPath(folderPath);
+    m_settings.setValue("lastFolder", folderPath);
+
     QModelIndex sourceRoot = m_fileModel->index(folderPath);
     QModelIndex proxyRoot = m_proxyModel->mapFromSource(sourceRoot);
     m_fileTree->setRootIndex(proxyRoot);
-    m_settings.setValue("lastFolder", folderPath);
 }
 
 void MainWindow::updateRecentFiles(const QString &filePath)
@@ -1038,7 +1056,12 @@ void MainWindow::styleCodeBlocks()
         break; // only inspect the first code region
     }
 
-    QString cbFamily = m_settings.value("editor/codeBlockFontFamily", "Consolas").toString();
+#ifdef Q_OS_LINUX
+    const QString defaultCodeBlockFontFamily = QStringLiteral("DejaVu Sans Mono");
+#else
+    const QString defaultCodeBlockFontFamily = QStringLiteral("Consolas");
+#endif
+    QString cbFamily = m_settings.value("editor/codeBlockFontFamily", defaultCodeBlockFontFamily).toString();
     int cbSize = m_settings.value("editor/codeBlockFontSize", 11).toInt();
     QFont codeBlockFont(cbFamily);
     codeBlockFont.setPointSize(cbSize);

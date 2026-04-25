@@ -14,6 +14,7 @@ public:
     explicit FilterProxyModel(QObject *parent = nullptr);
 
     void setNameFilters(const QStringList &filters);
+    void setExemptPath(const QString &path);
 
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
@@ -23,6 +24,7 @@ private:
     bool fileMatches(const QString &fileName) const;
 
     QStringList m_nameFilters;
+    QString m_exemptPath;
 };
 
 #endif // FILTERPROXYMODEL_H

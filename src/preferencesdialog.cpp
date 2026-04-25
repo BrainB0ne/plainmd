@@ -59,13 +59,21 @@ void PreferencesDialog::loadSettings()
     QSettings settings(QSettings::IniFormat, QSettings::UserScope,
                        QApplication::organizationName(), QApplication::applicationName());
 
-    QString family = settings.value("editor/fontFamily", "Segoe UI").toString();
+#ifdef Q_OS_LINUX
+    const QString defaultFontFamily = QStringLiteral("DejaVu Sans");
+    const QString defaultCodeBlockFontFamily = QStringLiteral("DejaVu Sans Mono");
+#else
+    const QString defaultFontFamily = QStringLiteral("Segoe UI");
+    const QString defaultCodeBlockFontFamily = QStringLiteral("Consolas");
+#endif
+
+    QString family = settings.value("editor/fontFamily", defaultFontFamily).toString();
     int size = settings.value("editor/fontSize", 11).toInt();
     m_currentFont = QFont(family);
     m_currentFont.setPointSize(size);
     m_fontLabel->setText(QStringLiteral("%1, %2 pt").arg(m_currentFont.family()).arg(m_currentFont.pointSize()));
 
-    QString cbFamily = settings.value("editor/codeBlockFontFamily", "Consolas").toString();
+    QString cbFamily = settings.value("editor/codeBlockFontFamily", defaultCodeBlockFontFamily).toString();
     int cbSize = settings.value("editor/codeBlockFontSize", 11).toInt();
     m_codeBlockFont = QFont(cbFamily);
     m_codeBlockFont.setPointSize(cbSize);

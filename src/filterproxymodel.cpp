@@ -12,6 +12,12 @@ void FilterProxyModel::setNameFilters(const QStringList &filters)
     invalidateFilter();
 }
 
+void FilterProxyModel::setExemptPath(const QString &path)
+{
+    m_exemptPath = QDir::cleanPath(path);
+    invalidateFilter();
+}
+
 bool FilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
     QFileSystemModel *fsm = qobject_cast<QFileSystemModel*>(sourceModel());
@@ -20,6 +26,10 @@ bool FilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &source
     QModelIndex index = fsm->index(sourceRow, 0, sourceParent);
     QString filePath = fsm->filePath(index);
     QFileInfo info(filePath);
+
+    if (QDir::cleanPath(filePath) == m_exemptPath) {
+        return true;
+    }
 
     if (info.isFile()) {
         return fileMatches(info.fileName());
