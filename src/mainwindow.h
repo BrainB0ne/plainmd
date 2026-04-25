@@ -17,6 +17,7 @@
 #include <QNetworkReply>
 #include <QTimer>
 #include <QRegularExpression>
+#include <QFileSystemWatcher>
 #include "filterproxymodel.h"
 
 class FindDialog;
@@ -51,6 +52,7 @@ private slots:
     void onPrint();
     void onPreferences();
     void onFind();
+    void onFileChanged(const QString &path);
 
 private:
     void setupUI();
@@ -87,6 +89,7 @@ private:
     QSettings m_settings;
     QHash<QString, QString> m_imageUrlMap; // localPath -> originalUrl
     FindDialog *m_findDialog = nullptr;
+    QFileSystemWatcher *m_fileWatcher = nullptr;
 };
 
 #endif // MAINWINDOW_H

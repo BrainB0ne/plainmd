@@ -60,6 +60,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     showWelcomePage();
     refreshRecentFilesMenu();
+
+    // Setup file watcher for auto-reload
+    m_fileWatcher = new QFileSystemWatcher(this);
+    connect(m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::onFileChanged);
 }
 
 void MainWindow::setupUI()
@@ -554,6 +558,24 @@ void MainWindow::onFind()
     m_findDialog->activateWindow();
 }
 
+void MainWindow::onFileChanged(const QString &path)
+{
+    if (path != m_currentFile || !QFile::exists(path)) {
+        return;
+    }
+
+    // File has been modified externally - ask user if they want to reload
+    QMessageBox::StandardButton reply = QMessageBox::question(this,
+        tr("File Modified"),
+        tr("The file has been modified externally:\n%1\n\nDo you want to reload it?").arg(QFileInfo(path).fileName()),
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::Yes);
+
+    if (reply == QMessageBox::Yes) {
+        loadFile(path);
+    }
+}
+
 void MainWindow::applyEditorFont()
 {
 #ifdef Q_OS_LINUX
@@ -577,6 +599,11 @@ void MainWindow::showWelcomePage()
     // Disable print action on welcome page
     if (m_printAction) {
         m_printAction->setEnabled(false);
+    }
+
+    // Stop watching files when showing welcome page
+    if (m_fileWatcher) {
+        m_fileWatcher->removePaths(m_fileWatcher->files());
     }
 
 #ifdef Q_OS_LINUX
@@ -786,6 +813,12 @@ void MainWindow::loadFile(const QString &filePath)
 
     m_currentFile = filePath;
     setWindowTitle(tr("%1 - Vibe-MD").arg(QFileInfo(filePath).fileName()));
+
+    // Watch the file for external changes
+    if (m_fileWatcher) {
+        m_fileWatcher->removePaths(m_fileWatcher->files());
+        m_fileWatcher->addPath(filePath);
+    }
 
     // Enable print action when a file is loaded
     if (m_printAction) {

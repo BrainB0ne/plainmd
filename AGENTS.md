@@ -38,6 +38,7 @@
   - **Empty-folder safeguard**: `FilterProxyModel::setExemptPath()` ensures the current root folder is never filtered out, even when it contains no matching files.
 - File filter: `*.md`, `*.markdown`, `*.mdx`, `*.txt`.
 - **File tree lifecycle**: `setupFileTree()` does **not** attach the model immediately. The tree starts empty; `loadFolder()` attaches `m_proxyModel` on the first open and sets the root index.
+- **Auto-reload**: `QFileSystemWatcher` monitors the currently loaded file for external changes. When modified, a dialog prompts to reload. Watching stops when showing the welcome page.
 - Settings (`QSettings`, IniFormat) store last folder, recent files (max 10), window geometry, and splitter state.
 - **External images**: `QtNetwork` downloads remote images **synchronously** (10s timeout via `QEventLoop`) to `%TEMP%\vibe-md_images\` and replaces URLs with local paths before rendering (`resolveExternalImages()`). A privacy toggle in Preferences can disable this — when off, external image markup is replaced with placeholder text and **no network requests** are made.
 - **Relative images for printing**: `QTextDocument::setBaseUrl()` alone is not enough for print. `resolveRelativeImages()` pre-processes the markdown to convert relative image paths to absolute `file:///` URLs before `setMarkdown()`. Without this, local images render on screen but appear as broken placeholders when printed.
