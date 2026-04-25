@@ -372,11 +372,18 @@ void MainWindow::onFileTreeContextMenu(const QPoint &pos)
     if (!info.isFile() || !isMarkdownFile(filePath)) return;
 
     QMenu contextMenu(this);
+#ifdef Q_OS_LINUX
+    QAction *revealAction = contextMenu.addAction(QIcon(":/images/external-link.png"), tr("Show in File Manager"));
+    connect(revealAction, &QAction::triggered, this, [filePath]() {
+        QProcess::startDetached("xdg-open", QStringList() << QFileInfo(filePath).absolutePath());
+    });
+#else
     QAction *revealAction = contextMenu.addAction(QIcon(":/images/external-link.png"), tr("Show in Explorer"));
     connect(revealAction, &QAction::triggered, this, [filePath]() {
         QString path = QDir::toNativeSeparators(filePath);
         QProcess::startDetached("explorer", QStringList() << "/select," << path);
     });
+#endif
 
     contextMenu.exec(m_fileTree->viewport()->mapToGlobal(pos));
 }
