@@ -9,6 +9,7 @@ Makefile*
 *.exp
 *.obj
 *.o
+*.deb
 
 # Qt generated files
 moc_*.cpp
@@ -39,3 +40,4 @@ Thumbs.db
 *.vcxproj.filters
 *.vcxproj.user
 vibe-md
+

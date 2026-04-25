@@ -90,7 +90,6 @@ void MainWindow::setupFileTree()
     m_fileTree->hideColumn(1);
     m_fileTree->hideColumn(2);
     m_fileTree->hideColumn(3);
-    m_fileTree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
 
     connect(m_fileTree, &QTreeView::clicked, this, &MainWindow::onFileTreeClicked);
     connect(m_fileTree, &QTreeView::activated, this, &MainWindow::onFileTreeClicked);
@@ -713,6 +712,7 @@ void MainWindow::loadFolder(const QString &folderPath)
 
     if (!m_fileTree->model()) {
         m_fileTree->setModel(m_proxyModel);
+        m_fileTree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     }
 
     m_currentFolder = folderPath;

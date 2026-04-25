@@ -1,0 +1,133 @@
+#!/bin/bash
+set -e
+
+# vibe-md Debian package builder
+# Builds a .deb from the release binary, linked against system Qt6.
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "${SCRIPT_DIR}"
+
+# ---------------------------------------------------------------------------
+# 1. Locate system qmake (avoid local Qt installations)
+# ---------------------------------------------------------------------------
+QMAKE=""
+for candidate in /usr/bin/qmake6 /usr/lib/qt6/bin/qmake /usr/bin/qmake; do
+    if [ -x "$candidate" ]; then
+        ver="$($candidate --version 2>/dev/null | grep -oP 'Qt version \K[0-9]+\.[0-9]+' || true)"
+        if [ -n "$ver" ] && [ -z "$(echo "$candidate" | grep -E 'Qt-[0-9]|/Qt/[0-9]')" ]; then
+            QMAKE="$candidate"
+            break
+        fi
+    fi
+done
+
+if [ -z "$QMAKE" ]; then
+    echo "Error: Could not find system Qt6 qmake."
+    echo "Install qt6-base-dev (or equivalent) and try again."
+    exit 1
+fi
+
+echo "Using qmake: $QMAKE  (Qt $ver)"
+
+# ---------------------------------------------------------------------------
+# 2. Build release binary against system Qt
+# ---------------------------------------------------------------------------
+echo "Building release binary..."
+$QMAKE vibe-md.pro CONFIG+=release
+make -f Makefile.Release
+
+if [ ! -x "release/vibe-md" ]; then
+    echo "Error: release/vibe-md was not built."
+    exit 1
+fi
+
+# Verify it links to system libs, not a local Qt installation
+if ldd release/vibe-md | grep -qE '/home/.*/Qt/[0-9]|/usr/local/Qt'; then
+    echo "Warning: Binary still links to a local Qt installation."
+    echo "The resulting .deb will NOT work on other machines."
+    echo "Install qt6-base-dev and rebuild against system Qt."
+    exit 1
+fi
+
+echo "Binary links to system Qt — OK."
+
+# ---------------------------------------------------------------------------
+# 3. Package metadata
+# ---------------------------------------------------------------------------
+PKG_NAME="vibe-md"
+PKG_VERSION="1.2.0"
+PKG_ARCH="amd64"
+BUILD_DIR="build-deb"
+PKG_DIR="${BUILD_DIR}/${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}"
+
+# ---------------------------------------------------------------------------
+# 4. Assemble Debian package tree
+# ---------------------------------------------------------------------------
+echo "Assembling package..."
+rm -rf "${BUILD_DIR}"
+mkdir -p "${PKG_DIR}/DEBIAN"
+mkdir -p "${PKG_DIR}/usr/bin"
+mkdir -p "${PKG_DIR}/usr/share/applications"
+mkdir -p "${PKG_DIR}/usr/share/pixmaps"
+
+# Binary
+cp release/vibe-md "${PKG_DIR}/usr/bin/"
+chmod 755 "${PKG_DIR}/usr/bin/vibe-md"
+
+# .desktop entry
+cat > "${PKG_DIR}/usr/share/applications/vibe-md.desktop" << 'EOF'
+[Desktop Entry]
+Name=Vibe-MD
+GenericName=Markdown Viewer
+Comment=A simple and elegant Markdown viewer
+Exec=vibe-md %F
+Icon=vibe-md
+Type=Application
+Categories=Office;Viewer;
+MimeType=text/markdown;text/x-markdown;text/plain;
+Terminal=false
+StartupNotify=true
+EOF
+chmod 644 "${PKG_DIR}/usr/share/applications/vibe-md.desktop"
+
+# Icon
+cp icon.png "${PKG_DIR}/usr/share/pixmaps/vibe-md.png"
+chmod 644 "${PKG_DIR}/usr/share/pixmaps/vibe-md.png"
+
+# ---------------------------------------------------------------------------
+# 5. DEBIAN/control
+# ---------------------------------------------------------------------------
+# Qt6 package names vary by distro:
+#   Debian 13 / Ubuntu 24.04+ : libqt6core6t64, libqt6gui6t64, ...
+#   Older releases              : libqt6core6,   libqt6gui6,   ...
+# Adjust the Depends line below for your target distribution.
+cat > "${PKG_DIR}/DEBIAN/control" << EOF
+Package: ${PKG_NAME}
+Version: ${PKG_VERSION}
+Section: utils
+Priority: optional
+Architecture: ${PKG_ARCH}
+Depends: libqt6core6t64 | libqt6core6, libqt6gui6t64 | libqt6gui6, libqt6widgets6t64 | libqt6widgets6, libqt6network6t64 | libqt6network6, libqt6printsupport6t64 | libqt6printsupport6
+Maintainer: Vibe-MD Team
+Description: A simple and elegant Markdown viewer
+ Vibe-MD is a lightweight desktop Markdown viewer built with Qt6.
+ It supports .md, .markdown, .mdx, and .txt files with a built-in
+ file browser, external image preview, and print support.
+EOF
+
+# ---------------------------------------------------------------------------
+# 6. Build .deb
+# ---------------------------------------------------------------------------
+echo "Building .deb package..."
+dpkg-deb --build "${PKG_DIR}"
+
+mv "${BUILD_DIR}/${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}.deb" .
+
+# Clean up build tree
+rm -rf "${BUILD_DIR}"
+
+echo ""
+echo "Success: ${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}.deb"
+echo ""
+echo "Install with:  sudo dpkg -i ${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}.deb"
+echo "Or:            sudo apt install ./${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}.deb"
