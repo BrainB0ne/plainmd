@@ -113,7 +113,17 @@ void MainWindow::setupEditor()
 
 void MainWindow::setMarkdownStyle()
 {
-    QString style = R"(
+    // Get the code block font from settings to use for inline code as well
+#ifdef Q_OS_LINUX
+    const QString defaultCodeFontFamily = QStringLiteral("DejaVu Sans Mono");
+#else
+    const QString defaultCodeFontFamily = QStringLiteral("Consolas");
+#endif
+    QString codeFontFamily = m_settings.value("editor/codeBlockFontFamily", defaultCodeFontFamily).toString();
+    // Escape single quotes for CSS
+    codeFontFamily.replace("'", "\\'");
+
+    QString style = QStringLiteral(R"(
         body {
 #ifdef Q_OS_LINUX
             font-family: "DejaVu Sans", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
@@ -136,7 +146,7 @@ void MainWindow::setMarkdownStyle()
             color: #c7254e;
             padding: 2px 6px;
             border-radius: 4px;
-            font-family: "SFMono-Regular", "DejaVu Sans Mono", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-family: '%1', 'SFMono-Regular', 'DejaVu Sans Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
             font-size: 0.9em;
         }
         pre {
@@ -196,7 +206,7 @@ void MainWindow::setMarkdownStyle()
             max-width: 100%;
             height: auto;
         }
-    )";
+    )").arg(codeFontFamily);
 
     m_editor->document()->setDefaultStyleSheet(style);
 }
@@ -487,6 +497,7 @@ void MainWindow::onPreferences()
     if (dlg.exec() == QDialog::Accepted) {
         dlg.saveSettings();
         applyEditorFont();
+        setMarkdownStyle(); // Update CSS with new inline code font
         if (!dlg.keepRecentFiles()) {
             m_settings.setValue("recentFiles", QStringList());
         }
@@ -534,11 +545,14 @@ void MainWindow::showWelcomePage()
 
 #ifdef Q_OS_LINUX
     QString fontFamily = QStringLiteral("'DejaVu Sans', 'Noto Sans', 'Helvetica Neue', Arial, sans-serif");
-    QString monoFamily = QStringLiteral("'DejaVu Sans Mono', 'Liberation Mono', monospace");
+    QString defaultMonoFamily = QStringLiteral("DejaVu Sans Mono");
 #else
     QString fontFamily = QStringLiteral("'Segoe UI', 'Helvetica Neue', Arial, sans-serif");
-    QString monoFamily = QStringLiteral("Consolas, 'Liberation Mono', monospace");
+    QString defaultMonoFamily = QStringLiteral("Consolas");
 #endif
+    // Use the configured code block font for welcome page inline code too
+    QString monoFamily = m_settings.value("editor/codeBlockFontFamily", defaultMonoFamily).toString();
+    monoFamily = QStringLiteral("'%1', 'SFMono-Regular', 'DejaVu Sans Mono', Consolas, 'Liberation Mono', monospace").arg(monoFamily);
 
     QString html = QStringLiteral(R"(
         <html>
@@ -1176,6 +1190,35 @@ void MainWindow::styleCodeBlocks()
         }
     }
 
+    cursor.endEditBlock();
+
+    // Also style inline code spans (fragments with monospace font inside non-code blocks)
+    cursor.beginEditBlock();
+    for (QTextBlock block = doc->begin(); block != doc->end(); block = block.next()) {
+        // Skip blocks that are already styled as code blocks
+        bool isBlockCode = false;
+        for (int i = 0; i < blocks.size(); ++i) {
+            if (blocks[i] == block && isCode[i]) {
+                isBlockCode = true;
+                break;
+            }
+        }
+        if (isBlockCode) continue;
+
+        // Find inline code fragments in non-code blocks
+        for (QTextBlock::iterator it = block.begin(); !it.atEnd(); ++it) {
+            QTextFragment frag = it.fragment();
+            if (!frag.isValid()) continue;
+            QTextCharFormat cf = frag.charFormat();
+            // Check if this is inline code (monospace font and red color from CSS)
+            if (cf.font().fixedPitch() || cf.font().family().contains("mono", Qt::CaseInsensitive)) {
+                cf.setFont(codeBlockFont);
+                cursor.setPosition(frag.position());
+                cursor.setPosition(frag.position() + frag.length(), QTextCursor::KeepAnchor);
+                cursor.setCharFormat(cf);
+            }
+        }
+    }
     cursor.endEditBlock();
 }
 

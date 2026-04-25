@@ -27,7 +27,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent)
     m_fontLabel->setWordWrap(true);
     editorLayout->addWidget(m_fontLabel, 1, 0, 1, 2);
 
-    editorLayout->addWidget(new QLabel(tr("Code Block Font:"), this), 2, 0);
+    editorLayout->addWidget(new QLabel(tr("Code Font:"), this), 2, 0);
     m_codeBlockFontButton = new QPushButton(tr("Choose Font..."), this);
     connect(m_codeBlockFontButton, &QPushButton::clicked, this, &PreferencesDialog::onChooseCodeBlockFont);
     editorLayout->addWidget(m_codeBlockFontButton, 2, 1);
