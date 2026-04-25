@@ -74,11 +74,9 @@ void MainWindow::setupUI()
 void MainWindow::setupFileTree()
 {
     m_fileTree = new QTreeView(this);
-    m_fileTree->setHeaderHidden(true);
     m_fileTree->setSortingEnabled(true);
     m_fileTree->setAnimated(true);
     m_fileTree->setMinimumWidth(200);
-    m_fileTree->setMaximumWidth(400);
 
     m_fileModel = new QFileSystemModel(this);
     m_fileModel->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
@@ -86,10 +84,6 @@ void MainWindow::setupFileTree()
     m_proxyModel = new FilterProxyModel(this);
     m_proxyModel->setNameFilters(QStringList() << "*.md" << "*.markdown" << "*.mdx" << "*.txt");
     m_proxyModel->setSourceModel(m_fileModel);
-
-    m_fileTree->hideColumn(1);
-    m_fileTree->hideColumn(2);
-    m_fileTree->hideColumn(3);
 
     connect(m_fileTree, &QTreeView::clicked, this, &MainWindow::onFileTreeClicked);
     connect(m_fileTree, &QTreeView::activated, this, &MainWindow::onFileTreeClicked);
@@ -719,6 +713,9 @@ void MainWindow::loadFolder(const QString &folderPath)
     if (!m_fileTree->model()) {
         m_fileTree->setModel(m_proxyModel);
         m_fileTree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+        m_fileTree->hideColumn(1);
+        m_fileTree->hideColumn(2);
+        m_fileTree->hideColumn(3);
     }
 
     m_currentFolder = folderPath;
