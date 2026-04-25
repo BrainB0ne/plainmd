@@ -413,6 +413,7 @@ void MainWindow::onAbout()
            "- Find / Search\n"
            "- Print support\n"
            "- External image preview with privacy toggle\n"
+           "- URL tooltips on hover\n"
            "- Configurable editor font\n"
            "- Configurable external editor\n"
            "- YAML frontmatter display"));
@@ -1213,6 +1214,19 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                         tooltip = QDir::toNativeSeparators(displayName);
                     }
                     QToolTip::showText(helpEvent->globalPos(), tooltip, m_editor);
+                    return true;
+                }
+            }
+        }
+
+        // Also check for link/anchor fragments (show URL on hover)
+        QTextCursor cursor = m_editor->cursorForPosition(pos);
+        if (!cursor.isNull()) {
+            QTextCharFormat fmt = cursor.charFormat();
+            if (fmt.isAnchor()) {
+                QString url = fmt.anchorHref();
+                if (!url.isEmpty()) {
+                    QToolTip::showText(helpEvent->globalPos(), url, m_editor);
                     return true;
                 }
             }
