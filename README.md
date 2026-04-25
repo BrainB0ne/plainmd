@@ -16,9 +16,9 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **Find/Search** - Search within documents with Ctrl+F
 - **Print support** - Print to PDF or physical printer
 - **External editor integration** - Open files with your preferred editor from the context menu
-- **Customizable fonts** - Configure editor font, code font, and emoji print font
+- **Customizable fonts** - Configure editor font and emoji print font
 - **Privacy options** - Toggle external image loading and recent files history
-- **YAML frontmatter display** - Shows frontmatter in a styled code block
+- **YAML frontmatter display** - Shows frontmatter as a code block
 
 ## Installation
 
@@ -125,7 +125,6 @@ make
 Access preferences via **View → Preferences** (Ctrl+,):
 
 - **Editor Font** - Main text font
-- **Code Font** - Font for code blocks and inline code
 - **Emoji Print Font** - Font for emoji characters when printing (use a Nerd Font for best results)
 - **External Editor** - Path to your preferred external editor
 - **Privacy** - Toggle external image preview and recent files history

@@ -14,7 +14,8 @@
 
 ## Qt6 Quirks
 - `QTextEdit::setZoomFactor()` **does not exist in Qt6**. Zoom reset by re-setting base font point size.
-- **CSS limitation**: `QTextDocument` ignores `background-color`, `border-radius`, `padding` on block elements. Code block backgrounds applied **after** `setMarkdown()` via `QTextBlockFormat` manipulation.
+- **CSS limitation**: `QTextDocument` ignores `background-color`, `border-radius`, `padding` on block elements.
+- **Document corruption bug**: QTextCursor operations (setBlockFormat/setCharFormat) on documents >5000 bytes corrupt the document structure. Both `styleCodeBlocks()` and custom CSS styling are **disabled** as a result.
 - **Emoji printing bug**: Color emoji fonts (Segoe UI Emoji) render incorrectly when printing to PDF on Windows. Use **Nerd Fonts** (CaskaydiaCove, JetBrainsMono) via `editor/printEmojiFont` setting.
 
 ## Architecture
@@ -26,14 +27,15 @@
 - **Auto-reload**: `QFileSystemWatcher` monitors current file. Watching stops on welcome page.
 
 ## Critical Implementation Details
-- **Code block styling**: **DISABLED** — `styleCodeBlocks()` caused document corruption on large files (>5000 bytes with multiple code blocks). QTextCursor operations (setBlockFormat/mergeBlockFormat) corrupt document structure, causing content after a certain point to disappear. Code blocks render with default Qt styling now.
+- **Code block styling**: **DISABLED** — `styleCodeBlocks()` caused document corruption on large files (>5000 bytes). QTextCursor operations corrupt document structure. Code blocks and inline code render with default Qt styling now.
+- **Welcome page styling**: Welcome page uses hardcoded CSS with Consolas (Windows) / DejaVu Sans Mono (Linux) for shortcuts. Not configurable.
 - **External images**: Downloaded **synchronously** (10s timeout via `QEventLoop`) to `%TEMP%\vibe-md_images\`. Privacy toggle can disable this — no network when off.
 - **Relative images for printing**: `setBaseUrl()` alone fails for print. `resolveRelativeImages()` converts relative paths to `file:///` URLs before `setMarkdown()`.
 - **Fenced code protection**: `resolveExternalImages()` and `resolveRelativeImages()` skip image syntax inside `` ``` `` blocks (regex-based).
-- **Frontmatter**: Converted to fenced `yaml` code block before rendering. First block highlighted blue if contains `title:` and `date:`.
+- **Frontmatter**: Converted to fenced `yaml` code block before rendering.
 
 ## Platform Differences
-- **Fonts**: Linux defaults to DejaVu Sans (editor) / DejaVu Sans Mono (code). Windows: Segoe UI / Consolas.
+- **Fonts**: Linux defaults to DejaVu Sans (editor). Windows: Segoe UI. Code font settings removed due to Qt6 bugs.
 - **Path separators**: Display with `QDir::toNativeSeparators()`, store normalized (forward slashes).
 - **Reveal in folder**: Windows uses `explorer`, Linux uses `xdg-open`.
 - **Menu bar**: File / View / Help only. Preferences under **View** (Ctrl+,).

@@ -404,7 +404,7 @@ void MainWindow::onAbout()
            "- Find / Search\n"
            "- Print support\n"
            "- External image preview with privacy toggle\n"
-           "- Customizable editor and code fonts\n"
+           "- Configurable editor font\n"
            "- Configurable external editor\n"
            "- YAML frontmatter display"));
     layout->addWidget(featuresEdit);
