@@ -6,7 +6,7 @@ This document demonstrates image support in Markdown Viewer.
 
 Here is a relative image reference:
 
-![Application Icon](icon.png)
+![Application Icon](../icon.png)
 
 ## Absolute Path Image
 
@@ -21,6 +21,6 @@ External images are rendered too:
 ## Markdown Syntax Reference
 
 ```markdown
-![Alt text](image.png)
+![Alt text](../image.png)
 ![Alt text](https://example.com/image.png)
 ```
