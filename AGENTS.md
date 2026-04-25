@@ -2,7 +2,17 @@
 
 ## Build System
 - **qmake only** — `vibe-md.pro` is the source of truth. Do not add CMake files.
-- On Windows with MSVC: you must run `vcvarsall.bat x64` before `qmake` and `nmake`, or the compiler (`cl`) will not be found.
+
+### Linux
+- Typical flow:
+  ```bash
+  qmake vibe-md.pro
+  make
+  ```
+- Output lands in `./vibe-md` (or `release/vibe-md` if `CONFIG += release`).
+
+### Windows (MSVC)
+- You must run `vcvarsall.bat x64` before `qmake` and `nmake`, or the compiler (`cl`) will not be found.
 - Typical flow:
   ```cmd
   call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
@@ -23,20 +33,24 @@
 - `QFileSystemModel` is wrapped by a custom `FilterProxyModel` that hides folders with no matching files.
 - File filter: `*.md`, `*.markdown`, `*.mdx`, `*.txt`.
 - Settings (`QSettings`, IniFormat) store last folder, recent files (max 10), window geometry, and splitter state.
-- **External images**: `QtNetwork` downloads remote images to `%TEMP%\vibe-md_images\` and replaces URLs with local paths before rendering (`resolveExternalImages()`). A privacy toggle in Preferences can disable this — when off, external image markup is replaced with placeholder text and **no network requests** are made.
+- **External images**: `QtNetwork` downloads remote images **synchronously** (10s timeout via `QEventLoop`) to `%TEMP%\vibe-md_images\` and replaces URLs with local paths before rendering (`resolveExternalImages()`). A privacy toggle in Preferences can disable this — when off, external image markup is replaced with placeholder text and **no network requests** are made.
 - **Relative images for printing**: `QTextDocument::setBaseUrl()` alone is not enough for print. `resolveRelativeImages()` pre-processes the markdown to convert relative image paths to absolute `file:///` URLs before `setMarkdown()`. Without this, local images render on screen but appear as broken placeholders when printed.
 - **Frontmatter**: YAML frontmatter (`---` delimited) is converted to a fenced `yaml` code block before rendering so Qt displays it; `styleCodeBlocks()` highlights the first region in blue when it contains `title:` and `date:` keys (`resolveFrontMatter()`).
 - **Code block styling**: post-processed after `setMarkdown()` by iterating `QTextDocument` blocks, detecting monospace-only blocks, and applying `QTextBlockFormat` background + margins. Code block font is configurable via Preferences (settings key `editor/codeBlockFontFamily`).
+  - **Detection heuristic**: a block is considered code only if *every* fragment reports `fixedPitch` **or** a font family containing `mono`, `Courier`, `Consolas`, `Menlo`, or `Liberation`. Changing fonts or Qt font resolution can break this.
+  - Empty blocks between two code blocks are coerced into the code region, and any list bullet markers are removed so code does not appear inside a `QTextList`.
 - **Fenced code block protection**: Both `resolveExternalImages()` and `resolveRelativeImages()` skip any image-like syntax (`![alt](url)` or `<img src="...">`) that appears inside `` ```...``` `` blocks, so example markdown in code blocks is not corrupted.
 - **Find dialog**: Modeless `FindDialog` with case-sensitive and whole-word search. Lives in `src/finddialog.cpp`.
 - **Preferences dialog**: `PreferencesDialog` in `src/preferencesdialog.cpp`. Settings: editor font, code block font, and privacy toggle for external images.
 - **Menu bar**: File / View / Help. No Edit menu. Preferences is under **View**.
+- **Platform-specific code**: The file-tree context menu uses `QProcess::startDetached("explorer", ...)` to reveal files on Windows. This needs a Linux equivalent (e.g. `xdg-open` or `dbus-send`) if porting that feature.
 
 ## Resources
 - `appicon.rc` + `icon.ico` → Windows exe icon (`RC_FILE` in `.pro`).
 - `resources.qrc` + `icon.png` → runtime window icon.
 - `images.qrc` + `images/*.png` → toolbar/menu icons (Tabler Icons, MIT licensed).
 - `tabler-icons/` is in `.gitignore`; only the copied icons in `images/` are tracked.
+- New icons should be picked from `tabler-icons/png/outline/` (the outline set) and copied into `images/` before embedding.
 
 ## Editing Guidelines
 - Keep all source files under `src/`. Update `vibe-md.pro` `SOURCES`/`HEADERS` when adding files.
