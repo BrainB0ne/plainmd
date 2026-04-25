@@ -730,7 +730,7 @@ void MainWindow::loadFile(const QString &filePath)
         }
     }
 
-    statusBar()->showMessage(tr("Loaded: %1").arg(filePath), 3000);
+    statusBar()->showMessage(tr("Loaded: %1").arg(QDir::toNativeSeparators(filePath)), 3000);
 }
 
 void MainWindow::loadFolder(const QString &folderPath)
@@ -799,11 +799,13 @@ void MainWindow::refreshRecentFilesMenu()
     } else {
         for (int i = 0; i < recentFiles.size(); ++i) {
             QString filePath = recentFiles.at(i);
-            QString displayName = QString("&%1 %2").arg(i + 1).arg(filePath);
+            // Convert to native separators for display
+            QString displayPath = QDir::toNativeSeparators(filePath);
+            QString displayName = QString("&%1 %2").arg(i + 1).arg(displayPath);
 
             QAction *action = new QAction(displayName, this);
             action->setData(filePath);
-            action->setToolTip(filePath);
+            action->setToolTip(displayPath);
             connect(action, &QAction::triggered, this, &MainWindow::onRecentFileTriggered);
             m_recentMenu->addAction(action);
             m_recentActions.append(action);
