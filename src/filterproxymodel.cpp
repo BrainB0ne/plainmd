@@ -48,10 +48,10 @@ bool FilterProxyModel::fileMatches(const QString &fileName) const
 {
     for (const QString &filter : m_nameFilters) {
         QString pattern = filter;
-        // Convert "*.md" style filter to wildcard match
+        // Convert "*.md" style filter to extension match
         if (pattern.startsWith("*.")) {
             QString suffix = pattern.mid(2);
-            if (fileName.endsWith(suffix, Qt::CaseInsensitive)) {
+            if (QFileInfo(fileName).suffix().compare(suffix, Qt::CaseInsensitive) == 0) {
                 return true;
             }
         } else {
