@@ -1206,6 +1206,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                     if (displayName.startsWith("file:///")) {
                         displayName = displayName.mid(8);
                     }
+                    // Clean up path (resolve .. and .)
+                    displayName = QDir::cleanPath(displayName);
                     QString tooltip;
                     if (m_imageUrlMap.contains(imgName)) {
                         tooltip = tr("Original: %1\nCached: %2")
@@ -1226,7 +1228,19 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             if (fmt.isAnchor()) {
                 QString url = fmt.anchorHref();
                 if (!url.isEmpty()) {
-                    QToolTip::showText(helpEvent->globalPos(), url, m_editor);
+                    // Resolve relative URLs to absolute paths
+                    QUrl urlObj(url);
+                    QString displayUrl;
+                    if (urlObj.isRelative() && !m_currentFile.isEmpty()) {
+                        QFileInfo currentInfo(m_currentFile);
+                        QString absolutePath = currentInfo.dir().absoluteFilePath(url);
+                        // Clean up path (resolve .. and .)
+                        absolutePath = QDir::cleanPath(absolutePath);
+                        displayUrl = QDir::toNativeSeparators(absolutePath);
+                    } else {
+                        displayUrl = url;
+                    }
+                    QToolTip::showText(helpEvent->globalPos(), displayUrl, m_editor);
                     return true;
                 }
             }
