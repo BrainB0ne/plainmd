@@ -352,6 +352,7 @@ void MainWindow::onFileTreeClicked(const QModelIndex &index)
 
     if (info.isFile() && isMarkdownFile(filePath)) {
         loadFile(filePath);
+        updateRecentFiles(filePath);
     }
 }
 
