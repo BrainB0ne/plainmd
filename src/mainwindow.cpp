@@ -382,6 +382,15 @@ void MainWindow::onAbout()
     version->setAlignment(Qt::AlignCenter);
     layout->addWidget(version);
 
+    // Format build date as yyyy-MM-dd HH:mm:ss
+    QDate buildDateValue = QDate::fromString(__DATE__, "MMM d yyyy");
+    QString buildDateStr = buildDateValue.toString("yyyy-MM-dd");
+    QString buildTimeStr = QString(__TIME__);
+    QLabel *buildDate = new QLabel(tr("Build: %1 %2").arg(buildDateStr, buildTimeStr), &dlg);
+    buildDate->setAlignment(Qt::AlignCenter);
+    buildDate->setStyleSheet("color: #888; font-size: 0.9em;");
+    layout->addWidget(buildDate);
+
     QLabel *desc = new QLabel(tr("A simple and elegant Markdown viewer built with Qt6."), &dlg);
     desc->setAlignment(Qt::AlignCenter);
     desc->setWordWrap(true);
