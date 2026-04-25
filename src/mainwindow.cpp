@@ -831,8 +831,10 @@ QString MainWindow::resolveExternalImages(const QString &markdownContent, bool p
 
     if (matches.isEmpty()) return result;
 
-    // Locate fenced code blocks so we skip image-looking syntax inside them
+    // Locate fenced code blocks and inline code spans so we skip image-looking syntax inside them
     QList<QPair<qsizetype, qsizetype>> codeBlocks;
+
+    // First, collect fenced code blocks
     QRegularExpression fenceRe(QStringLiteral("```[\\s\\S]*?```"));
     QRegularExpressionMatchIterator fenceIt = fenceRe.globalMatch(result);
     while (fenceIt.hasNext()) {
@@ -840,15 +842,38 @@ QString MainWindow::resolveExternalImages(const QString &markdownContent, bool p
         codeBlocks.append({fm.capturedStart(), fm.capturedEnd()});
     }
 
+    // Then, collect inline code spans, but skip any that fall inside fenced code blocks
+    QRegularExpression inlineCodeRe(QStringLiteral("`[^`]+`"));
+    QRegularExpressionMatchIterator inlineIt = inlineCodeRe.globalMatch(result);
+    while (inlineIt.hasNext()) {
+        QRegularExpressionMatch im = inlineIt.next();
+        qsizetype spanStart = im.capturedStart();
+        qsizetype spanEnd = im.capturedEnd();
+
+        // Check if this inline span is inside any fenced code block
+        bool insideFence = false;
+        for (const auto &fence : codeBlocks) {
+            if (spanStart >= fence.first && spanEnd <= fence.second) {
+                insideFence = true;
+                break;
+            }
+        }
+
+        if (!insideFence) {
+            codeBlocks.append({spanStart, spanEnd});
+        }
+    }
+
     // Sort by position descending so replacements do not shift earlier indices
     std::sort(matches.begin(), matches.end(),
               [](const Match &a, const Match &b) { return a.urlPos > b.urlPos; });
 
     for (const Match &match : matches) {
-        // Skip anything inside a fenced code block
+        // Skip anything inside a fenced code block or inline code span
         bool insideCodeBlock = false;
         for (const auto &range : codeBlocks) {
-            if (match.fullPos >= range.first && match.fullPos < range.second) {
+            // Use <= for end check because image can start right at the boundary of inline code
+            if (match.fullPos >= range.first && match.fullPos <= range.second) {
                 insideCodeBlock = true;
                 break;
             }
@@ -913,9 +938,11 @@ QString MainWindow::resolveRelativeImages(const QString &markdownContent, const 
     QDir baseDir(basePath);
 
     struct Match {
-        qsizetype pos;
-        qsizetype len;
+        qsizetype urlPos;
+        qsizetype urlLen;
         QString url;
+        qsizetype fullPos;
+        qsizetype fullLen;
     };
     QList<Match> matches;
 
@@ -924,7 +951,8 @@ QString MainWindow::resolveRelativeImages(const QString &markdownContent, const 
     QRegularExpressionMatchIterator it = mdRe.globalMatch(result);
     while (it.hasNext()) {
         QRegularExpressionMatch m = it.next();
-        matches.append({m.capturedStart(1), m.capturedLength(1), m.captured(1)});
+        matches.append({m.capturedStart(1), m.capturedLength(1), m.captured(1),
+                        m.capturedStart(0), m.capturedLength(0)});
     }
 
     // HTML <img> tags
@@ -932,11 +960,14 @@ QString MainWindow::resolveRelativeImages(const QString &markdownContent, const 
     it = htmlRe.globalMatch(result);
     while (it.hasNext()) {
         QRegularExpressionMatch m = it.next();
-        matches.append({m.capturedStart(1), m.capturedLength(1), m.captured(1)});
+        matches.append({m.capturedStart(1), m.capturedLength(1), m.captured(1),
+                        m.capturedStart(0), m.capturedLength(0)});
     }
 
-    // Locate fenced code blocks so we skip image-looking syntax inside them
+    // Locate fenced code blocks and inline code spans so we skip image-looking syntax inside them
     QList<QPair<qsizetype, qsizetype>> codeBlocks;
+
+    // First, collect fenced code blocks
     QRegularExpression fenceRe(QStringLiteral("```[\\s\\S]*?```"));
     QRegularExpressionMatchIterator fenceIt = fenceRe.globalMatch(result);
     while (fenceIt.hasNext()) {
@@ -944,25 +975,47 @@ QString MainWindow::resolveRelativeImages(const QString &markdownContent, const 
         codeBlocks.append({fm.capturedStart(), fm.capturedEnd()});
     }
 
+    // Then, collect inline code spans, but skip any that fall inside fenced code blocks
+    QRegularExpression inlineCodeRe(QStringLiteral("`[^`]+`"));
+    QRegularExpressionMatchIterator inlineIt = inlineCodeRe.globalMatch(result);
+    while (inlineIt.hasNext()) {
+        QRegularExpressionMatch im = inlineIt.next();
+        qsizetype spanStart = im.capturedStart();
+        qsizetype spanEnd = im.capturedEnd();
+
+        // Check if this inline span is inside any fenced code block
+        bool insideFence = false;
+        for (const auto &fence : codeBlocks) {
+            if (spanStart >= fence.first && spanEnd <= fence.second) {
+                insideFence = true;
+                break;
+            }
+        }
+
+        if (!insideFence) {
+            codeBlocks.append({spanStart, spanEnd});
+        }
+    }
+
     // Sort by position descending so replacements do not shift earlier indices
     std::sort(matches.begin(), matches.end(),
-              [](const Match &a, const Match &b) { return a.pos > b.pos; });
+              [](const Match &a, const Match &b) { return a.urlPos > b.urlPos; });
 
+    // Skip anything inside a fenced code block or inline code span
     for (const Match &match : matches) {
-        // Skip anything inside a fenced code block
         bool insideCodeBlock = false;
         for (const auto &range : codeBlocks) {
-            if (match.pos >= range.first && match.pos < range.second) {
+            // Use <= for end check because image can start right at the boundary of inline code
+            if (match.fullPos >= range.first && match.fullPos <= range.second) {
                 insideCodeBlock = true;
                 break;
             }
         }
         if (insideCodeBlock) continue;
-
         QUrl url(match.url);
         if (url.scheme().isEmpty() && !QDir::isAbsolutePath(match.url)) {
             QString absoluteUrl = QUrl::fromLocalFile(baseDir.absoluteFilePath(match.url)).toString();
-            result.replace(match.pos, match.len, absoluteUrl);
+            result.replace(match.urlPos, match.urlLen, absoluteUrl);
         }
     }
 
