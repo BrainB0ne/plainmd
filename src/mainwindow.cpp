@@ -533,16 +533,20 @@ void MainWindow::showWelcomePage()
     m_currentFile.clear();
     setWindowTitle(tr("Vibe-MD"));
 
-    QString html = R"(
+#ifdef Q_OS_LINUX
+    QString fontFamily = QStringLiteral("'DejaVu Sans', 'Noto Sans', 'Helvetica Neue', Arial, sans-serif");
+    QString monoFamily = QStringLiteral("'DejaVu Sans Mono', 'Liberation Mono', monospace");
+#else
+    QString fontFamily = QStringLiteral("'Segoe UI', 'Helvetica Neue', Arial, sans-serif");
+    QString monoFamily = QStringLiteral("Consolas, 'Liberation Mono', monospace");
+#endif
+
+    QString html = QStringLiteral(R"(
         <html>
         <head>
         <style>
             body {
-#ifdef Q_OS_LINUX
-                font-family: 'DejaVu Sans', 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
-#else
-                font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-#endif
+                font-family: %1;
                 color: #444;
                 margin: 16px;
                 line-height: 1.3;
@@ -554,11 +558,6 @@ void MainWindow::showWelcomePage()
                 font-weight: 300;
                 margin: 0;
                 text-align: center;
-            }
-            .tagline {
-                font-size: 1em;
-                color: #7f8c8d;
-                margin: 0 0 8px 0;
             }
             h2 {
                 font-size: 1em;
@@ -573,7 +572,7 @@ void MainWindow::showWelcomePage()
                 border: 1px solid #ddd;
                 border-radius: 3px;
                 padding: 1px 6px;
-                font-family: "DejaVu Sans Mono", Consolas, monospace;
+                font-family: %2;
                 font-size: 0.8em;
                 color: #555;
             }
@@ -622,7 +621,7 @@ void MainWindow::showWelcomePage()
             </div>
         </body>
         </html>
-    )";
+    )").arg(fontFamily, monoFamily);
 
     m_editor->setHtml(html);
 }
