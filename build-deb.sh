@@ -69,6 +69,7 @@ mkdir -p "${PKG_DIR}/DEBIAN"
 mkdir -p "${PKG_DIR}/usr/bin"
 mkdir -p "${PKG_DIR}/usr/share/applications"
 mkdir -p "${PKG_DIR}/usr/share/pixmaps"
+mkdir -p "${PKG_DIR}/usr/share/icons/hicolor/256x256/apps"
 
 # Binary
 cp release/vibe-md "${PKG_DIR}/usr/bin/"
@@ -90,7 +91,11 @@ StartupNotify=true
 EOF
 chmod 644 "${PKG_DIR}/usr/share/applications/vibe-md.desktop"
 
-# Icon
+# Icon — hicolor theme path (used by GTK/Cinnamon/GNOME start menus)
+cp icon.png "${PKG_DIR}/usr/share/icons/hicolor/256x256/apps/vibe-md.png"
+chmod 644 "${PKG_DIR}/usr/share/icons/hicolor/256x256/apps/vibe-md.png"
+
+# Fallback for Qt-only / older systems
 cp icon.png "${PKG_DIR}/usr/share/pixmaps/vibe-md.png"
 chmod 644 "${PKG_DIR}/usr/share/pixmaps/vibe-md.png"
 
