@@ -116,10 +116,10 @@ void MainWindow::setMarkdownStyle()
     // Get the code font from settings
 #ifdef Q_OS_LINUX
     const QString defaultCodeFontFamily = QStringLiteral("DejaVu Sans Mono");
-    const QString bodyFontFamily = QStringLiteral("\"DejaVu Sans\", \"Noto Sans\", \"Helvetica Neue\", Arial, sans-serif");
+    const QString bodyFontFamily = QStringLiteral("\"DejaVu Sans\", \"Noto Sans\", \"Noto Color Emoji\", \"Apple Color Emoji\", \"Helvetica Neue\", Arial, sans-serif");
 #else
     const QString defaultCodeFontFamily = QStringLiteral("Consolas");
-    const QString bodyFontFamily = QStringLiteral("\"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif");
+    const QString bodyFontFamily = QStringLiteral("\"Segoe UI\", \"Segoe UI Emoji\", \"Helvetica Neue\", Arial, sans-serif");
 #endif
     QString codeFontFamily = m_settings.value("editor/codeBlockFontFamily", defaultCodeFontFamily).toString();
     // Escape single quotes for CSS
@@ -146,6 +146,10 @@ void MainWindow::setMarkdownStyle()
             border-radius: 4px;
             font-family: '%2', 'SFMono-Regular', 'DejaVu Sans Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
             font-size: 0.9em;
+        }
+        /* Force emoji fonts for symbols */
+        .emoji, td, th {
+            font-family: 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', 'Apple Color Emoji', %1;
         }
         pre {
             background-color: #f4f4f4;
@@ -576,10 +580,10 @@ void MainWindow::showWelcomePage()
     }
 
 #ifdef Q_OS_LINUX
-    QString fontFamily = QStringLiteral("'DejaVu Sans', 'Noto Sans', 'Helvetica Neue', Arial, sans-serif");
+    QString fontFamily = QStringLiteral("'DejaVu Sans', 'Noto Sans', 'Noto Color Emoji', 'Apple Color Emoji', 'Helvetica Neue', Arial, sans-serif");
     QString defaultMonoFamily = QStringLiteral("DejaVu Sans Mono");
 #else
-    QString fontFamily = QStringLiteral("'Segoe UI', 'Helvetica Neue', Arial, sans-serif");
+    QString fontFamily = QStringLiteral("'Segoe UI', 'Segoe UI Emoji', 'Helvetica Neue', Arial, sans-serif");
     QString defaultMonoFamily = QStringLiteral("Consolas");
 #endif
     // Use the configured code block font for welcome page inline code too
@@ -681,7 +685,41 @@ void MainWindow::onPrint()
     QPrinter printer(QPrinter::HighResolution);
     QPrintDialog dialog(&printer, this);
     if (dialog.exec() == QDialog::Accepted) {
-        m_editor->print(&printer);
+        // Clone the document and apply emoji-friendly font for printing
+        QTextDocument printDoc;
+        printDoc.setHtml(m_editor->toHtml());
+        
+        // Check if Nerd Font is configured for emoji printing
+        bool useNerdFont = m_settings.value("editor/useNerdFontForEmoji", false).toBool();
+        QString emojiFontFamily = m_settings.value("editor/printEmojiFont", QStringLiteral("Segoe UI")).toString();
+        int emojiFontSize = m_settings.value("editor/printEmojiFontSize", 11).toInt();
+        
+        QString printCss;
+        QFont printFont;
+        
+        if (useNerdFont) {
+            // Use Nerd Font for proper monochrome emoji rendering
+            printCss = QStringLiteral(R"(
+                body { font-family: '%1', 'Segoe UI', sans-serif; }
+                td, th { font-family: '%1', 'Segoe UI', sans-serif; }
+            )").arg(emojiFontFamily);
+            printFont = QFont(emojiFontFamily, emojiFontSize);
+            printFont.setStyleHint(QFont::Monospace);
+            printFont.setFamilies(QStringList() << emojiFontFamily << "Segoe UI");
+        } else {
+            // Use standard emoji fonts (may not print correctly on Windows PDF)
+            printCss = QStringLiteral(R"(
+                body { font-family: 'Segoe UI', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; }
+                td, th { font-family: 'Segoe UI Emoji', 'Segoe UI Symbol', 'Segoe UI', sans-serif; }
+            )");
+            printFont = QFont("Segoe UI", 11);
+            printFont.setStyleHint(QFont::SansSerif);
+            printFont.setFamilies(QStringList() << "Segoe UI" << "Segoe UI Emoji" << "Segoe UI Symbol");
+        }
+        
+        printDoc.setDefaultStyleSheet(printCss);
+        printDoc.setDefaultFont(printFont);
+        printDoc.print(&printer);
     }
 }
 

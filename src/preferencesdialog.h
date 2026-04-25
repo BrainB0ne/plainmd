@@ -7,6 +7,7 @@
 #include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QLineEdit>
+#include <QEvent>
 
 class PreferencesDialog : public QDialog
 {
@@ -25,11 +26,17 @@ public:
     bool previewExternalImages() const;
     bool keepRecentFiles() const;
     QString externalEditor() const;
+    bool useNerdFontForEmoji() const;
+    QFont printEmojiFont() const;
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private slots:
     void onChooseFont();
     void onChooseCodeBlockFont();
     void onBrowseExternalEditor();
+    void onChoosePrintEmojiFont();
 
 private:
     QPushButton *m_fontButton = nullptr;
@@ -37,12 +44,15 @@ private:
     QPushButton *m_codeBlockFontButton = nullptr;
     QLabel *m_codeBlockFontLabel = nullptr;
     QLineEdit *m_externalEditorEdit = nullptr;
-    QPushButton *m_externalEditorBrowseButton = nullptr;
     QCheckBox *m_previewCheck = nullptr;
     QCheckBox *m_keepRecentCheck = nullptr;
+    QCheckBox *m_useNerdFontCheck = nullptr;
+    QPushButton *m_emojiFontButton = nullptr;
+    QLabel *m_emojiFontLabel = nullptr;
     QDialogButtonBox *m_buttonBox = nullptr;
     QFont m_currentFont;
     QFont m_codeBlockFont;
+    QFont m_emojiFont;
 };
 
 #endif // PREFERENCESDIALOG_H
