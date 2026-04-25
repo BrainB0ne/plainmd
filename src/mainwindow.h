@@ -64,7 +64,7 @@ private:
     void loadFolder(const QString &folderPath);
     void updateRecentFiles(const QString &filePath);
     void refreshRecentFilesMenu();
-    void setMarkdownStyle();
+
     bool isMarkdownFile(const QString &filePath) const;
     QString resolveExternalImages(const QString &markdownContent, bool previewEnabled);
     QString resolveRelativeImages(const QString &markdownContent, const QString &basePath);

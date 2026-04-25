@@ -29,32 +29,25 @@ PreferencesDialog::PreferencesDialog(QWidget *parent)
     m_fontLabel = new QLabel(this);
     editorLayout->addWidget(m_fontLabel, 0, 2);
 
-    editorLayout->addWidget(new QLabel(tr("Code Font:"), this), 1, 0);
-    m_codeBlockFontButton = new QPushButton(tr("Choose Font..."), this);
-    connect(m_codeBlockFontButton, &QPushButton::clicked, this, &PreferencesDialog::onChooseCodeBlockFont);
-    editorLayout->addWidget(m_codeBlockFontButton, 1, 1);
-    m_codeBlockFontLabel = new QLabel(this);
-    editorLayout->addWidget(m_codeBlockFontLabel, 1, 2);
-
-    // Emoji/Print font (Nerd Font support) - moved up below Code Font
-    editorLayout->addWidget(new QLabel(tr("Emoji Print Font:"), this), 2, 0);
+    // Emoji/Print font (Nerd Font support)
+    editorLayout->addWidget(new QLabel(tr("Emoji Print Font:"), this), 1, 0);
     m_emojiFontButton = new QPushButton(tr("Choose Font..."), this);
     connect(m_emojiFontButton, &QPushButton::clicked, this, &PreferencesDialog::onChoosePrintEmojiFont);
-    editorLayout->addWidget(m_emojiFontButton, 2, 1);
+    editorLayout->addWidget(m_emojiFontButton, 1, 1);
     m_emojiFontLabel = new QLabel(this);
-    editorLayout->addWidget(m_emojiFontLabel, 2, 2);
+    editorLayout->addWidget(m_emojiFontLabel, 1, 2);
     m_useNerdFontCheck = new QCheckBox(tr("Use for emoji printing"), this);
-    editorLayout->addWidget(m_useNerdFontCheck, 3, 0, 1, 3);
+    editorLayout->addWidget(m_useNerdFontCheck, 2, 0, 1, 3);
 
     // External editor - clickable read-only field (acts as button)
-    editorLayout->addWidget(new QLabel(tr("External Editor:"), this), 6, 0);
+    editorLayout->addWidget(new QLabel(tr("External Editor:"), this), 3, 0);
     m_externalEditorEdit = new QLineEdit(this);
     m_externalEditorEdit->setPlaceholderText(tr("Click to select editor..."));
     m_externalEditorEdit->setReadOnly(true);
     m_externalEditorEdit->setCursor(Qt::PointingHandCursor);
     // Style it to look clickable like a button
     m_externalEditorEdit->setStyleSheet(QStringLiteral("QLineEdit { background: palette(button); border: 1px solid palette(mid); border-radius: 2px; }"));
-    editorLayout->addWidget(m_externalEditorEdit, 6, 1, 1, 2);  // Span 2 columns
+    editorLayout->addWidget(m_externalEditorEdit, 3, 1, 1, 2);  // Span 2 columns
     // Install event filter to handle clicks
     m_externalEditorEdit->installEventFilter(this);
 
@@ -84,10 +77,8 @@ void PreferencesDialog::loadSettings()
 
 #ifdef Q_OS_LINUX
     const QString defaultFontFamily = QStringLiteral("DejaVu Sans");
-    const QString defaultCodeBlockFontFamily = QStringLiteral("DejaVu Sans Mono");
 #else
     const QString defaultFontFamily = QStringLiteral("Segoe UI");
-    const QString defaultCodeBlockFontFamily = QStringLiteral("Consolas");
 #endif
 
     QString family = settings.value("editor/fontFamily", defaultFontFamily).toString();
@@ -95,12 +86,6 @@ void PreferencesDialog::loadSettings()
     m_currentFont = QFont(family);
     m_currentFont.setPointSize(size);
     m_fontLabel->setText(QStringLiteral("%1, %2 pt").arg(m_currentFont.family()).arg(m_currentFont.pointSize()));
-
-    QString cbFamily = settings.value("editor/codeBlockFontFamily", defaultCodeBlockFontFamily).toString();
-    int cbSize = settings.value("editor/codeBlockFontSize", 11).toInt();
-    m_codeBlockFont = QFont(cbFamily);
-    m_codeBlockFont.setPointSize(cbSize);
-    m_codeBlockFontLabel->setText(QStringLiteral("%1, %2 pt").arg(m_codeBlockFont.family()).arg(m_codeBlockFont.pointSize()));
 
     m_externalEditorEdit->setText(QDir::toNativeSeparators(settings.value("editor/externalEditor").toString()));
     
@@ -123,8 +108,6 @@ void PreferencesDialog::saveSettings()
                        QApplication::organizationName(), QApplication::applicationName());
     settings.setValue("editor/fontFamily", m_currentFont.family());
     settings.setValue("editor/fontSize", m_currentFont.pointSize());
-    settings.setValue("editor/codeBlockFontFamily", m_codeBlockFont.family());
-    settings.setValue("editor/codeBlockFontSize", m_codeBlockFont.pointSize());
     settings.setValue("editor/externalEditor", QDir::fromNativeSeparators(m_externalEditorEdit->text()));
     settings.setValue("editor/printEmojiFont", m_emojiFont.family());
     settings.setValue("editor/printEmojiFontSize", m_emojiFont.pointSize());
@@ -141,16 +124,6 @@ QString PreferencesDialog::fontFamily() const
 int PreferencesDialog::fontSize() const
 {
     return m_currentFont.pointSize();
-}
-
-QString PreferencesDialog::codeBlockFontFamily() const
-{
-    return m_codeBlockFont.family();
-}
-
-int PreferencesDialog::codeBlockFontSize() const
-{
-    return m_codeBlockFont.pointSize();
 }
 
 bool PreferencesDialog::previewExternalImages() const
@@ -185,16 +158,6 @@ void PreferencesDialog::onChooseFont()
     if (ok) {
         m_currentFont = font;
         m_fontLabel->setText(QStringLiteral("%1, %2 pt").arg(m_currentFont.family()).arg(m_currentFont.pointSize()));
-    }
-}
-
-void PreferencesDialog::onChooseCodeBlockFont()
-{
-    bool ok;
-    QFont font = QFontDialog::getFont(&ok, m_codeBlockFont, this);
-    if (ok) {
-        m_codeBlockFont = font;
-        m_codeBlockFontLabel->setText(QStringLiteral("%1, %2 pt").arg(m_codeBlockFont.family()).arg(m_codeBlockFont.pointSize()));
     }
 }
 

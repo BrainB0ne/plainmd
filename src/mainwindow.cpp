@@ -109,112 +109,11 @@ void MainWindow::setupEditor()
 
     applyEditorFont();
 
-    setMarkdownStyle();
+    // Use default Qt markdown styling (no custom CSS)
+    // setMarkdownStyle() and styleCodeBlocks() disabled due to Qt6 bugs
 
     m_splitter->addWidget(m_editor);
     m_splitter->setStretchFactor(1, 1);
-}
-
-void MainWindow::setMarkdownStyle()
-{
-    // Get the code font from settings
-#ifdef Q_OS_LINUX
-    const QString defaultCodeFontFamily = QStringLiteral("DejaVu Sans Mono");
-    const QString bodyFontFamily = QStringLiteral("\"DejaVu Sans\", \"Noto Sans\", \"Noto Color Emoji\", \"Apple Color Emoji\", \"Helvetica Neue\", Arial, sans-serif");
-#else
-    const QString defaultCodeFontFamily = QStringLiteral("Consolas");
-    const QString bodyFontFamily = QStringLiteral("\"Segoe UI\", \"Segoe UI Emoji\", \"Helvetica Neue\", Arial, sans-serif");
-#endif
-    QString codeFontFamily = m_settings.value("editor/codeBlockFontFamily", defaultCodeFontFamily).toString();
-    // Escape single quotes for CSS
-    codeFontFamily.replace("'", "\\'");
-
-    QString style = QStringLiteral(R"(
-        body {
-            font-family: %1;
-            font-size: 11pt;
-            line-height: 1.6;
-            color: #333333;
-            margin: 20px;
-        }
-        h1 { font-size: 2em; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 8px; margin-top: 24px; }
-        h2 { font-size: 1.6em; color: #34495e; border-bottom: 1px solid #bdc3c7; padding-bottom: 6px; margin-top: 20px; }
-        h3 { font-size: 1.3em; color: #34495e; margin-top: 16px; }
-        h4, h5, h6 { color: #34495e; margin-top: 12px; }
-        a { color: #3498db; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        code {
-            background-color: #f0f0f0;
-            color: #c7254e;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: '%2', 'SFMono-Regular', 'DejaVu Sans Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-            font-size: 0.9em;
-        }
-        /* Force emoji fonts for symbols */
-        .emoji, td, th {
-            font-family: 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', 'Apple Color Emoji', %1;
-        }
-        pre {
-            background-color: #f4f4f4;
-            color: #333333;
-            padding: 16px;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin: 16px 0;
-            border-left: 4px solid #3498db;
-        }
-        pre code {
-            background: none;
-            color: #333333;
-            padding: 0;
-            border-radius: 0;
-            font-size: 0.95em;
-        }
-        blockquote {
-            border-left: 4px solid #3498db;
-            margin: 12px 0;
-            padding: 8px 16px;
-            background-color: #f8f9fa;
-            color: #555555;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 12px 0;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #3498db;
-            color: white;
-            font-weight: bold;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        hr {
-            border: none;
-            border-top: 1px solid #bdc3c7;
-            margin: 20px 0;
-        }
-        ul, ol {
-            margin: 8px 0;
-            padding-left: 24px;
-        }
-        li {
-            margin: 4px 0;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-        }
-    )").arg(bodyFontFamily, codeFontFamily);
-
-    m_editor->document()->setDefaultStyleSheet(style);
 }
 
 void MainWindow::setupMenuBar()
@@ -537,7 +436,7 @@ void MainWindow::onPreferences()
     if (dlg.exec() == QDialog::Accepted) {
         dlg.saveSettings();
         applyEditorFont();
-        setMarkdownStyle(); // Update CSS with new inline code font
+        // setMarkdownStyle() and styleCodeBlocks() disabled - use default Qt styling
         if (!dlg.keepRecentFiles()) {
             m_settings.setValue("recentFiles", QStringList());
         }
@@ -608,14 +507,11 @@ void MainWindow::showWelcomePage()
 
 #ifdef Q_OS_LINUX
     QString fontFamily = QStringLiteral("'DejaVu Sans', 'Noto Sans', 'Noto Color Emoji', 'Apple Color Emoji', 'Helvetica Neue', Arial, sans-serif");
-    QString defaultMonoFamily = QStringLiteral("DejaVu Sans Mono");
+    QString monoFamily = QStringLiteral("'DejaVu Sans Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace");
 #else
     QString fontFamily = QStringLiteral("'Segoe UI', 'Segoe UI Emoji', 'Helvetica Neue', Arial, sans-serif");
-    QString defaultMonoFamily = QStringLiteral("Consolas");
+    QString monoFamily = QStringLiteral("Consolas, 'SFMono-Regular', 'DejaVu Sans Mono', 'Liberation Mono', monospace");
 #endif
-    // Use the configured code block font for welcome page inline code too
-    QString monoFamily = m_settings.value("editor/codeBlockFontFamily", defaultMonoFamily).toString();
-    monoFamily = QStringLiteral("'%1', 'SFMono-Regular', 'DejaVu Sans Mono', Consolas, 'Liberation Mono', monospace").arg(monoFamily);
 
     QString html = QStringLiteral(R"(
         <html>
@@ -808,7 +704,7 @@ void MainWindow::loadFile(const QString &filePath)
         m_editor->document()->setBaseUrl(baseUrl);
 
         m_editor->setMarkdown(processedContent);
-        styleCodeBlocks();
+        // styleCodeBlocks(); // Disabled - causes document corruption on large files
     }
 
     m_currentFile = filePath;
@@ -1203,129 +1099,7 @@ static bool blockIsCode(const QTextBlock &block)
     return hasText && allMonospace;
 }
 
-void MainWindow::styleCodeBlocks()
-{
-    QTextDocument *doc = m_editor->document();
-    if (!doc) return;
 
-    // First pass: collect code-block flags so we can group consecutive blocks.
-    QList<QTextBlock> blocks;
-    QList<bool> isCode;
-    for (QTextBlock block = doc->begin(); block != doc->end(); block = block.next()) {
-        blocks.append(block);
-        isCode.append(blockIsCode(block));
-    }
-
-    // Expand: empty blocks between two code blocks become code too.
-    for (int i = 0; i < blocks.size(); ) {
-        if (!isCode[i]) { ++i; continue; }
-
-        int j = i + 1;
-        while (j < blocks.size() && (isCode[j] || blocks[j].text().trimmed().isEmpty())) {
-            if (!isCode[j]) isCode[j] = true;
-            ++j;
-        }
-        i = j;
-    }
-
-    // Detect which consecutive code region (if any) is frontmatter.
-    // Frontmatter is always the first code region and contains YAML keys.
-    bool inFrontMatterRegion = false;
-    for (int i = 0; i < blocks.size(); ++i) {
-        if (!isCode[i]) continue;
-        // Scan the first few blocks of this region for frontmatter markers.
-        bool hasTitle = false, hasDate = false;
-        int j = i;
-        while (j < blocks.size() && isCode[j] && (j - i) < 6) {
-            QString text = blocks[j].text();
-            if (text.contains("title:")) hasTitle = true;
-            if (text.contains("date:")) hasDate = true;
-            ++j;
-        }
-        inFrontMatterRegion = hasTitle && hasDate;
-        break; // only inspect the first code region
-    }
-
-#ifdef Q_OS_LINUX
-    const QString defaultCodeBlockFontFamily = QStringLiteral("DejaVu Sans Mono");
-#else
-    const QString defaultCodeBlockFontFamily = QStringLiteral("Consolas");
-#endif
-    QString cbFamily = m_settings.value("editor/codeBlockFontFamily", defaultCodeBlockFontFamily).toString();
-    int cbSize = m_settings.value("editor/codeBlockFontSize", 11).toInt();
-    QFont codeBlockFont(cbFamily);
-    codeBlockFont.setPointSize(cbSize);
-
-    QTextCursor cursor(doc);
-    cursor.beginEditBlock();
-
-    // Second pass: style each block, collapsing margins for consecutive code lines.
-    for (int i = 0; i < blocks.size(); ++i) {
-        if (!isCode[i]) continue;
-
-        // Remove from list if nested inside one (prevents bullet markers)
-        if (QTextList *list = blocks[i].textList()) {
-            int idx = list->itemNumber(blocks[i]);
-            if (idx >= 0)
-                list->removeItem(idx);
-        }
-
-        bool prevCode = (i > 0) && isCode[i - 1];
-        bool nextCode = (i + 1 < blocks.size()) && isCode[i + 1];
-
-        QTextBlockFormat bf = blocks[i].blockFormat();
-        // Frontmatter gets a blue background; regular code blocks are gray.
-        bf.setBackground(QColor(inFrontMatterRegion ? "#e3f2fd" : "#f4f4f4"));
-        bf.setTopMargin(prevCode ? 0 : 8);
-        bf.setBottomMargin(nextCode ? 0 : 8);
-        bf.setLeftMargin(16);
-        bf.setRightMargin(16);
-        cursor.setPosition(blocks[i].position());
-        cursor.setBlockFormat(bf);
-
-        for (QTextBlock::iterator it = blocks[i].begin(); !it.atEnd(); ++it) {
-            QTextFragment frag = it.fragment();
-            if (!frag.isValid()) continue;
-            QTextCharFormat cf = frag.charFormat();
-            cf.setForeground(QColor("#333333"));
-            cf.setFont(codeBlockFont);
-            cursor.setPosition(frag.position());
-            cursor.setPosition(frag.position() + frag.length(), QTextCursor::KeepAnchor);
-            cursor.setCharFormat(cf);
-        }
-    }
-
-    cursor.endEditBlock();
-
-    // Also style inline code spans (fragments with monospace font inside non-code blocks)
-    cursor.beginEditBlock();
-    for (QTextBlock block = doc->begin(); block != doc->end(); block = block.next()) {
-        // Skip blocks that are already styled as code blocks
-        bool isBlockCode = false;
-        for (int i = 0; i < blocks.size(); ++i) {
-            if (blocks[i] == block && isCode[i]) {
-                isBlockCode = true;
-                break;
-            }
-        }
-        if (isBlockCode) continue;
-
-        // Find inline code fragments in non-code blocks
-        for (QTextBlock::iterator it = block.begin(); !it.atEnd(); ++it) {
-            QTextFragment frag = it.fragment();
-            if (!frag.isValid()) continue;
-            QTextCharFormat cf = frag.charFormat();
-            // Check if this is inline code (monospace font and red color from CSS)
-            if (cf.font().fixedPitch() || cf.font().family().contains("mono", Qt::CaseInsensitive)) {
-                cf.setFont(codeBlockFont);
-                cursor.setPosition(frag.position());
-                cursor.setPosition(frag.position() + frag.length(), QTextCursor::KeepAnchor);
-                cursor.setCharFormat(cf);
-            }
-        }
-    }
-    cursor.endEditBlock();
-}
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
