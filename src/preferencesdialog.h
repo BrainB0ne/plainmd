@@ -22,6 +22,7 @@ public:
     QString codeBlockFontFamily() const;
     int codeBlockFontSize() const;
     bool previewExternalImages() const;
+    bool keepRecentFiles() const;
 
 private slots:
     void onChooseFont();
@@ -33,6 +34,7 @@ private:
     QPushButton *m_codeBlockFontButton = nullptr;
     QLabel *m_codeBlockFontLabel = nullptr;
     QCheckBox *m_previewCheck = nullptr;
+    QCheckBox *m_keepRecentCheck = nullptr;
     QDialogButtonBox *m_buttonBox = nullptr;
     QFont m_currentFont;
     QFont m_codeBlockFont;

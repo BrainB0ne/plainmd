@@ -42,6 +42,9 @@ PreferencesDialog::PreferencesDialog(QWidget *parent)
     QVBoxLayout *privacyLayout = new QVBoxLayout(privacyGroup);
     m_previewCheck = new QCheckBox(tr("Preview external images"), this);
     privacyLayout->addWidget(m_previewCheck);
+
+    m_keepRecentCheck = new QCheckBox(tr("Keep recent files history"), this);
+    privacyLayout->addWidget(m_keepRecentCheck);
     mainLayout->addWidget(privacyGroup);
 
     m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
@@ -69,6 +72,7 @@ void PreferencesDialog::loadSettings()
     m_codeBlockFontLabel->setText(QStringLiteral("%1, %2 pt").arg(m_codeBlockFont.family()).arg(m_codeBlockFont.pointSize()));
 
     m_previewCheck->setChecked(settings.value("privacy/previewExternalImages", true).toBool());
+    m_keepRecentCheck->setChecked(settings.value("privacy/keepRecentFiles", true).toBool());
 }
 
 void PreferencesDialog::saveSettings()
@@ -80,6 +84,7 @@ void PreferencesDialog::saveSettings()
     settings.setValue("editor/codeBlockFontFamily", m_codeBlockFont.family());
     settings.setValue("editor/codeBlockFontSize", m_codeBlockFont.pointSize());
     settings.setValue("privacy/previewExternalImages", m_previewCheck->isChecked());
+    settings.setValue("privacy/keepRecentFiles", m_keepRecentCheck->isChecked());
 }
 
 QString PreferencesDialog::fontFamily() const
@@ -105,6 +110,11 @@ int PreferencesDialog::codeBlockFontSize() const
 bool PreferencesDialog::previewExternalImages() const
 {
     return m_previewCheck->isChecked();
+}
+
+bool PreferencesDialog::keepRecentFiles() const
+{
+    return m_keepRecentCheck->isChecked();
 }
 
 void PreferencesDialog::onChooseFont()

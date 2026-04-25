@@ -352,7 +352,9 @@ void MainWindow::onFileTreeClicked(const QModelIndex &index)
 
     if (info.isFile() && isMarkdownFile(filePath)) {
         loadFile(filePath);
-        updateRecentFiles(filePath);
+        if (m_settings.value("privacy/keepRecentFiles", true).toBool()) {
+            updateRecentFiles(filePath);
+        }
     }
 }
 
@@ -482,6 +484,10 @@ void MainWindow::onPreferences()
     if (dlg.exec() == QDialog::Accepted) {
         dlg.saveSettings();
         applyEditorFont();
+        if (!dlg.keepRecentFiles()) {
+            m_settings.setValue("recentFiles", QStringList());
+        }
+        refreshRecentFilesMenu();
         if (!m_currentFile.isEmpty()) {
             loadFile(m_currentFile);
         }
@@ -634,7 +640,9 @@ void MainWindow::openFile(const QString &filePath)
         loadFolder(folderPath);
     }
 
-    updateRecentFiles(filePath);
+    if (m_settings.value("privacy/keepRecentFiles", true).toBool()) {
+        updateRecentFiles(filePath);
+    }
 }
 
 void MainWindow::loadFile(const QString &filePath)
@@ -701,6 +709,10 @@ void MainWindow::loadFolder(const QString &folderPath)
 
 void MainWindow::updateRecentFiles(const QString &filePath)
 {
+    if (!m_settings.value("privacy/keepRecentFiles", true).toBool()) {
+        return;
+    }
+
     QStringList recentFiles = m_settings.value("recentFiles").toStringList();
 
     if (!filePath.isEmpty()) {
@@ -729,7 +741,8 @@ void MainWindow::refreshRecentFilesMenu()
     m_recentMenu->clear();
     m_recentActions.clear();
 
-    QStringList recentFiles = m_settings.value("recentFiles").toStringList();
+    bool keepRecent = m_settings.value("privacy/keepRecentFiles", true).toBool();
+    QStringList recentFiles = keepRecent ? m_settings.value("recentFiles").toStringList() : QStringList();
 
     if (recentFiles.isEmpty()) {
         QAction *emptyAction = new QAction(tr("No Recent Files"), this);
@@ -738,7 +751,7 @@ void MainWindow::refreshRecentFilesMenu()
     } else {
         for (int i = 0; i < recentFiles.size(); ++i) {
             QString filePath = recentFiles.at(i);
-            QString displayName = QString("&%1 %2").arg(i + 1).arg(QFileInfo(filePath).fileName());
+            QString displayName = QString("&%1 %2").arg(i + 1).arg(filePath);
 
             QAction *action = new QAction(displayName, this);
             action->setData(filePath);
