@@ -497,7 +497,8 @@ void MainWindow::onAbout()
            "- Find / Search\n"
            "- Print support\n"
            "- External image preview with privacy toggle\n"
-           "- Customizable editor and code-block fonts\n"
+           "- Customizable editor and code fonts\n"
+           "- Configurable external editor\n"
            "- YAML frontmatter display"));
     layout->addWidget(featuresEdit);
 
