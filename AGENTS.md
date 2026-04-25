@@ -46,17 +46,20 @@
 - **Code block styling**: post-processed after `setMarkdown()` by iterating `QTextDocument` blocks, detecting monospace-only blocks, and applying `QTextBlockFormat` background + margins. Code block font is configurable via Preferences (settings key `editor/codeBlockFontFamily`).
   - **Detection heuristic**: a block is considered code only if *every* fragment reports `fixedPitch` **or** a font family containing `mono`, `Courier`, `Consolas`, `Menlo`, or `Liberation`. Changing fonts or Qt font resolution can break this.
   - Empty blocks between two code blocks are coerced into the code region, and any list bullet markers are removed so code does not appear inside a `QTextList`.
+- **Inline code font**: Post-processed in `styleCodeBlocks()` to use the same configurable font as fenced code blocks (settings key `editor/codeBlockFontFamily`).
 - **Fenced code block protection**: Both `resolveExternalImages()` and `resolveRelativeImages()` skip any image-like syntax (`![alt](url)` or `<img src="...">`) that appears inside `` ```...``` `` blocks, so example markdown in code blocks is not corrupted.
 - **Find dialog**: Modeless `FindDialog` with case-sensitive and whole-word search. Lives in `src/finddialog.cpp`.
-- **Preferences dialog**: `PreferencesDialog` in `src/preferencesdialog.cpp`. Settings: editor font, code block font, privacy toggle for external images, and optional recent-files history.
+- **Preferences dialog**: `PreferencesDialog` in `src/preferencesdialog.cpp`. Settings: editor font, **code font** (applies to both inline and block code), **external editor path**, privacy toggle for external images, and optional recent-files history.
 - **Menu bar**: File / View / Help. No Edit menu. Preferences is under **View**.
+- **Print action**: Disabled when the welcome page is shown (`m_printAction->setEnabled(false)` in `showWelcomePage()`, enabled when a file is loaded).
 - **Platform-specific code**: The file-tree context menu uses `QProcess::startDetached("explorer", ...)` to reveal files on Windows, and `QProcess::startDetached("xdg-open", ...)` to open the parent directory on Linux.
+- **External editor**: Configurable in Preferences; context menu on file tree shows "Open with External Editor" action (icon: `edit.png` from Tabler Icons) when an editor path is set. Path stored in `editor/externalEditor`, displayed with native separators but stored normalized.
 - **Linux font defaults**: `applyEditorFont()`, `styleCodeBlocks()`, and the welcome-page CSS use `#ifdef Q_OS_LINUX` to default to **DejaVu Sans** (editor) and **DejaVu Sans Mono** (code blocks) instead of Segoe UI / Consolas.
+- **Native path separators**: Recent Files menu, status bar messages, and External Editor path field use `QDir::toNativeSeparators()` for display. Paths are stored normalized (forward slashes) via `QDir::fromNativeSeparators()`.
 
 ## Resources
-- `appicon.rc` + `icon.ico` → Windows exe icon (`RC_FILE` in `.pro`).
-- `resources.qrc` + `icon.png` → runtime window icon.
-- `images.qrc` + `images/*.png` → toolbar/menu icons (Tabler Icons, MIT licensed).
+- `vibe-md.rc` + `icon.ico` → Windows exe icon (`RC_FILE` in `.pro`).
+- `vibe-md.qrc` + `icon.png` + `images/*.png` → runtime window icon and toolbar/menu icons (Tabler Icons, MIT licensed).
 - `tabler-icons/` is in `.gitignore`; only the copied icons in `images/` are tracked.
 - New icons should be picked from `tabler-icons/png/outline/` (the outline set) and copied into `images/` before embedding.
 

@@ -25,5 +25,5 @@ HEADERS += \
     src/preferencesdialog.h \
     src/finddialog.h
 
-RC_FILE = appicon.rc
-RESOURCES += resources.qrc images.qrc
+RC_FILE = vibe-md.rc
+RESOURCES += vibe-md.qrc

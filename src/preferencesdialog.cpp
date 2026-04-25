@@ -6,12 +6,14 @@
 #include <QSettings>
 #include <QApplication>
 #include <QFontDialog>
+#include <QFileDialog>
+#include <QDir>
 
 PreferencesDialog::PreferencesDialog(QWidget *parent)
     : QDialog(parent)
 {
     setWindowTitle(tr("Preferences"));
-    resize(400, 260);
+    resize(400, 300);
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
@@ -34,6 +36,15 @@ PreferencesDialog::PreferencesDialog(QWidget *parent)
     m_codeBlockFontLabel = new QLabel(this);
     m_codeBlockFontLabel->setWordWrap(true);
     editorLayout->addWidget(m_codeBlockFontLabel, 3, 0, 1, 2);
+
+    // External editor
+    editorLayout->addWidget(new QLabel(tr("External Editor:"), this), 4, 0);
+    m_externalEditorEdit = new QLineEdit(this);
+    m_externalEditorEdit->setPlaceholderText(tr("Path to editor executable"));
+    editorLayout->addWidget(m_externalEditorEdit, 4, 1);
+    m_externalEditorBrowseButton = new QPushButton(tr("Browse..."), this);
+    connect(m_externalEditorBrowseButton, &QPushButton::clicked, this, &PreferencesDialog::onBrowseExternalEditor);
+    editorLayout->addWidget(m_externalEditorBrowseButton, 4, 2);
 
     mainLayout->addWidget(editorGroup);
 
@@ -79,6 +90,8 @@ void PreferencesDialog::loadSettings()
     m_codeBlockFont.setPointSize(cbSize);
     m_codeBlockFontLabel->setText(QStringLiteral("%1, %2 pt").arg(m_codeBlockFont.family()).arg(m_codeBlockFont.pointSize()));
 
+    m_externalEditorEdit->setText(QDir::toNativeSeparators(settings.value("editor/externalEditor").toString()));
+
     m_previewCheck->setChecked(settings.value("privacy/previewExternalImages", true).toBool());
     m_keepRecentCheck->setChecked(settings.value("privacy/keepRecentFiles", true).toBool());
 }
@@ -91,6 +104,7 @@ void PreferencesDialog::saveSettings()
     settings.setValue("editor/fontSize", m_currentFont.pointSize());
     settings.setValue("editor/codeBlockFontFamily", m_codeBlockFont.family());
     settings.setValue("editor/codeBlockFontSize", m_codeBlockFont.pointSize());
+    settings.setValue("editor/externalEditor", QDir::fromNativeSeparators(m_externalEditorEdit->text()));
     settings.setValue("privacy/previewExternalImages", m_previewCheck->isChecked());
     settings.setValue("privacy/keepRecentFiles", m_keepRecentCheck->isChecked());
 }
@@ -125,6 +139,11 @@ bool PreferencesDialog::keepRecentFiles() const
     return m_keepRecentCheck->isChecked();
 }
 
+QString PreferencesDialog::externalEditor() const
+{
+    return m_externalEditorEdit->text();
+}
+
 void PreferencesDialog::onChooseFont()
 {
     bool ok;
@@ -142,5 +161,20 @@ void PreferencesDialog::onChooseCodeBlockFont()
     if (ok) {
         m_codeBlockFont = font;
         m_codeBlockFontLabel->setText(QStringLiteral("%1, %2 pt").arg(m_codeBlockFont.family()).arg(m_codeBlockFont.pointSize()));
+    }
+}
+
+void PreferencesDialog::onBrowseExternalEditor()
+{
+    QString path = QFileDialog::getOpenFileName(this, tr("Select External Editor"),
+                                                m_externalEditorEdit->text(),
+#ifdef Q_OS_WIN
+                                                tr("Executable Files (*.exe);;All Files (*.*)")
+#else
+                                                tr("All Files (*)")
+#endif
+                                                );
+    if (!path.isEmpty()) {
+        m_externalEditorEdit->setText(QDir::toNativeSeparators(path));
     }
 }

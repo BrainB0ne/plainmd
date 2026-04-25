@@ -374,6 +374,18 @@ void MainWindow::onFileTreeContextMenu(const QPoint &pos)
     if (!info.isFile() || !isMarkdownFile(filePath)) return;
 
     QMenu contextMenu(this);
+
+    // Add external editor action if configured
+    QString externalEditor = m_settings.value("editor/externalEditor").toString();
+    if (!externalEditor.isEmpty()) {
+        QAction *openWithEditorAction = contextMenu.addAction(QIcon(":/images/edit.png"), tr("Open with External Editor"));
+        connect(openWithEditorAction, &QAction::triggered, this, [this, filePath]() {
+            m_settings.setValue("temp/externalEditorFile", filePath);
+            onOpenWithExternalEditor();
+        });
+        contextMenu.addSeparator();
+    }
+
 #ifdef Q_OS_LINUX
     QAction *revealAction = contextMenu.addAction(QIcon(":/images/external-link.png"), tr("Show in File Manager"));
     connect(revealAction, &QAction::triggered, this, [filePath]() {
@@ -388,6 +400,27 @@ void MainWindow::onFileTreeContextMenu(const QPoint &pos)
 #endif
 
     contextMenu.exec(m_fileTree->viewport()->mapToGlobal(pos));
+}
+
+void MainWindow::onOpenWithExternalEditor()
+{
+    QString externalEditor = m_settings.value("editor/externalEditor").toString();
+    QString filePath = m_settings.value("temp/externalEditorFile").toString();
+    m_settings.remove("temp/externalEditorFile");
+
+    if (externalEditor.isEmpty() || filePath.isEmpty()) return;
+
+    QFileInfo editorInfo(externalEditor);
+    if (!editorInfo.exists() || !editorInfo.isExecutable()) {
+        QMessageBox::warning(this, tr("External Editor Not Found"),
+                             tr("The configured external editor was not found or is not executable:\n%1").arg(externalEditor));
+        return;
+    }
+
+    if (!QProcess::startDetached(externalEditor, QStringList() << filePath)) {
+        QMessageBox::warning(this, tr("Failed to Launch"),
+                             tr("Failed to launch the external editor.\nEditor: %1\nFile: %2").arg(externalEditor).arg(filePath));
+    }
 }
 
 void MainWindow::onRecentFileTriggered()

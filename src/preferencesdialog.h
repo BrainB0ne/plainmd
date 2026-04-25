@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QCheckBox>
 #include <QDialogButtonBox>
+#include <QLineEdit>
 
 class PreferencesDialog : public QDialog
 {
@@ -23,16 +24,20 @@ public:
     int codeBlockFontSize() const;
     bool previewExternalImages() const;
     bool keepRecentFiles() const;
+    QString externalEditor() const;
 
 private slots:
     void onChooseFont();
     void onChooseCodeBlockFont();
+    void onBrowseExternalEditor();
 
 private:
     QPushButton *m_fontButton = nullptr;
     QLabel *m_fontLabel = nullptr;
     QPushButton *m_codeBlockFontButton = nullptr;
     QLabel *m_codeBlockFontLabel = nullptr;
+    QLineEdit *m_externalEditorEdit = nullptr;
+    QPushButton *m_externalEditorBrowseButton = nullptr;
     QCheckBox *m_previewCheck = nullptr;
     QCheckBox *m_keepRecentCheck = nullptr;
     QDialogButtonBox *m_buttonBox = nullptr;

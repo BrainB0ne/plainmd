@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
+        <file>icon.png</file>
         <file>images/file-open.png</file>
         <file>images/external-link.png</file>
         <file>images/folder-open.png</file>
@@ -11,5 +12,6 @@
         <file>images/exit.png</file>
         <file>images/about.png</file>
         <file>images/printer.png</file>
+        <file>images/edit.png</file>
     </qresource>
 </RCC>

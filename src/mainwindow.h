@@ -40,6 +40,7 @@ private slots:
     void onOpenFolder();
     void onFileTreeClicked(const QModelIndex &index);
     void onFileTreeContextMenu(const QPoint &pos);
+    void onOpenWithExternalEditor();
     void onRecentFileTriggered();
     void onClearRecent();
     void onZoomIn();
