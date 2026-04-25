@@ -79,6 +79,7 @@ private:
     QMenu *m_recentMenu = nullptr;
     QList<QAction*> m_recentActions;
     QAction *m_clearRecentAction = nullptr;
+    QAction *m_printAction = nullptr;
 
     QString m_currentFile;
     QString m_currentFolder;

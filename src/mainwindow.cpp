@@ -221,10 +221,11 @@ void MainWindow::setupMenuBar()
 
     fileMenu->addSeparator();
 
-    QAction *printAction = new QAction(QIcon(":/images/printer.png"), tr("&Print..."), this);
-    printAction->setShortcut(QKeySequence::Print);
-    connect(printAction, &QAction::triggered, this, &MainWindow::onPrint);
-    fileMenu->addAction(printAction);
+    m_printAction = new QAction(QIcon(":/images/printer.png"), tr("&Print..."), this);
+    m_printAction->setShortcut(QKeySequence::Print);
+    m_printAction->setEnabled(false); // Disabled on welcome page
+    connect(m_printAction, &QAction::triggered, this, &MainWindow::onPrint);
+    fileMenu->addAction(m_printAction);
 
     fileMenu->addSeparator();
 
@@ -296,9 +297,8 @@ void MainWindow::setupToolBar()
     connect(openFolderAction, &QAction::triggered, this, &MainWindow::onOpenFolder);
     toolBar->addAction(openFolderAction);
 
-    QAction *printAction = new QAction(QIcon(":/images/printer.png"), tr("Print"), this);
-    connect(printAction, &QAction::triggered, this, &MainWindow::onPrint);
-    toolBar->addAction(printAction);
+    // Print action is created in setupMenuBar and stored in m_printAction
+    toolBar->addAction(m_printAction);
 
     toolBar->addSeparator();
 
@@ -527,6 +527,11 @@ void MainWindow::showWelcomePage()
     m_currentFile.clear();
     setWindowTitle(tr("Vibe-MD"));
 
+    // Disable print action on welcome page
+    if (m_printAction) {
+        m_printAction->setEnabled(false);
+    }
+
 #ifdef Q_OS_LINUX
     QString fontFamily = QStringLiteral("'DejaVu Sans', 'Noto Sans', 'Helvetica Neue', Arial, sans-serif");
     QString monoFamily = QStringLiteral("'DejaVu Sans Mono', 'Liberation Mono', monospace");
@@ -622,6 +627,11 @@ void MainWindow::showWelcomePage()
 
 void MainWindow::onPrint()
 {
+    // Disable print when welcome page is shown (no file loaded)
+    if (m_currentFile.isEmpty()) {
+        return;
+    }
+
     QPrinter printer(QPrinter::HighResolution);
     QPrintDialog dialog(&printer, this);
     if (dialog.exec() == QDialog::Accepted) {
@@ -692,6 +702,11 @@ void MainWindow::loadFile(const QString &filePath)
 
     m_currentFile = filePath;
     setWindowTitle(tr("%1 - Vibe-MD").arg(QFileInfo(filePath).fileName()));
+
+    // Enable print action when a file is loaded
+    if (m_printAction) {
+        m_printAction->setEnabled(true);
+    }
 
     // Select the file in the tree if visible
     if (m_fileTree && m_fileTree->model() && m_fileModel && m_proxyModel) {
