@@ -18,7 +18,7 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **External editor integration** - Open files with your preferred editor from the context menu
 - **Customizable fonts** - Configure editor font and emoji print font
 - **Privacy options** - Toggle external image loading and recent files history
-- **URL tooltips** - Hover over links to see the target URL
+- **URL tooltips** - Hover over links to see the resolved absolute path
 - **YAML frontmatter display** - Shows frontmatter as a code block
 
 ## Installation

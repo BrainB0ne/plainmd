@@ -29,7 +29,7 @@
 ## Critical Implementation Details
 - **Code block styling**: **DISABLED** — `styleCodeBlocks()` caused document corruption on large files (>5000 bytes). QTextCursor operations corrupt document structure. Code blocks and inline code render with default Qt styling now.
 - **Welcome page styling**: Welcome page uses hardcoded CSS with Consolas (Windows) / DejaVu Sans Mono (Linux) for shortcuts. Not configurable.
-- **Tooltips**: Image tooltips show original + cached paths. Link tooltips show URL on hover via `cursorForPosition()` + `charFormat().anchorHref()`.
+- **Tooltips**: Image tooltips show original + cached paths (resolved to absolute). Link tooltips show resolved absolute URL on hover via `cursorForPosition()` + `charFormat().anchorHref()`. Both use `QDir::cleanPath()` to resolve `..` and `.` in paths.
 - **External images**: Downloaded **synchronously** (10s timeout via `QEventLoop`) to `%TEMP%\vibe-md_images\`. Privacy toggle can disable this — no network when off.
 - **Relative images for printing**: `setBaseUrl()` alone fails for print. `resolveRelativeImages()` converts relative paths to `file:///` URLs before `setMarkdown()`.
 - **Fenced code protection**: `resolveExternalImages()` and `resolveRelativeImages()` skip image syntax inside `` ``` `` blocks (regex-based).
