@@ -113,11 +113,13 @@ void MainWindow::setupEditor()
 
 void MainWindow::setMarkdownStyle()
 {
-    // Get the code block font from settings to use for inline code as well
+    // Get the code font from settings
 #ifdef Q_OS_LINUX
     const QString defaultCodeFontFamily = QStringLiteral("DejaVu Sans Mono");
+    const QString bodyFontFamily = QStringLiteral("\"DejaVu Sans\", \"Noto Sans\", \"Helvetica Neue\", Arial, sans-serif");
 #else
     const QString defaultCodeFontFamily = QStringLiteral("Consolas");
+    const QString bodyFontFamily = QStringLiteral("\"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif");
 #endif
     QString codeFontFamily = m_settings.value("editor/codeBlockFontFamily", defaultCodeFontFamily).toString();
     // Escape single quotes for CSS
@@ -125,11 +127,7 @@ void MainWindow::setMarkdownStyle()
 
     QString style = QStringLiteral(R"(
         body {
-#ifdef Q_OS_LINUX
-            font-family: "DejaVu Sans", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
-#else
-            font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-#endif
+            font-family: %1;
             font-size: 11pt;
             line-height: 1.6;
             color: #333333;
@@ -146,7 +144,7 @@ void MainWindow::setMarkdownStyle()
             color: #c7254e;
             padding: 2px 6px;
             border-radius: 4px;
-            font-family: '%1', 'SFMono-Regular', 'DejaVu Sans Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-family: '%2', 'SFMono-Regular', 'DejaVu Sans Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
             font-size: 0.9em;
         }
         pre {
@@ -206,7 +204,7 @@ void MainWindow::setMarkdownStyle()
             max-width: 100%;
             height: auto;
         }
-    )").arg(codeFontFamily);
+    )").arg(bodyFontFamily, codeFontFamily);
 
     m_editor->document()->setDefaultStyleSheet(style);
 }
