@@ -14,7 +14,7 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **Auto-reload on file change** - Detects external file modifications and prompts to reload
 - **Zoom controls** - Zoom in/out with Ctrl++ and Ctrl+-
 - **Find/Search** - Search within documents with Ctrl+F
-- **Print support** - Print to PDF or physical printer
+- **Print & Export** - Print to physical printer or export directly to PDF (with better emoji support)
 - **External editor integration** - Open files with your preferred editor from the context menu
 - **Customizable fonts** - Configure editor font and emoji print font
 - **Privacy options** - Toggle external image loading and recent files history
@@ -116,6 +116,7 @@ make
 | Ctrl+Shift+O | Open folder |
 | Ctrl+F | Find in document |
 | Ctrl+P | Print |
+| Ctrl+Shift+P | Export to PDF |
 | Ctrl++, | Preferences |
 | Ctrl++ | Zoom in |
 | Ctrl+- | Zoom out |

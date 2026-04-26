@@ -142,7 +142,7 @@ void MainWindow::setupMenuBar()
     connect(m_printAction, &QAction::triggered, this, &MainWindow::onPrint);
     fileMenu->addAction(m_printAction);
 
-    m_exportPdfAction = new QAction(QIcon(":/images/printer.png"), tr("&Export to PDF..."), this);
+    m_exportPdfAction = new QAction(QIcon(":/images/file-type-pdf.png"), tr("&Export to PDF..."), this);
     m_exportPdfAction->setShortcut(QKeySequence(tr("Ctrl+Shift+P")));
     m_exportPdfAction->setEnabled(false); // Disabled on welcome page
     connect(m_exportPdfAction, &QAction::triggered, this, &MainWindow::onExportToPdf);
@@ -220,6 +220,9 @@ void MainWindow::setupToolBar()
 
     // Print action is created in setupMenuBar and stored in m_printAction
     toolBar->addAction(m_printAction);
+
+    // Export to PDF action is created in setupMenuBar and stored in m_exportPdfAction
+    toolBar->addAction(m_exportPdfAction);
 
     toolBar->addSeparator();
 
@@ -417,7 +420,7 @@ void MainWindow::onAbout()
            "- Recent files\n"
            "- Zoom controls\n"
            "- Find / Search\n"
-           "- Print support\n"
+           "- Print & Export to PDF\n"
            "- External image preview with privacy toggle\n"
            "- URL tooltips on hover\n"
            "- Configurable editor font\n"

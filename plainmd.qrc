@@ -13,6 +13,7 @@
         <file>images/exit.png</file>
         <file>images/about.png</file>
         <file>images/printer.png</file>
+        <file>images/file-type-pdf.png</file>
         <file>images/edit.png</file>
     </qresource>
 </RCC>

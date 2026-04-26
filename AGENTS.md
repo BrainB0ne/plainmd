@@ -17,6 +17,7 @@
 - **CSS limitation**: `QTextDocument` ignores `background-color`, `border-radius`, `padding` on block elements.
 - **Document corruption bug**: QTextCursor operations (setBlockFormat/setCharFormat) on documents >5000 bytes corrupt the document structure. Both `styleCodeBlocks()` and custom CSS styling are **disabled** as a result.
 - **Emoji printing bug**: Color emoji fonts (Segoe UI Emoji) render incorrectly when printing to PDF on Windows. Use **Nerd Fonts** (CaskaydiaCove, JetBrainsMono) via `editor/printEmojiFont` setting.
+- **Export to PDF vs Print**: Export to PDF uses `QPrinter::PdfFormat` which handles emoji fonts correctly (bypasses Windows print drivers). Print goes through Windows print spooler and has emoji rendering issues. Export to PDF is preferred for digital distribution.
 
 ## Architecture
 - Single-window app. Entry: `src/main.cpp` → `MainWindow`.
