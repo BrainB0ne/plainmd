@@ -41,7 +41,7 @@ Copyright © 2026 BrainByteZ
 - **MDX files**: Treated as plain text (`.mdx` uses JSX syntax that Qt's markdown parser doesn't support). Line breaks preserved but no rich rendering.
 
 ## Platform Differences
-- **Fonts**: Linux defaults to DejaVu Sans (editor). Windows: Segoe UI. Code font settings removed due to Qt6 bugs.
+- **Fonts**: Linux defaults to DejaVu Sans (editor) and Noto Sans (emoji printing). Windows: Segoe UI for both. Code font settings removed due to Qt6 bugs.
 - **Path separators**: Display with `QDir::toNativeSeparators()`, store normalized (forward slashes).
 - **Reveal in folder**: Windows uses `explorer`, Linux uses `xdg-open`.
 - **Menu bar**: File / View / Help only. Preferences under **View** (Ctrl+,).

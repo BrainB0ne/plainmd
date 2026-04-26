@@ -608,30 +608,41 @@ void MainWindow::onPrint()
 
         // Check if Nerd Font is configured for emoji printing
         bool useNerdFont = m_settings.value("editor/useNerdFontForEmoji", false).toBool();
-        QString emojiFontFamily = m_settings.value("editor/printEmojiFont", QStringLiteral("Segoe UI")).toString();
+#ifdef Q_OS_LINUX
+        QString defaultEmojiFont = QStringLiteral("Noto Sans");
+#else
+        QString defaultEmojiFont = QStringLiteral("Segoe UI");
+#endif
+        QString emojiFontFamily = m_settings.value("editor/printEmojiFont", defaultEmojiFont).toString();
         int emojiFontSize = m_settings.value("editor/printEmojiFontSize", 11).toInt();
 
         QString printCss;
         QFont printFont;
 
+#ifdef Q_OS_LINUX
+        QString fallbackEmojiFonts = QStringLiteral("'Noto Sans', 'Noto Color Emoji', sans-serif");
+#else
+        QString fallbackEmojiFonts = QStringLiteral("'Segoe UI', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif");
+#endif
+
         if (useNerdFont) {
             // Use Nerd Font for proper monochrome emoji rendering
             printCss = QStringLiteral(R"(
-                body { font-family: '%1', 'Segoe UI', sans-serif; }
-                td, th { font-family: '%1', 'Segoe UI', sans-serif; }
-            )").arg(emojiFontFamily);
+                body { font-family: '%1', %2; }
+                td, th { font-family: '%1', %2; }
+            )").arg(emojiFontFamily).arg(fallbackEmojiFonts);
             printFont = QFont(emojiFontFamily, emojiFontSize);
             printFont.setStyleHint(QFont::Monospace);
-            printFont.setFamilies(QStringList() << emojiFontFamily << "Segoe UI");
+            printFont.setFamilies(QStringList() << emojiFontFamily << defaultEmojiFont);
         } else {
-            // Use standard emoji fonts (may not print correctly on Windows PDF)
+            // Use standard emoji fonts
             printCss = QStringLiteral(R"(
-                body { font-family: 'Segoe UI', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; }
-                td, th { font-family: 'Segoe UI Emoji', 'Segoe UI Symbol', 'Segoe UI', sans-serif; }
-            )");
-            printFont = QFont("Segoe UI", 11);
+                body { font-family: %1; }
+                td, th { font-family: %1; }
+            )").arg(fallbackEmojiFonts);
+            printFont = QFont(defaultEmojiFont, 11);
             printFont.setStyleHint(QFont::SansSerif);
-            printFont.setFamilies(QStringList() << "Segoe UI" << "Segoe UI Emoji" << "Segoe UI Symbol");
+            printFont.setFamilies(QStringList() << defaultEmojiFont << "Noto Color Emoji" << "Noto Sans");
         }
 
         printDoc.setDefaultStyleSheet(printCss);
@@ -670,7 +681,14 @@ void MainWindow::onExportToPdf()
 
     // Check if Nerd Font is configured for emoji printing
     bool useNerdFont = m_settings.value("editor/useNerdFontForEmoji", false).toBool();
-    QString emojiFontFamily = m_settings.value("editor/printEmojiFont", QStringLiteral("Segoe UI")).toString();
+#ifdef Q_OS_LINUX
+    QString defaultEmojiFont = QStringLiteral("Noto Sans");
+    QString fallbackEmojiFonts = QStringLiteral("'Noto Sans', 'Noto Color Emoji', sans-serif");
+#else
+    QString defaultEmojiFont = QStringLiteral("Segoe UI");
+    QString fallbackEmojiFonts = QStringLiteral("'Segoe UI', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif");
+#endif
+    QString emojiFontFamily = m_settings.value("editor/printEmojiFont", defaultEmojiFont).toString();
     int emojiFontSize = m_settings.value("editor/printEmojiFontSize", 11).toInt();
 
     QString printCss;
@@ -679,21 +697,21 @@ void MainWindow::onExportToPdf()
     if (useNerdFont) {
         // Use Nerd Font for proper monochrome emoji rendering
         printCss = QStringLiteral(R"(
-            body { font-family: '%1', 'Segoe UI', sans-serif; }
-            td, th { font-family: '%1', 'Segoe UI', sans-serif; }
-        )").arg(emojiFontFamily);
+            body { font-family: '%1', %2; }
+            td, th { font-family: '%1', %2; }
+        )").arg(emojiFontFamily).arg(fallbackEmojiFonts);
         printFont = QFont(emojiFontFamily, emojiFontSize);
         printFont.setStyleHint(QFont::Monospace);
-        printFont.setFamilies(QStringList() << emojiFontFamily << "Segoe UI");
+        printFont.setFamilies(QStringList() << emojiFontFamily << defaultEmojiFont);
     } else {
-        // Use standard emoji fonts (may not print correctly on Windows PDF)
+        // Use standard emoji fonts
         printCss = QStringLiteral(R"(
-            body { font-family: 'Segoe UI', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; }
-            td, th { font-family: 'Segoe UI Emoji', 'Segoe UI Symbol', 'Segoe UI', sans-serif; }
-        )");
-        printFont = QFont("Segoe UI", 11);
+            body { font-family: %1; }
+            td, th { font-family: %1; }
+        )").arg(fallbackEmojiFonts);
+        printFont = QFont(defaultEmojiFont, 11);
         printFont.setStyleHint(QFont::SansSerif);
-        printFont.setFamilies(QStringList() << "Segoe UI" << "Segoe UI Emoji" << "Segoe UI Symbol");
+        printFont.setFamilies(QStringList() << defaultEmojiFont << "Noto Color Emoji" << "Noto Sans");
     }
 
     printDoc.setDefaultStyleSheet(printCss);

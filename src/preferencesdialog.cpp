@@ -61,7 +61,12 @@ void PreferencesDialog::loadSettings()
     ui->externalEditorEdit->setText(QDir::toNativeSeparators(settings.value("editor/externalEditor").toString()));
 
     // Load emoji print font
-    QString emojiFamily = settings.value("editor/printEmojiFont", QStringLiteral("Segoe UI")).toString();
+#ifdef Q_OS_LINUX
+    QString defaultEmojiFont = QStringLiteral("Noto Sans");
+#else
+    QString defaultEmojiFont = QStringLiteral("Segoe UI");
+#endif
+    QString emojiFamily = settings.value("editor/printEmojiFont", defaultEmojiFont).toString();
     int emojiSize = settings.value("editor/printEmojiFontSize", 11).toInt();
     m_emojiFont = QFont(emojiFamily);
     m_emojiFont.setPointSize(emojiSize);
