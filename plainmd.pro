@@ -1,16 +1,22 @@
 QT += core gui widgets network printsupport
 
-CONFIG += c++17
+CONFIG += c++17 debug_and_release
 
 TARGET = plainmd
 TEMPLATE = app
 
-# Place the executable in release/ or debug/ on all platforms
+# Separate output directories for debug and release builds
 CONFIG(debug, debug|release) {
     DESTDIR = debug
 } else {
     DESTDIR = release
 }
+
+# Dump all generated files directly into the build type folder
+OBJECTS_DIR = $$DESTDIR
+MOC_DIR = $$DESTDIR
+RCC_DIR = $$DESTDIR
+UI_DIR = $$DESTDIR
 
 SOURCES += \
     src/main.cpp \
