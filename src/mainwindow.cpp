@@ -1,3 +1,20 @@
+/*
+ * PlainMD
+ * Copyright (C) 2026 BrainByteZ
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "mainwindow.h"
 #include "filterproxymodel.h"
 #include "preferencesdialog.h"
@@ -663,15 +680,15 @@ void MainWindow::onPrint()
         // Clone the document and apply emoji-friendly font for printing
         QTextDocument printDoc;
         printDoc.setHtml(m_editor->toHtml());
-        
+
         // Check if Nerd Font is configured for emoji printing
         bool useNerdFont = m_settings.value("editor/useNerdFontForEmoji", false).toBool();
         QString emojiFontFamily = m_settings.value("editor/printEmojiFont", QStringLiteral("Segoe UI")).toString();
         int emojiFontSize = m_settings.value("editor/printEmojiFontSize", 11).toInt();
-        
+
         QString printCss;
         QFont printFont;
-        
+
         if (useNerdFont) {
             // Use Nerd Font for proper monochrome emoji rendering
             printCss = QStringLiteral(R"(
@@ -691,7 +708,7 @@ void MainWindow::onPrint()
             printFont.setStyleHint(QFont::SansSerif);
             printFont.setFamilies(QStringList() << "Segoe UI" << "Segoe UI Emoji" << "Segoe UI Symbol");
         }
-        
+
         printDoc.setDefaultStyleSheet(printCss);
         printDoc.setDefaultFont(printFont);
         printDoc.print(&printer);

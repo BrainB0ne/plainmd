@@ -1,3 +1,20 @@
+/*
+ * PlainMD
+ * Copyright (C) 2026 BrainByteZ
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "preferencesdialog.h"
 
 #include <QVBoxLayout>
@@ -91,14 +108,14 @@ void PreferencesDialog::loadSettings()
     m_fontLabel->setText(QStringLiteral("%1, %2 pt").arg(m_currentFont.family()).arg(m_currentFont.pointSize()));
 
     m_externalEditorEdit->setText(QDir::toNativeSeparators(settings.value("editor/externalEditor").toString()));
-    
+
     // Load emoji print font
     QString emojiFamily = settings.value("editor/printEmojiFont", QStringLiteral("Segoe UI")).toString();
     int emojiSize = settings.value("editor/printEmojiFontSize", 11).toInt();
     m_emojiFont = QFont(emojiFamily);
     m_emojiFont.setPointSize(emojiSize);
     m_emojiFontLabel->setText(QStringLiteral("%1, %2 pt").arg(m_emojiFont.family()).arg(m_emojiFont.pointSize()));
-    
+
     m_useNerdFontCheck->setChecked(settings.value("editor/useNerdFontForEmoji", false).toBool());
 
     m_previewCheck->setChecked(settings.value("privacy/previewExternalImages", true).toBool());
