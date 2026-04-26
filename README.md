@@ -23,6 +23,9 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **URL tooltips** - Hover over links to see the resolved absolute path
 - **YAML frontmatter display** - Shows frontmatter as a code block
 
+## Screenshot
+![PlainMD Screenshot](screenshots/plainmd-screenshot.png)
+
 ## Building from Source
 
 ### Prerequisites
