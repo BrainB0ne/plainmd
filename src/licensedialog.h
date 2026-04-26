@@ -15,22 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <QApplication>
-#include "mainwindow.h"
+#ifndef LICENSEDIALOG_H
+#define LICENSEDIALOG_H
 
-int main(int argc, char *argv[])
-{
-    QApplication app(argc, argv);
-    app.setApplicationName("PlainMD");
-    app.setOrganizationName("plainmd");
-    app.setApplicationVersion("1.2");
+#include <QDialog>
 
-    MainWindow window;
-    window.show();
-
-    if (argc > 1) {
-        window.openFile(QString::fromLocal8Bit(argv[1]));
-    }
-
-    return app.exec();
+namespace Ui {
+class LicenseDialog;
 }
+
+class LicenseDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit LicenseDialog(QWidget *parent = nullptr);
+    ~LicenseDialog();
+
+    void initialize();
+
+private:
+    Ui::LicenseDialog *ui;
+};
+
+#endif // LICENSEDIALOG_H

@@ -17,13 +17,21 @@ SOURCES += \
     src/mainwindow.cpp \
     src/filterproxymodel.cpp \
     src/preferencesdialog.cpp \
-    src/finddialog.cpp
+    src/finddialog.cpp \
+    src/aboutdialog.cpp \
+    src/licensedialog.cpp
 
 HEADERS += \
     src/mainwindow.h \
     src/filterproxymodel.h \
     src/preferencesdialog.h \
-    src/finddialog.h
+    src/finddialog.h \
+    src/aboutdialog.h \
+    src/licensedialog.h
+
+FORMS += \
+    src/aboutdialog.ui \
+    src/licensedialog.ui
 
 RC_FILE = plainmd.rc
 RESOURCES += plainmd.qrc

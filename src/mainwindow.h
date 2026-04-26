@@ -67,7 +67,6 @@ private slots:
     void onZoomOut();
     void onZoomReset();
     void onAbout();
-    void onAboutQt();
     void onPrint();
     void onExportToPdf();
     void onPreferences();

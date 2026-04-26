@@ -15,22 +15,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <QApplication>
-#include "mainwindow.h"
+#ifndef ABOUTDIALOG_H
+#define ABOUTDIALOG_H
 
-int main(int argc, char *argv[])
-{
-    QApplication app(argc, argv);
-    app.setApplicationName("PlainMD");
-    app.setOrganizationName("plainmd");
-    app.setApplicationVersion("1.2");
+#include <QDialog>
 
-    MainWindow window;
-    window.show();
-
-    if (argc > 1) {
-        window.openFile(QString::fromLocal8Bit(argv[1]));
-    }
-
-    return app.exec();
+namespace Ui {
+class AboutDialog;
 }
+
+class AboutDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit AboutDialog(QWidget *parent = 0);
+    ~AboutDialog();
+
+private slots:
+    void on_licenseButton_clicked();
+    void on_iconsLicenseButton_clicked();
+
+private:
+    Ui::AboutDialog *ui;
+};
+
+#endif // ABOUTDIALOG_H

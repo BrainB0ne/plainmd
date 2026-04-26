@@ -15,22 +15,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <QApplication>
-#include "mainwindow.h"
+#include "licensedialog.h"
+#include "ui_licensedialog.h"
 
-int main(int argc, char *argv[])
+#include <QFile>
+
+LicenseDialog::LicenseDialog(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::LicenseDialog)
 {
-    QApplication app(argc, argv);
-    app.setApplicationName("PlainMD");
-    app.setOrganizationName("plainmd");
-    app.setApplicationVersion("1.2");
+    ui->setupUi(this);
+}
 
-    MainWindow window;
-    window.show();
+LicenseDialog::~LicenseDialog()
+{
+    delete ui;
+}
 
-    if (argc > 1) {
-        window.openFile(QString::fromLocal8Bit(argv[1]));
-    }
+void LicenseDialog::initialize()
+{
+    QFile file(":/images/LICENSE-ICONS");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
 
-    return app.exec();
+    QTextStream in(&file);
+    QString text = in.readAll();
+
+    file.close();
+
+    ui->licenseTextEdit->setText(text);
 }

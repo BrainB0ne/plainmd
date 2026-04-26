@@ -19,6 +19,7 @@
 #include "filterproxymodel.h"
 #include "preferencesdialog.h"
 #include "finddialog.h"
+#include "aboutdialog.h"
 
 #include <QApplication>
 #include <QCryptographicHash>
@@ -218,10 +219,6 @@ void MainWindow::setupMenuBar()
     QAction *aboutAction = new QAction(QIcon(":/images/about.png"), tr("&About"), this);
     connect(aboutAction, &QAction::triggered, this, &MainWindow::onAbout);
     helpMenu->addAction(aboutAction);
-
-    QAction *aboutQtAction = new QAction(tr("About &Qt"), this);
-    connect(aboutQtAction, &QAction::triggered, this, &MainWindow::onAboutQt);
-    helpMenu->addAction(aboutQtAction);
 }
 
 void MainWindow::setupToolBar()
@@ -417,80 +414,8 @@ void MainWindow::onZoomReset()
 
 void MainWindow::onAbout()
 {
-    QDialog dlg(this);
-    dlg.setWindowTitle(tr("About PlainMD"));
-    dlg.setMinimumSize(420, 420);
-
-    QVBoxLayout *layout = new QVBoxLayout(&dlg);
-
-    QLabel *title = new QLabel(tr("<h2>PlainMD</h2>"), &dlg);
-    title->setAlignment(Qt::AlignCenter);
-    layout->addWidget(title);
-
-    QLabel *version = new QLabel(tr("Version 1.2"), &dlg);
-    version->setAlignment(Qt::AlignCenter);
-    layout->addWidget(version);
-
-    QLabel *copyright = new QLabel(tr("Copyright © 2026 BrainByteZ"), &dlg);
-    copyright->setAlignment(Qt::AlignCenter);
-    copyright->setStyleSheet("color: #666; font-size: 0.85em;");
-    layout->addWidget(copyright);
-
-    // Format build date as yyyy-MM-dd HH:mm:ss
-    QDate buildDateValue = QDate::fromString(__DATE__, "MMM d yyyy");
-    QString buildDateStr = buildDateValue.toString("yyyy-MM-dd");
-    QString buildTimeStr = QString(__TIME__);
-    QLabel *buildDate = new QLabel(tr("Build: %1 %2").arg(buildDateStr, buildTimeStr), &dlg);
-    buildDate->setAlignment(Qt::AlignCenter);
-    buildDate->setStyleSheet("color: #888; font-size: 0.9em;");
-    layout->addWidget(buildDate);
-
-    QLabel *desc = new QLabel(tr("A simple and elegant Markdown viewer built with Qt6."), &dlg);
-    desc->setAlignment(Qt::AlignCenter);
-    desc->setWordWrap(true);
-    layout->addWidget(desc);
-
-    layout->addSpacing(8);
-
-    QLabel *featuresLabel = new QLabel(tr("Features:"), &dlg);
-    layout->addWidget(featuresLabel);
-
-    QTextEdit *featuresEdit = new QTextEdit(&dlg);
-    featuresEdit->setReadOnly(true);
-    featuresEdit->setPlainText(
-        tr("- Native Qt6 markdown rendering\n"
-           "- Markdown, MDX, and plain text support\n"
-           "- File browser sidebar\n"
-           "- Drag and drop support\n"
-           "- Recent files & folders\n"
-           "- Zoom controls\n"
-           "- Find / Search\n"
-           "- Print & Export to PDF\n"
-           "- External image preview with privacy toggle\n"
-           "- URL tooltips on hover\n"
-           "- Configurable editor font\n"
-           "- Configurable external editor\n"
-           "- YAML frontmatter display"));
-    layout->addWidget(featuresEdit);
-
-    QLabel *icons = new QLabel(
-        tr("Icons by <a href='https://tabler.io/icons'>Tabler Icons</a> "
-           "(<a href='https://github.com/tabler/tabler-icons/blob/main/LICENSE'>MIT License</a>)"), &dlg);
-    icons->setOpenExternalLinks(true);
-    icons->setAlignment(Qt::AlignCenter);
-    icons->setWordWrap(true);
-    layout->addWidget(icons);
-
-    QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok, &dlg);
-    connect(buttons, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
-    layout->addWidget(buttons);
-
+    AboutDialog dlg(this);
     dlg.exec();
-}
-
-void MainWindow::onAboutQt()
-{
-    QMessageBox::aboutQt(this);
 }
 
 void MainWindow::onPreferences()

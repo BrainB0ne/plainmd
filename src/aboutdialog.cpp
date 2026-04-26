@@ -15,22 +15,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <QApplication>
-#include "mainwindow.h"
+#include "aboutdialog.h"
+#include "ui_aboutdialog.h"
+#include "licensedialog.h"
 
-int main(int argc, char *argv[])
+AboutDialog::AboutDialog(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::AboutDialog)
 {
-    QApplication app(argc, argv);
-    app.setApplicationName("PlainMD");
-    app.setOrganizationName("plainmd");
-    app.setApplicationVersion("1.2");
+    ui->setupUi(this);
 
-    MainWindow window;
-    window.show();
+    ui->buildDateLabel->setText(tr("Build Date: %1 - %2").arg(__DATE__).arg(__TIME__));
+    ui->versionLabel->setText(tr("Version: %1").arg(QApplication::applicationVersion()));
+}
 
-    if (argc > 1) {
-        window.openFile(QString::fromLocal8Bit(argv[1]));
-    }
+AboutDialog::~AboutDialog()
+{
+    delete ui;
+}
 
-    return app.exec();
+void AboutDialog::on_licenseButton_clicked()
+{
+    QApplication::aboutQt();
+}
+
+void AboutDialog::on_iconsLicenseButton_clicked()
+{
+    LicenseDialog dlg(this);
+    dlg.initialize();
+    dlg.exec();
 }

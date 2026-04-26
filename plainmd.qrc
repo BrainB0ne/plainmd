@@ -15,5 +15,8 @@
         <file>images/printer.png</file>
         <file>images/file-type-pdf.png</file>
         <file>images/edit.png</file>
+        <file>images/qt.png</file>
+        <file>images/brand-tabler.png</file>
+        <file>images/LICENSE-ICONS</file>
     </qresource>
 </RCC>
