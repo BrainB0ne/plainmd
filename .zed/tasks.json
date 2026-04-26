@@ -1,0 +1,32 @@
+[
+  {
+    "label": "Build PlainMD (Windows)",
+    "command": "cmd.exe /C build.bat",
+    "hide": "never",
+    "reveal": "always",
+  },
+  {
+    "label": "Build & Deploy (Windows)",
+    "command": "cmd.exe /C build.bat && windeployqt.exe release\\plainmd.exe",
+    "hide": "never",
+    "reveal": "always",
+  },
+  {
+    "label": "Clean Build",
+    "command": "cmd.exe /C clean.bat",
+    "hide": "never",
+    "reveal": "always",
+  },
+  {
+    "label": "Run PlainMD",
+    "command": "release\\plainmd.exe",
+    "hide": "never",
+    "reveal": "always",
+  },
+  {
+    "label": "Build (Linux)",
+    "command": "qmake plainmd.pro && make",
+    "hide": "never",
+    "reveal": "always",
+  },
+]
