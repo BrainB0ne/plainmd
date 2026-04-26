@@ -10,14 +10,14 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **File browser sidebar** - Browse and open markdown files with a tree view
 - **Multiple format support** - Markdown (.md), MDX (.mdx), and plain text (.txt)
 - **Drag and drop support** - Open files and folders by dragging them into the window
-- **Recent files** - Quick access to recently opened files
+- **Recent files & folders** - Quick access to recently opened files and folders with separate history and privacy toggles
 - **Auto-reload on file change** - Detects external file modifications and prompts to reload
 - **Zoom controls** - Zoom in/out with Ctrl++ and Ctrl+-
 - **Find/Search** - Search within documents with Ctrl+F
 - **Print & Export** - Print to physical printer or export directly to PDF (with better emoji support)
 - **External editor integration** - Open files with your preferred editor from the context menu
 - **Customizable fonts** - Configure editor font and emoji print font
-- **Privacy options** - Toggle external image loading and recent files history
+- **Privacy options** - Toggle external image loading, recent files, and recent folders history independently
 - **URL tooltips** - Hover over links to see the resolved absolute path
 - **YAML frontmatter display** - Shows frontmatter as a code block
 
@@ -141,7 +141,7 @@ Access preferences via **View → Preferences** (Ctrl+,):
 - **Editor Font** - Main text font
 - **Emoji Print Font** - Font for emoji characters when printing (use a Nerd Font for best results)
 - **External Editor** - Path to your preferred external editor
-- **Privacy** - Toggle external image preview and recent files history
+- **Privacy** - Toggle external image preview, recent files, and recent folders history independently
 
 ### Emoji Printing on Windows (Experimental)
 

@@ -23,6 +23,7 @@ public:
     int fontSize() const;
     bool previewExternalImages() const;
     bool keepRecentFiles() const;
+    bool keepRecentFolders() const;
     QString externalEditor() const;
     bool useNerdFontForEmoji() const;
     QFont printEmojiFont() const;
@@ -41,6 +42,7 @@ private:
     QLineEdit *m_externalEditorEdit = nullptr;
     QCheckBox *m_previewCheck = nullptr;
     QCheckBox *m_keepRecentCheck = nullptr;
+    QCheckBox *m_keepRecentFoldersCheck = nullptr;
     QCheckBox *m_useNerdFontCheck = nullptr;
     QPushButton *m_emojiFontButton = nullptr;
     QLabel *m_emojiFontLabel = nullptr;

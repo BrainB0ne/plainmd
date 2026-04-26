@@ -57,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     showWelcomePage();
     refreshRecentFilesMenu();
+    refreshRecentFoldersMenu();
 
     // Setup file watcher for auto-reload
     m_fileWatcher = new QFileSystemWatcher(this);
@@ -150,6 +151,10 @@ void MainWindow::setupMenuBar()
     m_recentMenu = fileMenu->addMenu(tr("Recent &Files"));
     m_clearRecentAction = new QAction(tr("&Clear Recent Files"), this);
     connect(m_clearRecentAction, &QAction::triggered, this, &MainWindow::onClearRecent);
+
+    m_recentFoldersMenu = fileMenu->addMenu(tr("Recent F&olders"));
+    m_clearRecentFoldersAction = new QAction(tr("&Clear Recent Folders"), this);
+    connect(m_clearRecentFoldersAction, &QAction::triggered, this, &MainWindow::onClearRecentFolders);
 
     fileMenu->addSeparator();
 
@@ -351,10 +356,31 @@ void MainWindow::onRecentFileTriggered()
     }
 }
 
+void MainWindow::onRecentFolderTriggered()
+{
+    QAction *action = qobject_cast<QAction*>(sender());
+    if (action) {
+        QString folderPath = action->data().toString();
+        if (QDir(folderPath).exists()) {
+            loadFolder(folderPath);
+        } else {
+            QMessageBox::warning(this, tr("Folder Not Found"),
+                                 tr("The folder no longer exists:\n%1").arg(folderPath));
+            updateRecentFolders(QString()); // Refresh to remove missing folder
+        }
+    }
+}
+
 void MainWindow::onClearRecent()
 {
     m_settings.setValue("recentFiles", QStringList());
     refreshRecentFilesMenu();
+}
+
+void MainWindow::onClearRecentFolders()
+{
+    m_settings.setValue("recentFolders", QStringList());
+    refreshRecentFoldersMenu();
 }
 
 void MainWindow::onZoomIn()
@@ -414,7 +440,7 @@ void MainWindow::onAbout()
            "- Markdown, MDX, and plain text support\n"
            "- File browser sidebar\n"
            "- Drag and drop support\n"
-           "- Recent files\n"
+           "- Recent files & folders\n"
            "- Zoom controls\n"
            "- Find / Search\n"
            "- Print & Export to PDF\n"
@@ -456,7 +482,11 @@ void MainWindow::onPreferences()
         if (!dlg.keepRecentFiles()) {
             m_settings.setValue("recentFiles", QStringList());
         }
+        if (!dlg.keepRecentFolders()) {
+            m_settings.setValue("recentFolders", QStringList());
+        }
         refreshRecentFilesMenu();
+        refreshRecentFoldersMenu();
         if (!m_currentFile.isEmpty()) {
             loadFile(m_currentFile);
         }
@@ -842,6 +872,11 @@ void MainWindow::loadFolder(const QString &folderPath)
     QModelIndex sourceRoot = m_fileModel->index(folderPath);
     QModelIndex proxyRoot = m_proxyModel->mapFromSource(sourceRoot);
     m_fileTree->setRootIndex(proxyRoot);
+
+    // Track recent folder
+    if (m_settings.value("privacy/keepRecentFolders", true).toBool()) {
+        updateRecentFolders(folderPath);
+    }
 }
 
 void MainWindow::updateRecentFiles(const QString &filePath)
@@ -903,6 +938,67 @@ void MainWindow::refreshRecentFilesMenu()
 
     m_recentMenu->addSeparator();
     m_recentMenu->addAction(m_clearRecentAction);
+}
+
+void MainWindow::updateRecentFolders(const QString &folderPath)
+{
+    if (!m_settings.value("privacy/keepRecentFolders", true).toBool()) {
+        return;
+    }
+
+    QStringList recentFolders = m_settings.value("recentFolders").toStringList();
+
+    if (!folderPath.isEmpty()) {
+        recentFolders.removeAll(folderPath);
+        recentFolders.prepend(folderPath);
+        while (recentFolders.size() > 10) {
+            recentFolders.removeLast();
+        }
+        m_settings.setValue("recentFolders", recentFolders);
+    } else {
+        // Remove non-existent folders
+        QStringList validFolders;
+        for (const QString &f : recentFolders) {
+            if (QDir(f).exists()) validFolders.append(f);
+        }
+        m_settings.setValue("recentFolders", validFolders);
+    }
+
+    refreshRecentFoldersMenu();
+}
+
+void MainWindow::refreshRecentFoldersMenu()
+{
+    if (!m_recentFoldersMenu) return;
+
+    m_recentFoldersMenu->clear();
+    m_recentFolderActions.clear();
+
+    bool keepRecent = m_settings.value("privacy/keepRecentFolders", true).toBool();
+    QStringList recentFolders = keepRecent ? m_settings.value("recentFolders").toStringList() : QStringList();
+
+    if (recentFolders.isEmpty()) {
+        QAction *emptyAction = new QAction(tr("No Recent Folders"), this);
+        emptyAction->setEnabled(false);
+        m_recentFoldersMenu->addAction(emptyAction);
+    } else {
+        for (int i = 0; i < recentFolders.size(); ++i) {
+            QString folderPath = recentFolders.at(i);
+            // Convert to native separators for display
+            QString displayPath = QDir::toNativeSeparators(folderPath);
+            QString displayName = QString("&%1 %2").arg(i + 1).arg(displayPath);
+
+            QAction *action = new QAction(displayName, this);
+            action->setData(folderPath);
+            action->setToolTip(displayPath);
+            connect(action, &QAction::triggered, this, &MainWindow::onRecentFolderTriggered);
+            m_recentFoldersMenu->addAction(action);
+            m_recentFolderActions.append(action);
+        }
+    }
+
+    m_recentFoldersMenu->addSeparator();
+    m_recentFoldersMenu->addAction(m_clearRecentFoldersAction);
 }
 
 bool MainWindow::isMarkdownFile(const QString &filePath) const

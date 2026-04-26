@@ -61,6 +61,9 @@ PreferencesDialog::PreferencesDialog(QWidget *parent)
 
     m_keepRecentCheck = new QCheckBox(tr("Keep recent files history"), this);
     privacyLayout->addWidget(m_keepRecentCheck);
+
+    m_keepRecentFoldersCheck = new QCheckBox(tr("Keep recent folders history"), this);
+    privacyLayout->addWidget(m_keepRecentFoldersCheck);
     mainLayout->addWidget(privacyGroup);
 
     m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
@@ -100,6 +103,7 @@ void PreferencesDialog::loadSettings()
 
     m_previewCheck->setChecked(settings.value("privacy/previewExternalImages", true).toBool());
     m_keepRecentCheck->setChecked(settings.value("privacy/keepRecentFiles", true).toBool());
+    m_keepRecentFoldersCheck->setChecked(settings.value("privacy/keepRecentFolders", true).toBool());
 }
 
 void PreferencesDialog::saveSettings()
@@ -114,6 +118,7 @@ void PreferencesDialog::saveSettings()
     settings.setValue("editor/useNerdFontForEmoji", m_useNerdFontCheck->isChecked());
     settings.setValue("privacy/previewExternalImages", m_previewCheck->isChecked());
     settings.setValue("privacy/keepRecentFiles", m_keepRecentCheck->isChecked());
+    settings.setValue("privacy/keepRecentFolders", m_keepRecentFoldersCheck->isChecked());
 }
 
 QString PreferencesDialog::fontFamily() const
@@ -134,6 +139,11 @@ bool PreferencesDialog::previewExternalImages() const
 bool PreferencesDialog::keepRecentFiles() const
 {
     return m_keepRecentCheck->isChecked();
+}
+
+bool PreferencesDialog::keepRecentFolders() const
+{
+    return m_keepRecentFoldersCheck->isChecked();
 }
 
 QString PreferencesDialog::externalEditor() const

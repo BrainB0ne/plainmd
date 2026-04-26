@@ -43,7 +43,9 @@ private slots:
     void onFileTreeContextMenu(const QPoint &pos);
     void onOpenWithExternalEditor();
     void onRecentFileTriggered();
+    void onRecentFolderTriggered();
     void onClearRecent();
+    void onClearRecentFolders();
     void onZoomIn();
     void onZoomOut();
     void onZoomReset();
@@ -64,7 +66,9 @@ private:
     void loadFile(const QString &filePath);
     void loadFolder(const QString &folderPath);
     void updateRecentFiles(const QString &filePath);
+    void updateRecentFolders(const QString &folderPath);
     void refreshRecentFilesMenu();
+    void refreshRecentFoldersMenu();
 
     bool isMarkdownFile(const QString &filePath) const;
     QString resolveExternalImages(const QString &markdownContent, bool previewEnabled);
@@ -81,8 +85,11 @@ private:
     QSplitter *m_splitter = nullptr;
 
     QMenu *m_recentMenu = nullptr;
+    QMenu *m_recentFoldersMenu = nullptr;
     QList<QAction*> m_recentActions;
+    QList<QAction*> m_recentFolderActions;
     QAction *m_clearRecentAction = nullptr;
+    QAction *m_clearRecentFoldersAction = nullptr;
     QAction *m_printAction = nullptr;
     QAction *m_exportPdfAction = nullptr;
 
