@@ -59,7 +59,7 @@ qmake plainmd.pro && nmake
 windeployqt release\plainmd.exe
 
 :: Create installer (optional, requires Inno Setup)
-:: Output: dist\plainmd-setup.exe
+:: Output: dist\plainmd-<version>-x64-setup.exe
 build-installer.bat
 ```
 

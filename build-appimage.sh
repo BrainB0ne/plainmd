@@ -7,6 +7,9 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 
+# Package version
+PKG_VERSION="1.2.0"
+
 # ---------------------------------------------------------------------------
 # 1. Locate system qmake and build against it
 # ---------------------------------------------------------------------------
@@ -155,7 +158,7 @@ echo "Creating AppImage..."
 mkdir -p dist
 run_appimage "$APPIMAGETOOL" \
     "${SCRIPT_DIR}/AppDir" \
-    "${SCRIPT_DIR}/dist/plainmd-x86_64.AppImage"
+    "${SCRIPT_DIR}/dist/plainmd-${PKG_VERSION}-x86_64.AppImage"
 
 # ---------------------------------------------------------------------------
 # 6. Cleanup
@@ -163,7 +166,7 @@ run_appimage "$APPIMAGETOOL" \
 rm -rf AppDir
 
 echo ""
-echo "Success: dist/plainmd-x86_64.AppImage"
+echo "Success: dist/plainmd-${PKG_VERSION}-x86_64.AppImage"
 echo ""
-echo "Run with:  ./dist/plainmd-x86_64.AppImage"
+echo "Run with:  ./dist/plainmd-${PKG_VERSION}-x86_64.AppImage"
 echo "Or make executable and double-click in your file manager."

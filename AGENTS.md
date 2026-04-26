@@ -11,7 +11,7 @@ Copyright © 2026 BrainByteZ
 - **Linux**: `qmake plainmd.pro && make`. Output: `release/plainmd`.
   - `build.sh` — convenience wrapper that finds system qmake and builds release
   - `clean.sh` — removes `release/`, `debug/`, Makefiles, and generated files
-- **Installer**: Run `build-installer.bat` (Windows, outputs `dist/plainmd-setup.exe`) or `build-deb.sh`/`build-appimage.sh` (Linux, outputs to `dist/`).
+- **Installer**: Run `build-installer.bat` (Windows, outputs `dist/plainmd-<version>-x64-setup.exe`) or `build-deb.sh`/`build-appimage.sh` (Linux, outputs to `dist/`).
 - **Editor Integration**: Build tasks configured in `.zed/tasks.json` (Zed) and `.vscode/tasks.json` (VS Code) for integrated development.
 
 ## Qt6 Quirks
