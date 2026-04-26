@@ -1,11 +1,10 @@
 #include "finddialog.h"
 
-#include <QTextEdit>
-#include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QGridLayout>
 #include <QLabel>
 #include <QTextDocument>
+#include <QTextEdit>
+#include <QVBoxLayout>
 
 FindDialog::FindDialog(QTextEdit *editor, QWidget *parent)
     : QDialog(parent)
