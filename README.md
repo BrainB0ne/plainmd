@@ -90,7 +90,7 @@ windeployqt release\plainmd.exe
 build-installer.bat
 ```
 
-**Zed Editor integration:** Tasks are configured in `.zed/tasks.json` for building, cleaning, and running directly from the editor.
+**Editor integration:** Build tasks are configured for Zed (`.zed/tasks.json`) and VS Code (`.vscode/tasks.json`) for integrated development.
 
 ### Linux
 
@@ -177,6 +177,8 @@ PlainMD/
 ├── samples/                # Sample markdown files
 ├── .zed/                   # Zed Editor configuration
 │   └── tasks.json          # Build tasks for Zed
+├── .vscode/                # VS Code configuration
+│   └── tasks.json          # Build tasks for VS Code
 ├── plainmd.pro             # qmake project file
 ├── plainmd.qrc             # Qt resources
 ├── plainmd.rc              # Windows resources

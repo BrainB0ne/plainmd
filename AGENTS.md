@@ -10,7 +10,7 @@ Copyright © 2026 BrainByteZ
   - Manual: `setenv.bat && qmake plainmd.pro && nmake` (or run `vcvarsall.bat x64` directly)
 - **Linux**: `qmake plainmd.pro && make`. Output: `release/plainmd`.
 - **Installer**: Run `build-installer.bat` (Windows) or `build-deb.sh`/`build-appimage.sh` (Linux).
-- **Zed Editor**: Build tasks configured in `.zed/tasks.json` for integrated development.
+- **Editor Integration**: Build tasks configured in `.zed/tasks.json` (Zed) and `.vscode/tasks.json` (VS Code) for integrated development.
 
 ## Qt6 Quirks
 - `QTextEdit::setZoomFactor()` **does not exist in Qt6**. Zoom reset by re-setting base font point size.
