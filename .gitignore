@@ -23,6 +23,7 @@ qrc_*.cpp
 *.qbs.user
 *.qbs.user.*
 .vscode/
+!.vscode/tasks.json
 .idea/
 .clangd
 
