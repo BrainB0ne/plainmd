@@ -3,8 +3,8 @@
 
 [Setup]
 AppName=PlainMD
-AppVersion=1.2
-AppVerName=PlainMD 1.2
+AppVersion=1.2.0
+AppVerName=PlainMD 1.2.0
 AppCopyright=Copyright (C) 2026 BrainByteZ
 AppPublisher=BrainByteZ
 DefaultDirName={autopf64}\PlainMD
