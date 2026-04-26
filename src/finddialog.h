@@ -19,10 +19,10 @@
 #define FINDDIALOG_H
 
 #include <QDialog>
-#include <QLineEdit>
-#include <QCheckBox>
-#include <QPushButton>
-#include <QLabel>
+
+namespace Ui {
+class FindDialog;
+}
 
 class QTextEdit;
 
@@ -32,27 +32,22 @@ class FindDialog : public QDialog
 
 public:
     explicit FindDialog(QTextEdit *editor, QWidget *parent = nullptr);
+    ~FindDialog();
 
 protected:
     void showEvent(QShowEvent *event) override;
 
 private slots:
-    void onFind();
-    void onFindNext();
-    void onCloseClicked();
+    void on_findButton_clicked();
+    void on_findNextButton_clicked();
+    void on_closeButton_clicked();
 
 private:
     bool performFind(bool fromStart);
     void updateStatus(bool found);
 
+    Ui::FindDialog *ui;
     QTextEdit *m_editor = nullptr;
-    QLineEdit *m_searchEdit = nullptr;
-    QCheckBox *m_caseSensitiveCheck = nullptr;
-    QCheckBox *m_wholeWordCheck = nullptr;
-    QPushButton *m_findButton = nullptr;
-    QPushButton *m_findNextButton = nullptr;
-    QPushButton *m_closeButton = nullptr;
-    QLabel *m_statusLabel = nullptr;
 };
 
 #endif // FINDDIALOG_H
