@@ -1,8 +1,8 @@
-# Vibe-MD
+# PlainMD
 
 A simple and elegant **Markdown Viewer** built with **Qt6**.
 
-![Vibe-MD Icon](icon.png)
+![PlainMD Icon](icon.png)
 
 ## Features
 
@@ -25,10 +25,10 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 
 ### Windows
 
-Download the latest `vibe-md-setup.exe` and run the installer.
+Download the latest `plainmd-setup.exe` and run the installer.
 
 The installer will:
-- Install Vibe-MD to your Program Files folder
+- Install PlainMD to your Program Files folder
 - Create Start Menu and optional Desktop shortcuts
 - Optionally associate .md, .markdown, and .mdx file extensions
 
@@ -36,20 +36,20 @@ The installer will:
 
 **Debian/Ubuntu (.deb package):**
 ```bash
-sudo dpkg -i vibe-md_1.2_amd64.deb
+sudo dpkg -i plainmd_1.2_amd64.deb
 ```
 
 **AppImage (portable):**
 ```bash
-chmod +x vibe-md-x86_64.AppImage
-./vibe-md-x86_64.AppImage
+chmod +x plainmd-x86_64.AppImage
+./plainmd-x86_64.AppImage
 ```
 
 **Build from source:**
 ```bash
-qmake vibe-md.pro
+qmake plainmd.pro
 make
-sudo cp release/vibe-md /usr/local/bin/
+sudo cp release/plainmd /usr/local/bin/
 ```
 
 ## Building from Source
@@ -66,13 +66,13 @@ sudo cp release/vibe-md /usr/local/bin/
 call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
 
 :: Generate build files
-qmake vibe-md.pro
+qmake plainmd.pro
 
 :: Build
 nmake
 
 :: Deploy Qt dependencies
-windeployqt release\vibe-md.exe
+windeployqt release\plainmd.exe
 
 :: Create installer (optional, requires Inno Setup)
 build-installer.bat
@@ -85,12 +85,12 @@ build-installer.bat
 sudo apt install qt6-base-dev build-essential
 
 # Generate build files
-qmake vibe-md.pro
+qmake plainmd.pro
 
 # Build
 make
 
-# Output: release/vibe-md
+# Output: release/plainmd
 ```
 
 ## Usage
@@ -99,7 +99,7 @@ make
 
 - **File Menu** → Open File (Ctrl+O) or Open Folder (Ctrl+Shift+O)
 - **Drag and drop** files or folders into the window
-- **Command line:** `vibe-md <file.md>`
+- **Command line:** `plainmd <file.md>`
 - **Double-click** .md files (after file association on Windows)
 
 ### Navigation
@@ -151,7 +151,7 @@ Color emoji fonts (like Segoe UI Emoji) may not render correctly when printing t
 ## Project Structure
 
 ```
-vibe-md/
+plainmd/
 ├── src/                    # Source code
 │   ├── main.cpp
 │   ├── mainwindow.cpp/h
@@ -160,9 +160,9 @@ vibe-md/
 │   └── filterproxymodel.cpp/h
 ├── images/                 # Application icons
 ├── samples/                # Sample markdown files
-├── vibe-md.pro             # qmake project file
-├── vibe-md.qrc             # Qt resources
-├── vibe-md.rc              # Windows resources
+├── plainmd.pro             # qmake project file
+├── plainmd.qrc             # Qt resources
+├── plainmd.rc              # Windows resources
 ├── installer.iss           # Inno Setup installer script
 ├── build-installer.bat     # Windows build script
 ├── build-deb.sh            # Debian package builder

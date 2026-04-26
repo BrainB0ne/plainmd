@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-# vibe-md install script
+# plainmd install script
 # Installs the local .deb package and resolves dependencies automatically.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEB_FILE="${SCRIPT_DIR}/vibe-md_1.2.0_amd64.deb"
+DEB_FILE="${SCRIPT_DIR}/plainmd_1.2.0_amd64.deb"
 
 if [ "$EUID" -ne 0 ]; then
     echo "This script must be run as root (use sudo)."
@@ -18,11 +18,11 @@ if [ ! -f "$DEB_FILE" ]; then
     exit 1
 fi
 
-echo "Installing vibe-md..."
+echo "Installing plainmd..."
 
 # apt's sandboxed _apt user cannot read files in user home directories.
 # Copy to /tmp first to avoid the "unsandboxed as root" warning.
-TMP_DEB="/tmp/vibe-md_1.2.0_amd64.deb"
+TMP_DEB="/tmp/plainmd_1.2.0_amd64.deb"
 cp "$DEB_FILE" "$TMP_DEB"
 
 # apt install resolves dependencies automatically; dpkg -i does not.
@@ -44,5 +44,5 @@ if command -v gtk-update-icon-cache >/dev/null 2>&1; then
 fi
 
 echo ""
-echo "vibe-md installed successfully."
-echo "Launch from the Start Menu or run:  vibe-md"
+echo "plainmd installed successfully."
+echo "Launch from the Start Menu or run:  plainmd"

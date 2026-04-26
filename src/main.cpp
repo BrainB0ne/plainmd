@@ -4,8 +4,8 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    app.setApplicationName("Vibe-MD");
-    app.setOrganizationName("vibe-md");
+    app.setApplicationName("PlainMD");
+    app.setOrganizationName("plainmd");
 
     MainWindow window;
     window.show();

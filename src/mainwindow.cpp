@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
     setupMenuBar();
     setupToolBar();
     setAcceptDrops(true);
-    setWindowTitle(tr("Vibe-MD"));
+    setWindowTitle(tr("PlainMD"));
     setWindowIcon(QIcon(":/icon.png"));
     resize(1200, 800);
 
@@ -369,12 +369,12 @@ void MainWindow::onZoomReset()
 void MainWindow::onAbout()
 {
     QDialog dlg(this);
-    dlg.setWindowTitle(tr("About Vibe-MD"));
+    dlg.setWindowTitle(tr("About PlainMD"));
     dlg.setMinimumSize(420, 420);
 
     QVBoxLayout *layout = new QVBoxLayout(&dlg);
 
-    QLabel *title = new QLabel(tr("<h2>Vibe-MD</h2>"), &dlg);
+    QLabel *title = new QLabel(tr("<h2>PlainMD</h2>"), &dlg);
     title->setAlignment(Qt::AlignCenter);
     layout->addWidget(title);
 
@@ -503,7 +503,7 @@ void MainWindow::showWelcomePage()
 {
     m_editor->clear();
     m_currentFile.clear();
-    setWindowTitle(tr("Vibe-MD"));
+    setWindowTitle(tr("PlainMD"));
 
     // Disable print action on welcome page
     if (m_printAction) {
@@ -571,7 +571,7 @@ void MainWindow::showWelcomePage()
         </style>
         </head>
         <body>
-            <h1>Vibe-MD</h1>
+            <h1>PlainMD</h1>
             <p align="center" style="margin:0; line-height:1.2;">
                 <img src=":/icon_96.png" width="96" height="96" alt="" title=""><br>
                 <span style="font-size:1em; color:#7f8c8d;">A simple and elegant Markdown viewer</span><br>
@@ -719,7 +719,7 @@ void MainWindow::loadFile(const QString &filePath)
     }
 
     m_currentFile = filePath;
-    setWindowTitle(tr("%1 - Vibe-MD").arg(QFileInfo(filePath).fileName()));
+    setWindowTitle(tr("%1 - PlainMD").arg(QFileInfo(filePath).fileName()));
 
     // Watch the file for external changes
     if (m_fileWatcher) {
@@ -933,10 +933,10 @@ QString MainWindow::resolveExternalImages(const QString &markdownContent, bool p
         if (ext.isEmpty()) ext = "png";
 
         QByteArray hash = QCryptographicHash::hash(urlStr.toUtf8(), QCryptographicHash::Md5).toHex();
-        QString localPath = QDir::tempPath() + "/vibe-md_images/" + QString::fromLatin1(hash) + "." + ext;
+        QString localPath = QDir::tempPath() + "/plainmd_images/" + QString::fromLatin1(hash) + "." + ext;
 
         if (!QFile::exists(localPath)) {
-            QDir().mkpath(QDir::tempPath() + "/vibe-md_images");
+            QDir().mkpath(QDir::tempPath() + "/plainmd_images");
             QNetworkAccessManager nam;
             QUrl imgUrl(urlStr);
             QNetworkRequest req(imgUrl);

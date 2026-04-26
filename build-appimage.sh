@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# vibe-md AppImage builder
+# plainmd AppImage builder
 # Bundles the release binary + Qt6 libraries into a single portable AppImage.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -28,16 +28,16 @@ if [ -z "$SYS_QMAKE" ]; then
 fi
 
 echo "Building release binary with system Qt ($SYS_QMAKE)..."
-$SYS_QMAKE vibe-md.pro CONFIG+=release
+$SYS_QMAKE plainmd.pro CONFIG+=release
 make -f Makefile.Release
 
-if [ ! -x "release/vibe-md" ]; then
-    echo "Error: release/vibe-md was not built."
+if [ ! -x "release/plainmd" ]; then
+    echo "Error: release/plainmd was not built."
     exit 1
 fi
 
 # Verify it links to system libs, not a local Qt installation
-if ldd release/vibe-md | grep -qE '/home/.*/Qt/[0-9]|/usr/local/Qt'; then
+if ldd release/plainmd | grep -qE '/home/.*/Qt/[0-9]|/usr/local/Qt'; then
     echo "Warning: Binary still links to a local Qt installation."
     echo "The resulting AppImage will NOT be portable."
     exit 1
@@ -109,32 +109,32 @@ mkdir -p AppDir/usr/share/applications
 mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
 
 # Binary
-cp release/vibe-md AppDir/usr/bin/
-chmod 755 AppDir/usr/bin/vibe-md
+cp release/plainmd AppDir/usr/bin/
+chmod 755 AppDir/usr/bin/plainmd
 
 # Desktop entry
-cat > AppDir/usr/share/applications/vibe-md.desktop << 'EOF'
+cat > AppDir/usr/share/applications/plainmd.desktop << 'EOF'
 [Desktop Entry]
-Name=Vibe-MD
+Name=PlainMD
 GenericName=Markdown Viewer
 Comment=A simple and elegant Markdown viewer
-Exec=vibe-md %F
-Icon=vibe-md
+Exec=plainmd %F
+Icon=plainmd
 Type=Application
 Categories=Office;Viewer;
 MimeType=text/markdown;text/x-markdown;text/plain;
 Terminal=false
 StartupNotify=true
 EOF
-chmod 644 AppDir/usr/share/applications/vibe-md.desktop
+chmod 644 AppDir/usr/share/applications/plainmd.desktop
 
 # Icon
-cp icon.png AppDir/usr/share/icons/hicolor/256x256/apps/vibe-md.png
-chmod 644 AppDir/usr/share/icons/hicolor/256x256/apps/vibe-md.png
+cp icon.png AppDir/usr/share/icons/hicolor/256x256/apps/plainmd.png
+chmod 644 AppDir/usr/share/icons/hicolor/256x256/apps/plainmd.png
 
 # linuxdeploy/appimagetool convention: place these in AppDir root too
-cp AppDir/usr/share/applications/vibe-md.desktop AppDir/vibe-md.desktop
-cp AppDir/usr/share/icons/hicolor/256x256/apps/vibe-md.png AppDir/vibe-md.png
+cp AppDir/usr/share/applications/plainmd.desktop AppDir/plainmd.desktop
+cp AppDir/usr/share/icons/hicolor/256x256/apps/plainmd.png AppDir/plainmd.png
 
 # ---------------------------------------------------------------------------
 # 4. Bundle Qt6 libraries and plugins with linuxdeploy
@@ -144,8 +144,8 @@ export LDAI_PLUGIN_QT="${LINUXDEPLOY_QT}"
 export QMAKE="${SYS_QMAKE}"   # force linuxdeploy-plugin-qt to use system Qt
 run_appimage "$LINUXDEPLOY" \
     --appdir "${SCRIPT_DIR}/AppDir" \
-    --desktop-file "${SCRIPT_DIR}/AppDir/vibe-md.desktop" \
-    --icon-file "${SCRIPT_DIR}/AppDir/vibe-md.png" \
+    --desktop-file "${SCRIPT_DIR}/AppDir/plainmd.desktop" \
+    --icon-file "${SCRIPT_DIR}/AppDir/plainmd.png" \
     --plugin qt
 
 # ---------------------------------------------------------------------------
@@ -154,7 +154,7 @@ run_appimage "$LINUXDEPLOY" \
 echo "Creating AppImage..."
 run_appimage "$APPIMAGETOOL" \
     "${SCRIPT_DIR}/AppDir" \
-    "${SCRIPT_DIR}/vibe-md-x86_64.AppImage"
+    "${SCRIPT_DIR}/plainmd-x86_64.AppImage"
 
 # ---------------------------------------------------------------------------
 # 6. Cleanup
@@ -162,7 +162,7 @@ run_appimage "$APPIMAGETOOL" \
 rm -rf AppDir
 
 echo ""
-echo "Success: vibe-md-x86_64.AppImage"
+echo "Success: plainmd-x86_64.AppImage"
 echo ""
-echo "Run with:  ./vibe-md-x86_64.AppImage"
+echo "Run with:  ./plainmd-x86_64.AppImage"
 echo "Or make executable and double-click in your file manager."

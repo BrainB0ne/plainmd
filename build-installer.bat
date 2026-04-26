@@ -1,14 +1,14 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: Vibe-MD Windows Build and Installer Script
+:: PlainMD Windows Build and Installer Script
 :: This script builds the application and creates an Inno Setup installer
 
 set "SCRIPT_DIR=%~dp0"
 cd /d "%SCRIPT_DIR%"
 
 echo ============================================
-echo Vibe-MD Build and Installer Script
+echo PlainMD Build and Installer Script
 echo ============================================
 echo.
 
@@ -64,7 +64,7 @@ if exist Makefile.Debug del /q Makefile.Debug
 :: Generate build files
 echo.
 echo Generating build files with qmake...
-qmake vibe-md.pro
+qmake plainmd.pro
 if errorlevel 1 (
     echo ERROR: qmake failed.
     exit /b 1
@@ -72,7 +72,7 @@ if errorlevel 1 (
 
 :: Build the project
 echo.
-echo Building Vibe-MD (Release)...
+echo Building PlainMD (Release)...
 nmake
 if errorlevel 1 (
     echo ERROR: Build failed.
@@ -80,8 +80,8 @@ if errorlevel 1 (
 )
 
 :: Check executable was created
-if not exist release\vibe-md.exe (
-    echo ERROR: vibe-md.exe was not created.
+if not exist release\plainmd.exe (
+    echo ERROR: plainmd.exe was not created.
     exit /b 1
 )
 
@@ -91,7 +91,7 @@ echo.
 
 :: Deploy Qt dependencies
 echo Deploying Qt dependencies with windeployqt...
-windeployqt release\vibe-md.exe
+windeployqt release\plainmd.exe
 if errorlevel 1 (
     echo WARNING: windeployqt reported errors, continuing anyway...
 )
@@ -113,7 +113,7 @@ echo ============================================
 echo Build and Installer Creation Successful!
 echo ============================================
 echo.
-echo Output: vibe-md-setup.exe
+echo Output: plainmd-setup.exe
 echo.
 
 endlocal

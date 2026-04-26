@@ -2,7 +2,7 @@ QT += core gui widgets network printsupport
 
 CONFIG += c++17
 
-TARGET = vibe-md
+TARGET = plainmd
 TEMPLATE = app
 
 # Place the executable in release/ or debug/ on all platforms
@@ -25,5 +25,5 @@ HEADERS += \
     src/preferencesdialog.h \
     src/finddialog.h
 
-RC_FILE = vibe-md.rc
-RESOURCES += vibe-md.qrc
+RC_FILE = plainmd.rc
+RESOURCES += plainmd.qrc

@@ -39,7 +39,7 @@ Thumbs.db
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
-vibe-md
+plainmd
 
 # AppImage builder
 .appimage-tools/

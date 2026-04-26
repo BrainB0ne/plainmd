@@ -1,15 +1,15 @@
-# Agent Notes: vibe-md
+# Agent Notes: plainmd
 
 ## Build System
-- **qmake only** — `vibe-md.pro` is the source of truth. Do not add CMake.
+- **qmake only** — `plainmd.pro` is the source of truth. Do not add CMake.
 - **Windows (MSVC)**: Must run `vcvarsall.bat x64` before `qmake`/`nmake`:
   ```cmd
   call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
-  qmake vibe-md.pro
+  qmake plainmd.pro
   nmake
-  windeployqt release\vibe-md.exe
+  windeployqt release\plainmd.exe
   ```
-- **Linux**: `qmake vibe-md.pro && make`. Output: `release/vibe-md`.
+- **Linux**: `qmake plainmd.pro && make`. Output: `release/plainmd`.
 - **Installer**: Run `build-installer.bat` (Windows) or `build-deb.sh`/`build-appimage.sh` (Linux).
 
 ## Qt6 Quirks
@@ -30,7 +30,7 @@
 - **Code block styling**: **DISABLED** — `styleCodeBlocks()` caused document corruption on large files (>5000 bytes). QTextCursor operations corrupt document structure. Code blocks and inline code render with default Qt styling now.
 - **Welcome page styling**: Welcome page uses hardcoded CSS with Consolas (Windows) / DejaVu Sans Mono (Linux) for shortcuts. Not configurable.
 - **Tooltips**: Image tooltips show original + cached paths (resolved to absolute). Link tooltips show resolved absolute URL on hover via `cursorForPosition()` + `charFormat().anchorHref()`. Both use `QDir::cleanPath()` to resolve `..` and `.` in paths.
-- **External images**: Downloaded **synchronously** (10s timeout via `QEventLoop`) to `%TEMP%\vibe-md_images\`. Privacy toggle can disable this — no network when off.
+- **External images**: Downloaded **synchronously** (10s timeout via `QEventLoop`) to `%TEMP%\plainmd_images\`. Privacy toggle can disable this — no network when off.
 - **Relative images for printing**: `setBaseUrl()` alone fails for print. `resolveRelativeImages()` converts relative paths to `file:///` URLs before `setMarkdown()`.
 - **Fenced code protection**: `resolveExternalImages()` and `resolveRelativeImages()` skip image syntax inside `` ``` `` blocks (regex-based).
 - **Frontmatter**: Converted to fenced `yaml` code block before rendering.
@@ -43,12 +43,12 @@
 - **Menu bar**: File / View / Help only. Preferences under **View** (Ctrl+,).
 
 ## Resources
-- `vibe-md.rc` + `icon.ico` → Windows exe icon.
-- `vibe-md.qrc` + `images/*.png` → runtime icons (Tabler Icons, MIT licensed).
+- `plainmd.rc` + `icon.ico` → Windows exe icon.
+- `plainmd.qrc` + `images/*.png` → runtime icons (Tabler Icons, MIT licensed).
 - `tabler-icons/` is in `.gitignore`. Copy new icons from `tabler-icons/png/outline/` to `images/` before embedding.
 
 ## Verification
 - No tests, no CI, no lint config. **Verify by building and running the executable.**
 - Use `samples/sample.md`, `samples/sample-frontmatter.md`, `samples/image_test.md` for manual testing.
 - C++17 standard (`CONFIG += c++17` in `.pro`).
-- Add new source files to `SOURCES`/`HEADERS` in `vibe-md.pro`.
+- Add new source files to `SOURCES`/`HEADERS` in `plainmd.pro`.

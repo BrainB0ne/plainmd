@@ -1,4 +1,4 @@
-# Vibe-MD
+# PlainMD
 
 A simple and elegant **Markdown Viewer** built with **Qt6**.
 
@@ -37,5 +37,5 @@ int main(int argc, char *argv[])
 
 ## Build Instructions
 
-1. Run `qmake vibe-md.pro`
+1. Run `qmake plainmd.pro`
 2. Run `make` (or `nmake` on Windows)

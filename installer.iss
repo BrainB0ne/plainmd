@@ -1,16 +1,16 @@
-; Vibe-MD Installer
-; Inno Setup Script for Vibe-MD
+; PlainMD Installer
+; Inno Setup Script for PlainMD
 
 [Setup]
-AppName=Vibe-MD
+AppName=PlainMD
 AppVersion=1.2
-AppVerName=Vibe-MD 1.2
-DefaultDirName={autopf64}\Vibe-MD
-DefaultGroupName=Vibe-MD
+AppVerName=PlainMD 1.2
+DefaultDirName={autopf64}\PlainMD
+DefaultGroupName=PlainMD
 OutputDir=.
-OutputBaseFilename=vibe-md-setup
+OutputBaseFilename=plainmd-setup
 SetupIconFile=icon.ico
-UninstallDisplayIcon={app}\vibe-md.exe
+UninstallDisplayIcon={app}\plainmd.exe
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
@@ -24,11 +24,11 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
-Name: "fileassoc"; Description: "Associate Vibe-MD with Markdown files"; GroupDescription: "Other tasks:"
+Name: "fileassoc"; Description: "Associate PlainMD with Markdown files"; GroupDescription: "Other tasks:"
 
 [Files]
 ; Main executable
-Source: "release\vibe-md.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "release\plainmd.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 ; Qt6 Core DLLs
 Source: "release\Qt6Core.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -67,22 +67,22 @@ Source: "release\styles\*"; DestDir: "{app}\styles"; Flags: ignoreversion
 ; Source: "release\translations\*"; DestDir: "{app}\translations"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\Vibe-MD"; Filename: "{app}\vibe-md.exe"
-Name: "{group}\{cm:UninstallProgram,Vibe-MD}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\Vibe-MD"; Filename: "{app}\vibe-md.exe"; Tasks: desktopicon
+Name: "{group}\PlainMD"; Filename: "{app}\plainmd.exe"
+Name: "{group}\{cm:UninstallProgram,PlainMD}"; Filename: "{uninstallexe}"
+Name: "{autodesktop}\PlainMD"; Filename: "{app}\plainmd.exe"; Tasks: desktopicon
 
 [Registry]
 ; File associations for .md
-Root: HKA; Subkey: "Software\Classes\.md"; ValueType: string; ValueName: ""; ValueData: "VibeMD.Document"; Flags: uninsdeletevalue; Tasks: fileassoc
-Root: HKA; Subkey: "Software\Classes\VibeMD.Document"; ValueType: string; ValueName: ""; ValueData: "Markdown Document"; Flags: uninsdeletekey; Tasks: fileassoc
-Root: HKA; Subkey: "Software\Classes\VibeMD.Document\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\vibe-md.exe,0"; Tasks: fileassoc
-Root: HKA; Subkey: "Software\Classes\VibeMD.Document\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\vibe-md.exe"" ""%1"""; Tasks: fileassoc
+Root: HKA; Subkey: "Software\Classes\.md"; ValueType: string; ValueName: ""; ValueData: "PlainMD.Document"; Flags: uninsdeletevalue; Tasks: fileassoc
+Root: HKA; Subkey: "Software\Classes\PlainMD.Document"; ValueType: string; ValueName: ""; ValueData: "Markdown Document"; Flags: uninsdeletekey; Tasks: fileassoc
+Root: HKA; Subkey: "Software\Classes\PlainMD.Document\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\plainmd.exe,0"; Tasks: fileassoc
+Root: HKA; Subkey: "Software\Classes\PlainMD.Document\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\plainmd.exe"" ""%1"""; Tasks: fileassoc
 
 ; File associations for .markdown
-Root: HKA; Subkey: "Software\Classes\.markdown"; ValueType: string; ValueName: ""; ValueData: "VibeMD.Document"; Flags: uninsdeletevalue; Tasks: fileassoc
+Root: HKA; Subkey: "Software\Classes\.markdown"; ValueType: string; ValueName: ""; ValueData: "PlainMD.Document"; Flags: uninsdeletevalue; Tasks: fileassoc
 
 ; File associations for .mdx
-Root: HKA; Subkey: "Software\Classes\.mdx"; ValueType: string; ValueName: ""; ValueData: "VibeMD.Document"; Flags: uninsdeletevalue; Tasks: fileassoc
+Root: HKA; Subkey: "Software\Classes\.mdx"; ValueType: string; ValueName: ""; ValueData: "PlainMD.Document"; Flags: uninsdeletevalue; Tasks: fileassoc
 
 [Run]
-Filename: "{app}\vibe-md.exe"; Description: "{cm:LaunchProgram,Vibe-MD}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\plainmd.exe"; Description: "{cm:LaunchProgram,PlainMD}"; Flags: nowait postinstall skipifsilent
