@@ -9,6 +9,8 @@ Copyright © 2026 BrainByteZ
   - `clean.bat` — Clean all build artifacts
   - Manual: `setenv.bat && qmake plainmd.pro && nmake` (or run `vcvarsall.bat x64` directly)
 - **Linux**: `qmake plainmd.pro && make`. Output: `release/plainmd`.
+  - `build.sh` — convenience wrapper that finds system qmake and builds release
+  - `clean.sh` — removes `release/`, `debug/`, Makefiles, and generated files
 - **Installer**: Run `build-installer.bat` (Windows) or `build-deb.sh`/`build-appimage.sh` (Linux).
 - **Editor Integration**: Build tasks configured in `.zed/tasks.json` (Zed) and `.vscode/tasks.json` (VS Code) for integrated development.
 
@@ -54,4 +56,4 @@ Copyright © 2026 BrainByteZ
 - Use `samples/sample.md`, `samples/sample-frontmatter.md`, `samples/image_test.md` for manual testing.
 - C++17 standard (`CONFIG += c++17` in `.pro`).
 - Add new source files to `SOURCES`/`HEADERS` in `plainmd.pro`.
-- **Build scripts**: Use `build.bat` / `clean.bat` on Windows for consistent builds.
+- **Build scripts**: Use `build.bat` / `clean.bat` on Windows, or `build.sh` / `clean.sh` on Linux, for consistent builds.

@@ -66,15 +66,22 @@ build-installer.bat
 
 ### Linux
 
+**Quick build using provided scripts:**
+```bash
+# Build release binary
+./build.sh
+
+# Clean build artifacts
+./clean.sh
+```
+
+**Manual build:**
 ```bash
 # Install dependencies (Debian/Ubuntu)
 sudo apt install qt6-base-dev build-essential
 
-# Generate build files
-qmake plainmd.pro
-
-# Build
-make
+# Generate build files and build
+qmake plainmd.pro && make
 
 # Output: release/plainmd
 ```
@@ -158,7 +165,11 @@ PlainMD/
 ├── clean.bat               # Windows clean script
 ├── setenv.bat              # Set up MSVC environment
 ├── build-installer.bat     # Windows installer builder
+├── build.sh                # Linux build script
+├── clean.sh                # Linux clean script
 ├── build-deb.sh            # Debian package builder
+├── install-deb.sh          # Debian install helper
+├── uninstall-deb.sh        # Debian uninstall helper
 ├── build-appimage.sh       # AppImage builder
 ├── installer.iss           # Inno Setup installer script
 ├── README.md               # User documentation
