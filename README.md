@@ -164,7 +164,7 @@ Color emoji fonts (like Segoe UI Emoji) may not render correctly when printing t
 ## Project Structure
 
 ```
-plainmd/
+PlainMD/
 ├── src/                    # Source code
 │   ├── main.cpp
 │   ├── mainwindow.cpp/h
