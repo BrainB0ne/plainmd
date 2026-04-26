@@ -2,15 +2,13 @@
 
 ## Build System
 - **qmake only** — `plainmd.pro` is the source of truth. Do not add CMake.
-- **Windows (MSVC)**: Must run `vcvarsall.bat x64` before `qmake`/`nmake`:
-  ```cmd
-  call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
-  qmake plainmd.pro
-  nmake
-  windeployqt release\plainmd.exe
-  ```
+- **Windows (MSVC)**: Must run `vcvarsall.bat x64` before `qmake`/`nmake`. Use provided scripts:
+  - `build.bat` — Full build (vcvarsall + qmake + nmake)
+  - `clean.bat` — Clean all build artifacts
+  - Manual: `setenv.bat && qmake plainmd.pro && nmake` (or run `vcvarsall.bat x64` directly)
 - **Linux**: `qmake plainmd.pro && make`. Output: `release/plainmd`.
 - **Installer**: Run `build-installer.bat` (Windows) or `build-deb.sh`/`build-appimage.sh` (Linux).
+- **Zed Editor**: Build tasks configured in `.zed/tasks.json` for integrated development.
 
 ## Qt6 Quirks
 - `QTextEdit::setZoomFactor()` **does not exist in Qt6**. Zoom reset by re-setting base font point size.
@@ -53,3 +51,4 @@
 - Use `samples/sample.md`, `samples/sample-frontmatter.md`, `samples/image_test.md` for manual testing.
 - C++17 standard (`CONFIG += c++17` in `.pro`).
 - Add new source files to `SOURCES`/`HEADERS` in `plainmd.pro`.
+- **Build scripts**: Use `build.bat` / `clean.bat` on Windows for consistent builds.

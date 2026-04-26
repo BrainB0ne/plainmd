@@ -61,15 +61,25 @@ sudo cp release/plainmd /usr/local/bin/
 
 ### Windows (Visual Studio 2022)
 
+**Quick build using provided scripts:**
 ```batch
-:: Setup MSVC environment
-call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
-
-:: Generate build files
-qmake plainmd.pro
-
 :: Build
-nmake
+build.bat
+
+:: Clean build artifacts
+clean.bat
+
+:: Deploy Qt dependencies (after building)
+windeployqt release\plainmd.exe
+```
+
+**Manual build:**
+```batch
+:: Setup MSVC environment (or run vcvarsall.bat x64 directly)
+setenv.bat
+
+:: Generate build files and build
+qmake plainmd.pro && nmake
 
 :: Deploy Qt dependencies
 windeployqt release\plainmd.exe
@@ -77,6 +87,8 @@ windeployqt release\plainmd.exe
 :: Create installer (optional, requires Inno Setup)
 build-installer.bat
 ```
+
+**Zed Editor integration:** Tasks are configured in `.zed/tasks.json` for building, cleaning, and running directly from the editor.
 
 ### Linux
 
@@ -159,15 +171,21 @@ plainmd/
 │   ├── preferencesdialog.cpp/h
 │   ├── finddialog.cpp/h
 │   └── filterproxymodel.cpp/h
-├── images/                 # Application icons
+├── images/                 # Application icons (Tabler Icons)
 ├── samples/                # Sample markdown files
+├── .zed/                   # Zed Editor configuration
+│   └── tasks.json          # Build tasks for Zed
 ├── plainmd.pro             # qmake project file
 ├── plainmd.qrc             # Qt resources
 ├── plainmd.rc              # Windows resources
-├── installer.iss           # Inno Setup installer script
-├── build-installer.bat     # Windows build script
+├── build.bat               # Windows build script
+├── clean.bat               # Windows clean script
+├── setenv.bat              # Set up MSVC environment
+├── build-installer.bat     # Windows installer builder
 ├── build-deb.sh            # Debian package builder
 ├── build-appimage.sh       # AppImage builder
+├── installer.iss           # Inno Setup installer script
+├── README.md               # User documentation
 └── AGENTS.md               # Developer documentation
 ```
 
