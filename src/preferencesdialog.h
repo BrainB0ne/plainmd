@@ -19,12 +19,10 @@
 #define PREFERENCESDIALOG_H
 
 #include <QDialog>
-#include <QPushButton>
-#include <QLabel>
-#include <QCheckBox>
-#include <QDialogButtonBox>
-#include <QLineEdit>
-#include <QEvent>
+
+namespace Ui {
+class PreferencesDialog;
+}
 
 class PreferencesDialog : public QDialog
 {
@@ -32,6 +30,7 @@ class PreferencesDialog : public QDialog
 
 public:
     explicit PreferencesDialog(QWidget *parent = nullptr);
+    ~PreferencesDialog();
 
     void loadSettings();
     void saveSettings();
@@ -49,21 +48,13 @@ protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
 
 private slots:
-    void onChooseFont();
-    void onBrowseExternalEditor();
-    void onChoosePrintEmojiFont();
+    void on_fontButton_clicked();
+    void on_emojiFontButton_clicked();
 
 private:
-    QPushButton *m_fontButton = nullptr;
-    QLabel *m_fontLabel = nullptr;
-    QLineEdit *m_externalEditorEdit = nullptr;
-    QCheckBox *m_previewCheck = nullptr;
-    QCheckBox *m_keepRecentCheck = nullptr;
-    QCheckBox *m_keepRecentFoldersCheck = nullptr;
-    QCheckBox *m_useNerdFontCheck = nullptr;
-    QPushButton *m_emojiFontButton = nullptr;
-    QLabel *m_emojiFontLabel = nullptr;
-    QDialogButtonBox *m_buttonBox = nullptr;
+    void browseExternalEditor();
+
+    Ui::PreferencesDialog *ui;
     QFont m_currentFont;
     QFont m_emojiFont;
 };

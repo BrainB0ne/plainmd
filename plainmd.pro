@@ -32,7 +32,8 @@ HEADERS += \
 FORMS += \
     src/aboutdialog.ui \
     src/licensedialog.ui \
-    src/finddialog.ui
+    src/finddialog.ui \
+    src/preferencesdialog.ui
 
 RC_FILE = plainmd.rc
 RESOURCES += plainmd.qrc
