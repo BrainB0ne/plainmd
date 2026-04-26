@@ -635,7 +635,7 @@ void MainWindow::showWelcomePage()
             <ul>
                 <li>Click any file in the sidebar to preview it instantly</li>
                 <li>External images can be toggled in <strong>Preferences</strong> for privacy</li>
-                <li>YAML frontmatter is displayed in a styled block at the top</li>
+                <li>Recent files and folders history can also be disabled in <strong>Preferences</strong></li>
             </ul>
 
         </body>
