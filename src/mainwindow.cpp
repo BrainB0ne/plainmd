@@ -704,7 +704,10 @@ void MainWindow::loadFile(const QString &filePath)
 
     m_editor->clear();
 
-    if (QFileInfo(filePath).suffix().toLower() == "txt") {
+    QString suffix = QFileInfo(filePath).suffix().toLower();
+    if (suffix == "txt" || suffix == "mdx") {
+        // Plain text and MDX files - preserve formatting without markdown processing
+        // MDX contains JSX syntax that Qt's markdown parser doesn't handle well
         m_editor->setPlainText(content);
     } else {
         // Resolve relative image paths against the markdown file's directory

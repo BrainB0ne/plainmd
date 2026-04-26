@@ -34,6 +34,7 @@
 - **Relative images for printing**: `setBaseUrl()` alone fails for print. `resolveRelativeImages()` converts relative paths to `file:///` URLs before `setMarkdown()`.
 - **Fenced code protection**: `resolveExternalImages()` and `resolveRelativeImages()` skip image syntax inside `` ``` `` blocks (regex-based).
 - **Frontmatter**: Converted to fenced `yaml` code block before rendering.
+- **MDX files**: Treated as plain text (`.mdx` uses JSX syntax that Qt's markdown parser doesn't support). Line breaks preserved but no rich rendering.
 
 ## Platform Differences
 - **Fonts**: Linux defaults to DejaVu Sans (editor). Windows: Segoe UI. Code font settings removed due to Qt6 bugs.
