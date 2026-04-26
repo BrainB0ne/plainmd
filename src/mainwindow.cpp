@@ -573,8 +573,9 @@ void MainWindow::showWelcomePage()
         <body>
             <h1>Vibe-MD</h1>
             <p align="center" style="margin:0; line-height:1.2;">
-                <img src=":/icon.png" width="64" height="64" alt="" title=""><br>
-                <span style="font-size:1em; color:#7f8c8d;">A simple and elegant Markdown viewer</span>
+                <img src=":/icon_96.png" width="96" height="96" alt="" title=""><br>
+                <span style="font-size:1em; color:#7f8c8d;">A simple and elegant Markdown viewer</span><br>
+                <span style="font-size:0.9em; color:#95a5a6;">Version 1.2</span>
             </p>
 
             <h2>Get Started</h2>
@@ -598,9 +599,6 @@ void MainWindow::showWelcomePage()
                 <li>YAML frontmatter is displayed in a styled block at the top</li>
             </ul>
 
-            <div class="footer">
-                <p>Version 1.2</p>
-            </div>
         </body>
         </html>
     )").arg(fontFamily, monoFamily);

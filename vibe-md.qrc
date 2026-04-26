@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>icon.png</file>
+        <file>icon_96.png</file>
         <file>images/file-open.png</file>
         <file>images/external-link.png</file>
         <file>images/folder-open.png</file>
