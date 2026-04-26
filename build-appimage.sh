@@ -152,9 +152,10 @@ run_appimage "$LINUXDEPLOY" \
 # 5. Create AppImage
 # ---------------------------------------------------------------------------
 echo "Creating AppImage..."
+mkdir -p dist
 run_appimage "$APPIMAGETOOL" \
     "${SCRIPT_DIR}/AppDir" \
-    "${SCRIPT_DIR}/plainmd-x86_64.AppImage"
+    "${SCRIPT_DIR}/dist/plainmd-x86_64.AppImage"
 
 # ---------------------------------------------------------------------------
 # 6. Cleanup
@@ -162,7 +163,7 @@ run_appimage "$APPIMAGETOOL" \
 rm -rf AppDir
 
 echo ""
-echo "Success: plainmd-x86_64.AppImage"
+echo "Success: dist/plainmd-x86_64.AppImage"
 echo ""
-echo "Run with:  ./plainmd-x86_64.AppImage"
+echo "Run with:  ./dist/plainmd-x86_64.AppImage"
 echo "Or make executable and double-click in your file manager."

@@ -126,13 +126,16 @@ EOF
 echo "Building .deb package..."
 dpkg-deb --build "${PKG_DIR}"
 
-mv "${BUILD_DIR}/${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}.deb" .
+# Create dist folder
+mkdir -p dist
+
+mv "${BUILD_DIR}/${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}.deb" dist/
 
 # Clean up build tree
 rm -rf "${BUILD_DIR}"
 
 echo ""
-echo "Success: ${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}.deb"
+echo "Success: dist/${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}.deb"
 echo ""
-echo "Install with:  sudo dpkg -i ${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}.deb"
-echo "Or:            sudo apt install ./${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}.deb"
+echo "Install with:  sudo dpkg -i dist/${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}.deb"
+echo "Or:            sudo apt install ./dist/${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}.deb"

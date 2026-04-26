@@ -59,6 +59,7 @@ qmake plainmd.pro && nmake
 windeployqt release\plainmd.exe
 
 :: Create installer (optional, requires Inno Setup)
+:: Output: dist\plainmd-setup.exe
 build-installer.bat
 ```
 
@@ -164,13 +165,14 @@ PlainMD/
 ├── build.bat               # Windows build script
 ├── clean.bat               # Windows clean script
 ├── setenv.bat              # Set up MSVC environment
-├── build-installer.bat     # Windows installer builder
+├── build-installer.bat     # Windows installer builder (outputs to dist/)
 ├── build.sh                # Linux build script
 ├── clean.sh                # Linux clean script
-├── build-deb.sh            # Debian package builder
+├── build-deb.sh            # Debian package builder (outputs to dist/)
 ├── install-deb.sh          # Debian install helper
 ├── uninstall-deb.sh        # Debian uninstall helper
-├── build-appimage.sh       # AppImage builder
+├── build-appimage.sh       # AppImage builder (outputs to dist/)
+├── dist/                   # Distribution packages (.exe, .deb, .AppImage)
 ├── installer.iss           # Inno Setup installer script
 ├── README.md               # User documentation
 └── AGENTS.md               # Developer documentation

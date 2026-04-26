@@ -46,3 +46,6 @@ plainmd
 .appimage-tools/
 *.AppImage
 
+# Distribution packages
+dist/
+
