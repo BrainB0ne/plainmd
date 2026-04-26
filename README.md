@@ -25,37 +25,6 @@ Copyright © 2026 BrainByteZ
 - **URL tooltips** - Hover over links to see the resolved absolute path
 - **YAML frontmatter display** - Shows frontmatter as a code block
 
-## Installation
-
-### Windows
-
-Download the latest `plainmd-setup.exe` and run the installer.
-
-The installer will:
-- Install PlainMD to your Program Files folder
-- Create Start Menu and optional Desktop shortcuts
-- Optionally associate .md, .markdown, and .mdx file extensions
-
-### Linux
-
-**Debian/Ubuntu (.deb package):**
-```bash
-sudo dpkg -i plainmd_1.2_amd64.deb
-```
-
-**AppImage (portable):**
-```bash
-chmod +x plainmd-x86_64.AppImage
-./plainmd-x86_64.AppImage
-```
-
-**Build from source:**
-```bash
-qmake plainmd.pro
-make
-sudo cp release/plainmd /usr/local/bin/
-```
-
 ## Building from Source
 
 ### Prerequisites
