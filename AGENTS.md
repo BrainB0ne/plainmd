@@ -1,5 +1,7 @@
 # Agent Notes: plainmd
 
+Copyright © 2026 BrainByteZ
+
 ## Build System
 - **qmake only** — `plainmd.pro` is the source of truth. Do not add CMake.
 - **Windows (MSVC)**: Must run `vcvarsall.bat x64` before `qmake`/`nmake`. Use provided scripts:

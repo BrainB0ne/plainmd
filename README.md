@@ -2,6 +2,8 @@
 
 A simple and elegant **Markdown Viewer** built with **Qt6**.
 
+Copyright © 2026 BrainByteZ
+
 ![PlainMD Icon](icon.png)
 
 ## Features

@@ -414,6 +414,11 @@ void MainWindow::onAbout()
     version->setAlignment(Qt::AlignCenter);
     layout->addWidget(version);
 
+    QLabel *copyright = new QLabel(tr("Copyright © 2026 BrainByteZ"), &dlg);
+    copyright->setAlignment(Qt::AlignCenter);
+    copyright->setStyleSheet("color: #666; font-size: 0.85em;");
+    layout->addWidget(copyright);
+
     // Format build date as yyyy-MM-dd HH:mm:ss
     QDate buildDateValue = QDate::fromString(__DATE__, "MMM d yyyy");
     QString buildDateStr = buildDateValue.toString("yyyy-MM-dd");

@@ -5,6 +5,8 @@
 AppName=PlainMD
 AppVersion=1.2
 AppVerName=PlainMD 1.2
+AppCopyright=Copyright (C) 2026 BrainByteZ
+AppPublisher=BrainByteZ
 DefaultDirName={autopf64}\PlainMD
 DefaultGroupName=PlainMD
 OutputDir=.

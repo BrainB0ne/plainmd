@@ -19,6 +19,7 @@ BEGIN
             VALUE "FileVersion", "1.2.0.0\0"
             VALUE "InternalName", "plainmd\0"
             VALUE "OriginalFilename", "plainmd.exe\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 BrainByteZ\0"
             VALUE "ProductName", "PlainMD\0"
             VALUE "ProductVersion", "1.2.0.0\0"
         END
