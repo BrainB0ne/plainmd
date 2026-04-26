@@ -12,6 +12,12 @@
     "reveal": "always",
   },
   {
+    "label": "Build Installer (Windows)",
+    "command": "cmd.exe /C build-installer.bat",
+    "hide": "never",
+    "reveal": "always",
+  },
+  {
     "label": "Clean Build",
     "command": "cmd.exe /C clean.bat",
     "hide": "never",
