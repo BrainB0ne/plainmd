@@ -2,7 +2,7 @@
 
 A simple and elegant **Markdown Viewer** built with **Qt6**.
 
-**PlainMD is partially vibe-coded with OpenCode: Kimi K2.5 Turbo / Kimi K2.6**
+**PlainMD is partially vibe-coded with OpenCode: Kimi K2.5 Turbo / Kimi K2.6 🤖**
 
 ![PlainMD Icon](icon.png)
 
