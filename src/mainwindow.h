@@ -50,6 +50,7 @@ private slots:
     void onAbout();
     void onAboutQt();
     void onPrint();
+    void onExportToPdf();
     void onPreferences();
     void onFind();
     void onFileChanged(const QString &path);
@@ -83,6 +84,7 @@ private:
     QList<QAction*> m_recentActions;
     QAction *m_clearRecentAction = nullptr;
     QAction *m_printAction = nullptr;
+    QAction *m_exportPdfAction = nullptr;
 
     QString m_currentFile;
     QString m_currentFolder;

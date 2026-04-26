@@ -142,6 +142,12 @@ void MainWindow::setupMenuBar()
     connect(m_printAction, &QAction::triggered, this, &MainWindow::onPrint);
     fileMenu->addAction(m_printAction);
 
+    m_exportPdfAction = new QAction(QIcon(":/images/printer.png"), tr("&Export to PDF..."), this);
+    m_exportPdfAction->setShortcut(QKeySequence(tr("Ctrl+Shift+P")));
+    m_exportPdfAction->setEnabled(false); // Disabled on welcome page
+    connect(m_exportPdfAction, &QAction::triggered, this, &MainWindow::onExportToPdf);
+    fileMenu->addAction(m_exportPdfAction);
+
     fileMenu->addSeparator();
 
     m_recentMenu = fileMenu->addMenu(tr("Recent &Files"));
@@ -505,9 +511,12 @@ void MainWindow::showWelcomePage()
     m_currentFile.clear();
     setWindowTitle(tr("PlainMD"));
 
-    // Disable print action on welcome page
+    // Disable print and export actions on welcome page
     if (m_printAction) {
         m_printAction->setEnabled(false);
+    }
+    if (m_exportPdfAction) {
+        m_exportPdfAction->setEnabled(false);
     }
 
     // Stop watching files when showing welcome page
@@ -654,6 +663,71 @@ void MainWindow::onPrint()
     }
 }
 
+void MainWindow::onExportToPdf()
+{
+    // Disable export when welcome page is shown (no file loaded)
+    if (m_currentFile.isEmpty()) {
+        return;
+    }
+
+    QString defaultFileName = QFileInfo(m_currentFile).baseName() + ".pdf";
+    QString filePath = QFileDialog::getSaveFileName(this, tr("Export to PDF"),
+                                                    QFileInfo(m_currentFile).dir().absoluteFilePath(defaultFileName),
+                                                    tr("PDF Files (*.pdf)"));
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    // Ensure .pdf extension
+    if (!filePath.endsWith(".pdf", Qt::CaseInsensitive)) {
+        filePath += ".pdf";
+    }
+
+    QPrinter printer(QPrinter::HighResolution);
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setOutputFileName(filePath);
+
+    // Clone the document and apply emoji-friendly font for printing
+    QTextDocument printDoc;
+    printDoc.setHtml(m_editor->toHtml());
+
+    // Check if Nerd Font is configured for emoji printing
+    bool useNerdFont = m_settings.value("editor/useNerdFontForEmoji", false).toBool();
+    QString emojiFontFamily = m_settings.value("editor/printEmojiFont", QStringLiteral("Segoe UI")).toString();
+    int emojiFontSize = m_settings.value("editor/printEmojiFontSize", 11).toInt();
+
+    QString printCss;
+    QFont printFont;
+
+    if (useNerdFont) {
+        // Use Nerd Font for proper monochrome emoji rendering
+        printCss = QStringLiteral(R"(
+            body { font-family: '%1', 'Segoe UI', sans-serif; }
+            td, th { font-family: '%1', 'Segoe UI', sans-serif; }
+        )").arg(emojiFontFamily);
+        printFont = QFont(emojiFontFamily, emojiFontSize);
+        printFont.setStyleHint(QFont::Monospace);
+        printFont.setFamilies(QStringList() << emojiFontFamily << "Segoe UI");
+    } else {
+        // Use standard emoji fonts (may not print correctly on Windows PDF)
+        printCss = QStringLiteral(R"(
+            body { font-family: 'Segoe UI', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; }
+            td, th { font-family: 'Segoe UI Emoji', 'Segoe UI Symbol', 'Segoe UI', sans-serif; }
+        )");
+        printFont = QFont("Segoe UI", 11);
+        printFont.setStyleHint(QFont::SansSerif);
+        printFont.setFamilies(QStringList() << "Segoe UI" << "Segoe UI Emoji" << "Segoe UI Symbol");
+    }
+
+    printDoc.setDefaultStyleSheet(printCss);
+    printDoc.setDefaultFont(printFont);
+    printDoc.print(&printer);
+
+    // Show success message
+    QMessageBox::information(this, tr("Export Successful"),
+                             tr("Document exported to:\n%1").arg(QDir::toNativeSeparators(filePath)));
+}
+
 void MainWindow::openFile(const QString &filePath)
 {
     if (!QFile::exists(filePath)) {
@@ -727,9 +801,12 @@ void MainWindow::loadFile(const QString &filePath)
         m_fileWatcher->addPath(filePath);
     }
 
-    // Enable print action when a file is loaded
+    // Enable print and export actions when a file is loaded
     if (m_printAction) {
         m_printAction->setEnabled(true);
+    }
+    if (m_exportPdfAction) {
+        m_exportPdfAction->setEnabled(true);
     }
 
     // Select the file in the tree if visible
