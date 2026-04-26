@@ -497,7 +497,7 @@ void MainWindow::showWelcomePage()
     }
 
     // Stop watching files when showing welcome page
-    if (m_fileWatcher) {
+    if (m_fileWatcher && !m_fileWatcher->files().isEmpty()) {
         m_fileWatcher->removePaths(m_fileWatcher->files());
     }
 
@@ -774,7 +774,9 @@ void MainWindow::loadFile(const QString &filePath)
 
     // Watch the file for external changes
     if (m_fileWatcher) {
-        m_fileWatcher->removePaths(m_fileWatcher->files());
+        if (!m_fileWatcher->files().isEmpty()) {
+            m_fileWatcher->removePaths(m_fileWatcher->files());
+        }
         m_fileWatcher->addPath(filePath);
     }
 
@@ -1205,32 +1207,6 @@ QString MainWindow::resolveFrontMatter(const QString &markdownContent)
     result.replace(m.capturedStart(), m.capturedLength(), replacement);
     return result;
 }
-
-static bool blockIsCode(const QTextBlock &block)
-{
-    bool allMonospace = true;
-    bool hasText = false;
-
-    for (QTextBlock::iterator it = block.begin(); !it.atEnd(); ++it) {
-        QTextFragment frag = it.fragment();
-        if (!frag.isValid()) continue;
-        hasText = true;
-        QString family = frag.charFormat().font().family();
-        bool isMono = frag.charFormat().font().fixedPitch() ||
-                      family.contains("mono", Qt::CaseInsensitive) ||
-                      family.contains("Courier", Qt::CaseInsensitive) ||
-                      family.contains("Consolas", Qt::CaseInsensitive) ||
-                      family.contains("Menlo", Qt::CaseInsensitive) ||
-                      family.contains("Liberation", Qt::CaseInsensitive);
-        if (!isMono) {
-            allMonospace = false;
-            break;
-        }
-    }
-    return hasText && allMonospace;
-}
-
-
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
