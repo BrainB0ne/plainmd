@@ -43,7 +43,7 @@ if "%HAS_FILES%"=="0" (
 REM Extract version from src\main.cpp
 REM Look for: app.setApplicationVersion("1.2.0");
 set "VERSION="
-for /f "delims=" %%a in ('findstr /r /c:"setApplicationVersion.*[0-9]\+[.][0-9]\+[.][0-9]\+" src\main.cpp 2^>nul') do (
+for /f "delims=" %%a in ('findstr /r /c:"setApplicationVersion.*[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*" src\main.cpp 2^>nul') do (
     set "LINE=%%a"
     REM Extract version number between quotes
     for /f "tokens=2 delims=()" %%b in ("%%a") do (
