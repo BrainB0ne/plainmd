@@ -152,6 +152,39 @@ run_appimage "$LINUXDEPLOY" \
     --plugin qt
 
 # ---------------------------------------------------------------------------
+# 4b. Manually bundle Wayland platform plugins and libraries (linuxdeploy-plugin-qt may skip these)
+# ---------------------------------------------------------------------------
+echo "Bundling Wayland platform plugins..."
+mkdir -p "${SCRIPT_DIR}/AppDir/usr/plugins/platforms"
+for plugin in /usr/lib/x86_64-linux-gnu/qt6/plugins/platforms/libqwayland*.so; do
+    if [ -f "$plugin" ]; then
+        cp "$plugin" "${SCRIPT_DIR}/AppDir/usr/plugins/platforms/"
+        echo "  Copied: $(basename $plugin)"
+    fi
+done
+
+# Bundle Wayland client libraries needed for the platform plugin to work
+echo "Bundling Wayland client libraries..."
+for lib in /usr/lib/x86_64-linux-gnu/libwayland-client.so* \
+           /usr/lib/x86_64-linux-gnu/libwayland-egl.so* \
+           /usr/lib/x86_64-linux-gnu/libwayland-cursor.so*; do
+    if [ -f "$lib" ]; then
+        cp "$lib" "${SCRIPT_DIR}/AppDir/usr/lib/" 2>/dev/null || true
+        echo "  Copied: $(basename $lib)"
+    fi
+done
+
+# Bundle GTK platform theme plugin for native styling on Cinnamon/GNOME
+echo "Bundling GTK platform theme plugin..."
+mkdir -p "${SCRIPT_DIR}/AppDir/usr/plugins/platformthemes"
+for plugin in /usr/lib/x86_64-linux-gnu/qt6/plugins/platformthemes/libqgtk*.so; do
+    if [ -f "$plugin" ]; then
+        cp "$plugin" "${SCRIPT_DIR}/AppDir/usr/plugins/platformthemes/"
+        echo "  Copied: $(basename $plugin)"
+    fi
+done
+
+# ---------------------------------------------------------------------------
 # 5. Create AppImage
 # ---------------------------------------------------------------------------
 echo "Creating AppImage..."

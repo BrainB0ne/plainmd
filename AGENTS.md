@@ -45,6 +45,7 @@ Copyright © 2026 BrainByteZ
 - **Path separators**: Display with `QDir::toNativeSeparators()`, store normalized (forward slashes).
 - **Reveal in folder**: Windows uses `explorer`, Linux uses `xdg-open`.
 - **Menu bar**: File / View / Help only. Preferences under **View** (Ctrl+,).
+- **AppImage styling**: On Linux, `build-appimage.sh` bundles the `qgtk3` platform theme plugin to ensure native GTK styling (matching the DEB package) on both X11 (Cinnamon) and Wayland desktops.
 
 ## Resources
 - `plainmd.rc` + `icon.ico` → Windows exe icon.
