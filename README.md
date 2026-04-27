@@ -176,6 +176,7 @@ PlainMD/
 ├── make-checksums.sh       # Generate SHA256 checksums for dist packages (Linux)
 ├── dist/                   # Distribution packages (.exe, .deb, .AppImage, .sha256)
 ├── installer.iss           # Inno Setup installer script
+├── .gitattributes          # Git line ending rules (for WSL/cross-platform dev)
 ├── README.md               # User documentation
 └── AGENTS.md               # Developer documentation
 ```

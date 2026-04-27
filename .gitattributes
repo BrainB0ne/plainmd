@@ -1,0 +1,42 @@
+# Git attributes for cross-platform development
+# Ensures consistent line endings across Windows (WSL), Linux, and macOS
+
+# Default: automatically handle line endings for text files
+* text=auto
+
+# Shell scripts must always use LF (Unix) line endings, even on Windows/WSL
+*.sh text eol=lf
+
+# Batch files should use CRLF (Windows) line endings
+*.bat text eol=crlf
+
+# C++ source and header files - normalize to LF
+*.cpp text
+*.h text
+*.hpp text
+
+# Qt project files - normalize to LF
+*.pro text
+*.pri text
+*.qrc text
+
+# Documentation - normalize to LF
+*.md text
+*.txt text
+
+# Binary files - do not modify line endings
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.icns binary
+*.exe binary
+*.dll binary
+*.lib binary
+*.so binary
+*.AppImage binary
+*.deb binary
+
+# Inno Setup files - normalize to LF
+*.iss text
