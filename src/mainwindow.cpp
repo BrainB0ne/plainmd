@@ -128,7 +128,6 @@ void MainWindow::setupEditor()
     applyEditorFont();
 
     // Use default Qt markdown styling (no custom CSS)
-    // setMarkdownStyle() and styleCodeBlocks() disabled due to Qt6 bugs
 
     m_splitter->addWidget(m_editor);
     m_splitter->setStretchFactor(1, 1);
@@ -427,7 +426,7 @@ void MainWindow::onPreferences()
     if (dlg.exec() == QDialog::Accepted) {
         dlg.saveSettings();
         applyEditorFont();
-        // setMarkdownStyle() and styleCodeBlocks() disabled - use default Qt styling
+        // Use default Qt markdown styling (no custom CSS)
         if (!dlg.keepRecentFiles()) {
             m_settings.setValue("recentFiles", QStringList());
         }
@@ -786,7 +785,6 @@ void MainWindow::loadFile(const QString &filePath)
         m_editor->document()->setBaseUrl(baseUrl);
 
         m_editor->setMarkdown(processedContent);
-        // styleCodeBlocks(); // Disabled - causes document corruption on large files
     }
 
     m_currentFile = filePath;

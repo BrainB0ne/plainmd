@@ -90,7 +90,6 @@ private:
     QString resolveExternalImages(const QString &markdownContent, bool previewEnabled);
     QString resolveRelativeImages(const QString &markdownContent, const QString &basePath);
     QString resolveFrontMatter(const QString &markdownContent);
-    void styleCodeBlocks();
     void applyEditorFont();
     void showWelcomePage();
 
