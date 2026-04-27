@@ -32,8 +32,9 @@ for file in *; do
     fi
 done
 
-# Also create a combined SHA256SUMS file
-sha256sum * > SHA256SUMS 2>/dev/null || true
+# Also create a combined SHA256SUMS file (exclude .sha256 files themselves)
+# Concatenate the individual .sha256 files to create the combined file
+cat *.sha256 > SHA256SUMS 2>/dev/null || true
 
 echo ""
 echo "Checksum files created in dist/:"
