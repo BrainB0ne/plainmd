@@ -8,17 +8,54 @@ set "SCRIPT_DIR=%~dp0"
 cd /d "%SCRIPT_DIR%"
 
 if not exist "dist\" (
-    echo Error: dist\ folder not found.
-    echo Build distribution packages first with:
-    echo   build-installer.bat       # for Windows .exe
-    echo   build-deb.sh              # for .deb (on Linux)
-    echo   build-appimage.sh         # for .AppImage (on Linux)
+    echo ============================================
+    echo ERROR: dist\ folder not found!
+    echo ============================================
+    echo.
+    echo Please build distribution packages first:
+    echo.
+    echo   Windows:  build-installer.bat
+    echo   Linux:    build-deb.sh
+    echo   Linux:    build-appimage.sh
+    echo.
+    echo Or create the dist\ folder manually and place
+    echo your distribution files there.
+    echo ============================================
+    pause
+    exit /b 1
+)
+
+cd dist
+
+REM Check if dist folder has any files to checksum
+set "HAS_FILES=0"
+for %%f in (*.*) do (
+    if /I not "%%~xf"==".sha256" (
+        if /I not "%%~xf"==".sha256sum" (
+            set "HAS_FILES=1"
+        )
+    )
+)
+
+if "%HAS_FILES%"=="0" (
+    echo ============================================
+    echo ERROR: No distribution files found in dist\
+    echo ============================================
+    echo.
+    echo The dist\ folder exists but contains no files to checksum.
+    echo.
+    echo Please build distribution packages first:
+    echo.
+    echo   Windows:  build-installer.bat
+    echo   Linux:    build-deb.sh
+    echo   Linux:    build-appimage.sh
+    echo ============================================
+    pause
     exit /b 1
 )
 
 echo Generating SHA256 checksums for distribution packages...
-
-cd dist
+echo.
 
 REM Remove old checksum files
 del /f /q *.sha256 2>nul
@@ -29,35 +66,63 @@ for %%f in (*.*) do (
     REM Skip directories and existing checksum files
     if /I not "%%~xf"==".sha256" (
         if /I not "%%~xf"==".sha256sum" (
-            certutil -hashfile "%%f" SHA256 > "%%f.sha256.tmp"
-            REM Extract just the hash and filename (certutil outputs extra lines)
-            for /f "skip=1 tokens=*" %%a in (%%f.sha256.tmp) do (
-                set "line=%%a"
-                if not defined hash (
-                    set "hash=%%a"
-                    echo %%a  %%f > "%%f.sha256"
+            if /I not "%%~xf"==".tmp" (
+                if "%%f" NEQ "SHA256SUMS" (
+                    echo Processing: %%f
+                    certutil -hashfile "%%f" SHA256 > "%%f.sha256.tmp" 2>nul
+                    if errorlevel 1 (
+                        echo   ERROR: Failed to generate hash for %%f
+                        del "%%f.sha256.tmp" 2>nul
+                    ) else (
+                        REM Extract just the hash (certutil outputs extra lines)
+                        set "HASH_LINE="
+                        for /f "skip=1 tokens=*" %%a in (%%f.sha256.tmp) do (
+                            if not defined HASH_LINE (
+                                set "HASH_LINE=%%a"
+                                echo %%a  %%f > "%%f.sha256"
+                            )
+                        )
+                        del "%%f.sha256.tmp" 2>nul
+                        echo   Created: %%f.sha256
+                    )
                 )
             )
-            set "hash="
-            del "%%f.sha256.tmp" 2>nul
-            echo   %%f.sha256
         )
     )
 )
 
-REM Also create a combined SHA256SUMS file using PowerShell
-echo Creating SHA256SUMS...
-powershell -Command "Get-ChildItem -File | Where-Object { $_.Extension -ne '.sha256' -and $_.Name -ne 'SHA256SUMS' } | ForEach-Object { $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(); Write-Output \"$hash  $($_.Name)\" } | Out-File -FilePath 'SHA256SUMS' -Encoding ASCII"
+REM Create combined SHA256SUMS file
+echo.
+echo Creating SHA256SUMS file...
+> SHA256SUMS.tmp (
+    for %%f in (*.*) do (
+        if /I not "%%~xf"==".sha256" (
+            if /I not "%%~xf"==".sha256sum" (
+                if /I not "%%~xf"==".tmp" (
+                    if "%%f" NEQ "SHA256SUMS" (
+                        if exist "%%f.sha256" (
+                            type "%%f.sha256"
+                        )
+                    )
+                )
+            )
+        )
+    )
+)
+move /y SHA256SUMS.tmp SHA256SUMS >nul 2>&1
 
 cd ..
 
 echo.
-echo Checksum files created in dist\:
-dir /b dist\*.sha256 dist\SHA256SUMS 2>nul
+echo ============================================
+echo Checksum files created successfully!
+echo ============================================
+dir /b dist/*.sha256 dist/SHA256SUMS 2>nul
 echo.
-echo Verify a package with:
+echo To verify a single package:
 echo   certutil -hashfile dist\package.exe SHA256
-echo   # Then compare with the value in dist\package.exe.sha256
 echo.
-echo Or verify all with PowerShell:
-echo   cd dist ^&^& Get-Content SHA256SUMS ^| ForEach-Object { $parts = $_ -split '  ', 2; $expected = $parts[0]; $file = $parts[1]; $actual = (Get-FileHash $file -Algorithm SHA256).Hash.ToLower(); if ($expected -eq $actual) { Write-Host \"[OK] $file\" -ForegroundColor Green } else { Write-Host \"[FAIL] $file\" -ForegroundColor Red } }
+echo Or open the .sha256 file and compare values.
+echo ============================================
+
+pause
