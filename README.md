@@ -166,13 +166,15 @@ PlainMD/
 ├── clean.bat               # Windows clean script
 ├── setenv.bat              # Set up MSVC environment
 ├── build-installer.bat     # Windows installer builder (outputs to dist/)
+├── make-checksums.bat      # Generate SHA256 checksums for dist packages (Windows)
 ├── build.sh                # Linux build script
 ├── clean.sh                # Linux clean script
 ├── build-deb.sh            # Debian package builder (outputs to dist/)
 ├── install-deb.sh          # Debian install helper
 ├── uninstall-deb.sh        # Debian uninstall helper
 ├── build-appimage.sh       # AppImage builder (outputs to dist/)
-├── dist/                   # Distribution packages (.exe, .deb, .AppImage)
+├── make-checksums.sh       # Generate SHA256 checksums for dist packages (Linux)
+├── dist/                   # Distribution packages (.exe, .deb, .AppImage, .sha256)
 ├── installer.iss           # Inno Setup installer script
 ├── README.md               # User documentation
 └── AGENTS.md               # Developer documentation
