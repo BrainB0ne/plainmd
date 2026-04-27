@@ -174,7 +174,8 @@ PlainMD/
 ├── uninstall-deb.sh        # Debian uninstall helper
 ├── build-appimage.sh       # AppImage builder (outputs to dist/)
 ├── make-checksums.sh       # Generate SHA256 checksums for dist packages (Linux)
-├── archive-release.sh      # Create versioned zip archive of dist/ folder
+├── archive-release.sh      # Create versioned zip archive of dist/ folder (Linux)
+├── archive-release.bat     # Create versioned zip archive of dist/ folder (Windows)
 ├── dist/                   # Distribution packages (.exe, .deb, .AppImage, .sha256)
 ├── installer.iss           # Inno Setup installer script
 ├── .gitattributes          # Git line ending rules (for WSL/cross-platform dev)
