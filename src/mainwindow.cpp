@@ -68,9 +68,11 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowIcon(QIcon(":/icon.png"));
     resize(1200, 800);
 
-    QString lastFolder = m_settings.value("lastFolder").toString();
-    if (!lastFolder.isEmpty() && QDir(lastFolder).exists()) {
-        loadFolder(lastFolder);
+    if (m_settings.value("privacy/rememberLastFolder", true).toBool()) {
+        QString lastFolder = m_settings.value("lastFolder").toString();
+        if (!lastFolder.isEmpty() && QDir(lastFolder).exists()) {
+            loadFolder(lastFolder);
+        }
     }
 
     showWelcomePage();
@@ -834,7 +836,9 @@ void MainWindow::loadFolder(const QString &folderPath)
     m_currentFolder = folderPath;
     m_proxyModel->setExemptPath(folderPath);
     m_fileModel->setRootPath(folderPath);
-    m_settings.setValue("lastFolder", folderPath);
+    if (m_settings.value("privacy/rememberLastFolder", true).toBool()) {
+        m_settings.setValue("lastFolder", folderPath);
+    }
 
     QModelIndex sourceRoot = m_fileModel->index(folderPath);
     QModelIndex proxyRoot = m_proxyModel->mapFromSource(sourceRoot);

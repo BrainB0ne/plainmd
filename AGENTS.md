@@ -30,6 +30,7 @@ Copyright © 2026 BrainByteZ
 - **File tree lifecycle**: `setupFileTree()` doesn't attach model immediately. `loadFolder()` attaches `m_proxyModel` on first open.
 - **Auto-reload**: `QFileSystemWatcher` monitors current file. Watching stops on welcome page.
 - **Recent history**: Separate tracking for recent files (`recentFiles`) and recent folders (`recentFolders`) with independent privacy toggles (`privacy/keepRecentFiles`, `privacy/keepRecentFolders`). Both stored as `QStringList` in QSettings.
+- **Last folder memory**: `privacy/rememberLastFolder` toggle controls whether the last opened folder is restored on startup (stored as `lastFolder` in QSettings).
 
 ## Critical Implementation Details
 - **Code block styling**: **DISABLED** — `styleCodeBlocks()` caused document corruption on large files (>5000 bytes). QTextCursor operations corrupt document structure. Code blocks and inline code render with default Qt styling now.

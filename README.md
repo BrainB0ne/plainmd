@@ -19,7 +19,7 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **Print & Export** - Print to physical printer or export directly to PDF (with better emoji support)
 - **External editor integration** - Open files with your preferred editor from the context menu
 - **Customizable fonts** - Configure editor font and emoji print font
-- **Privacy options** - Toggle external image loading, recent files, and recent folders history independently
+- **Privacy options** - Toggle external image loading, recent files/folders history, and last opened folder memory independently
 - **URL tooltips** - Hover over links to see the resolved absolute path
 - **YAML frontmatter display** - Shows frontmatter as a code block
 
@@ -123,7 +123,7 @@ Access preferences via **View → Preferences** (Ctrl+,):
 - **Editor Font** - Main text font
 - **Emoji Print Font** - Font for emoji characters when printing (use a Nerd Font for best results)
 - **External Editor** - Path to your preferred external editor
-- **Privacy** - Toggle external image preview, recent files, and recent folders history independently
+- **Privacy** - Toggle external image preview, recent files/folders history, and last opened folder memory independently
 
 ### Emoji Printing on Windows (Experimental)
 

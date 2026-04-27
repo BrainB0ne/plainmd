@@ -40,6 +40,7 @@ public:
     bool previewExternalImages() const;
     bool keepRecentFiles() const;
     bool keepRecentFolders() const;
+    bool rememberLastFolder() const;
     QString externalEditor() const;
     bool useNerdFontForEmoji() const;
     QFont printEmojiFont() const;

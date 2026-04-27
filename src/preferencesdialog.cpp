@@ -77,6 +77,7 @@ void PreferencesDialog::loadSettings()
     ui->previewCheck->setChecked(settings.value("privacy/previewExternalImages", true).toBool());
     ui->keepRecentCheck->setChecked(settings.value("privacy/keepRecentFiles", true).toBool());
     ui->keepRecentFoldersCheck->setChecked(settings.value("privacy/keepRecentFolders", true).toBool());
+    ui->rememberLastFolderCheck->setChecked(settings.value("privacy/rememberLastFolder", true).toBool());
 }
 
 void PreferencesDialog::saveSettings()
@@ -92,6 +93,7 @@ void PreferencesDialog::saveSettings()
     settings.setValue("privacy/previewExternalImages", ui->previewCheck->isChecked());
     settings.setValue("privacy/keepRecentFiles", ui->keepRecentCheck->isChecked());
     settings.setValue("privacy/keepRecentFolders", ui->keepRecentFoldersCheck->isChecked());
+    settings.setValue("privacy/rememberLastFolder", ui->rememberLastFolderCheck->isChecked());
 }
 
 QString PreferencesDialog::fontFamily() const
@@ -117,6 +119,11 @@ bool PreferencesDialog::keepRecentFiles() const
 bool PreferencesDialog::keepRecentFolders() const
 {
     return ui->keepRecentFoldersCheck->isChecked();
+}
+
+bool PreferencesDialog::rememberLastFolder() const
+{
+    return ui->rememberLastFolderCheck->isChecked();
 }
 
 QString PreferencesDialog::externalEditor() const
