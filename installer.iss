@@ -5,6 +5,8 @@
 AppName=PlainMD
 AppVersion=1.2.0
 AppVerName=PlainMD 1.2.0
+VersionInfoVersion=1.2.0.0
+VersionInfoTextVersion=1.2.0
 AppCopyright=Copyright (C) 2026 BrainByteZ
 AppPublisher=BrainByteZ
 DefaultDirName={autopf64}\PlainMD
