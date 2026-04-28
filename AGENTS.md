@@ -29,7 +29,7 @@
 - **Auto-reload**: `QFileSystemWatcher` monitors current file. Watching stops on welcome page.
 - **Recent history**: Separate tracking for files (`recentFiles`) and folders (`recentFolders`), each with independent privacy toggles (`privacy/keepRecentFiles`, `privacy/keepRecentFolders`). Max 10 entries each (LIFO), missing entries cleaned up.
 - **Last folder**: `privacy/rememberLastFolder` restores `lastFolder` on startup.
-- **QSettings**: IniFormat, UserScope, org=org name, app=app name. All keys: `recentFiles`, `recentFolders`, `lastFolder`, `privacy/*`, `editor/*`, `geometry`, `windowState`, `splitterState`.
+- **QSettings**: IniFormat, UserScope, org=org name, app=app name. All keys: `recentFiles`, `recentFolders`, `lastFolder`, `privacy/*`, `editor/*`, `view/*` (showFileTree), `geometry`, `windowState`, `splitterState`.
 
 ## Critical Implementation Details
 - **Code block styling**: **NOT POSSIBLE** — QTextCursor corrupts large documents. Do not attempt.
