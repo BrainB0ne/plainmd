@@ -5,7 +5,7 @@ set -e
 # Installs the local .deb package and resolves dependencies automatically.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEB_FILE="${SCRIPT_DIR}/plainmd_1.2.0_amd64.deb"
+DEB_FILE="${SCRIPT_DIR}/plainmd_1.3.0_amd64.deb"
 
 if [ "$EUID" -ne 0 ]; then
     echo "This script must be run as root (use sudo)."
@@ -22,7 +22,7 @@ echo "Installing plainmd..."
 
 # apt's sandboxed _apt user cannot read files in user home directories.
 # Copy to /tmp first to avoid the "unsandboxed as root" warning.
-TMP_DEB="/tmp/plainmd_1.2.0_amd64.deb"
+TMP_DEB="/tmp/plainmd_1.3.0_amd64.deb"
 cp "$DEB_FILE" "$TMP_DEB"
 
 # apt install resolves dependencies automatically; dpkg -i does not.

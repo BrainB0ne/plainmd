@@ -588,7 +588,7 @@ void MainWindow::showWelcomePage()
             <p align="center" style="margin:0; line-height:1.2;">
                 <img src=":/icon_96.png" width="96" height="96" alt="" title=""><br>
                 <span style="font-size:1em; color:#7f8c8d;">A simple and elegant Markdown viewer</span><br>
-                <span style="font-size:0.9em; color:#95a5a6;">Version 1.2.0</span>
+                <span style="font-size:0.9em; color:#95a5a6;">Version 1.3.0</span>
             </p>
 
             <h2>Get Started</h2>

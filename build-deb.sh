@@ -55,7 +55,7 @@ echo "Binary links to system Qt — OK."
 # 3. Package metadata
 # ---------------------------------------------------------------------------
 PKG_NAME="plainmd"
-PKG_VERSION="1.2.0"
+PKG_VERSION="1.3.0"
 PKG_ARCH="amd64"
 BUILD_DIR="build-deb"
 PKG_DIR="${BUILD_DIR}/${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}"
