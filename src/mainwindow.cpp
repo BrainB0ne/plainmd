@@ -89,17 +89,14 @@ MainWindow::MainWindow(QWidget *parent)
         m_fileTree->setVisible(showTree);
     }
 
-    // Restore minimap visibility (default to hidden)
+    // Restore minimap action state (but keep it hidden on welcome page until a file is loaded)
     bool showMinimap = m_settings.value("view/showMinimap", false).toBool();
     if (m_showMinimapAction) {
+        m_showMinimapAction->blockSignals(true);
         m_showMinimapAction->setChecked(showMinimap);
+        m_showMinimapAction->blockSignals(false);
     }
-    if (m_minimap) {
-        m_minimap->setVisible(showMinimap);
-        if (showMinimap) {
-            m_minimap->updateContent();
-        }
-    }
+    // Minimap stays hidden on welcome page - will be shown when a file is loaded in loadFile()
 
     // Setup file watcher for auto-reload
     m_fileWatcher = new QFileSystemWatcher(this);
@@ -584,6 +581,14 @@ void MainWindow::showWelcomePage()
         m_fileWatcher->removePaths(m_fileWatcher->files());
     }
 
+    // Hide minimap and disable toggle on welcome page (no document to show)
+    if (m_minimap) {
+        m_minimap->hide();
+    }
+    if (m_showMinimapAction) {
+        m_showMinimapAction->setEnabled(false);
+    }
+
 #ifdef Q_OS_LINUX
     QString fontFamily = QStringLiteral("'DejaVu Sans', 'Noto Sans', 'Noto Color Emoji', 'Apple Color Emoji', 'Helvetica Neue', Arial, sans-serif");
     QString monoFamily = QStringLiteral("'DejaVu Sans Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace");
@@ -861,12 +866,18 @@ void MainWindow::loadFile(const QString &filePath)
         // Plain text and MDX files - preserve formatting without markdown processing
         // MDX contains JSX syntax that Qt's markdown parser doesn't handle well
         m_editor->setPlainText(content);
+        if (m_minimap) {
+            m_minimap->setPlainTextMode(true);  // Skip markdown detection in minimap
+        }
     } else {
         // Resolve relative image paths against the markdown file's directory
         QUrl baseUrl = QUrl::fromLocalFile(QFileInfo(filePath).absolutePath() + "/");
         m_editor->document()->setBaseUrl(baseUrl);
 
         m_editor->setMarkdown(processedContent);
+        if (m_minimap) {
+            m_minimap->setPlainTextMode(false);  // Enable full markdown detection
+        }
     }
 
     m_currentFile = filePath;
@@ -896,6 +907,16 @@ void MainWindow::loadFile(const QString &filePath)
             m_fileTree->setCurrentIndex(proxyIndex);
             m_fileTree->scrollTo(proxyIndex);
         }
+    }
+
+    // Show minimap when a file is loaded (if enabled in settings)
+    if (m_minimap && m_settings.value("view/showMinimap", false).toBool()) {
+        m_minimap->show();
+        m_minimap->updateContent();
+    }
+    // Enable minimap toggle action when a file is loaded
+    if (m_showMinimapAction) {
+        m_showMinimapAction->setEnabled(true);
     }
 
     statusBar()->showMessage(tr("Loaded: %1").arg(QDir::toNativeSeparators(filePath)), 3000);

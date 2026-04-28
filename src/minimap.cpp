@@ -65,6 +65,12 @@ void Minimap::updateContent()
     update();
 }
 
+void Minimap::setPlainTextMode(bool enabled)
+{
+    m_plainTextMode = enabled;
+    update();
+}
+
 void Minimap::calculateScale()
 {
     if (!m_editor || !m_editor->document())
@@ -252,12 +258,13 @@ void Minimap::paintEvent(QPaintEvent *event)
         }
         
         // Apply colors based on detection (priority: images > code > headings > links > lists > normal)
+        // In plain text mode, skip fancy markdown detection (headings, links, lists)
         if (hasImage) {
             color = colorImage;
         } else if (isCodeBlock) {
             color = colorCode;
-        } else if (maxFontSize >= 14 || isBold) {
-            // Headings by font size or bold formatting
+        } else if (!m_plainTextMode && (maxFontSize >= 14 || isBold)) {
+            // Headings by font size or bold formatting (skip for plain text)
             if (maxFontSize >= 18 || (maxFontSize >= 14 && isBold)) {
                 color = colorH1;
             } else if (maxFontSize >= 14 || (maxFontSize >= 12 && isBold)) {
@@ -265,9 +272,9 @@ void Minimap::paintEvent(QPaintEvent *event)
             } else {
                 color = colorH3;
             }
-        } else if (hasLink && charCount > 0) {
+        } else if (!m_plainTextMode && hasLink && charCount > 0) {
             color = colorLink;
-        } else if (isListItem) {
+        } else if (!m_plainTextMode && isListItem) {
             color = colorList;
         } else {
             color = colorNormal;

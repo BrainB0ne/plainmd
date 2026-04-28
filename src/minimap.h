@@ -33,6 +33,7 @@ public:
     explicit Minimap(QTextEdit *editor, QWidget *parent = nullptr);
 
     void updateContent();
+    void setPlainTextMode(bool enabled);  // Enable for .txt files to skip markdown detection
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -56,6 +57,7 @@ private:
     qreal m_scale = 0.15;  // Default scale factor (15%)
     int m_minimapWidth = 120;  // Fixed width for minimap
     bool m_dragging = false;
+    bool m_plainTextMode = false;  // True for .txt files
 };
 
 #endif // MINIMAP_H

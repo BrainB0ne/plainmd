@@ -26,7 +26,7 @@
 - `QFileSystemModel` wrapped by `FilterProxyModel` (hides empty folders). Root folder exempted via `setExemptPath()`.
 - File filter: `*.md`, `*.markdown`, `*.mdx`, `*.txt`.
 - **File tree lifecycle**: `setupFileTree()` creates widgets but doesn't attach model. `loadFolder()` attaches `m_proxyModel` on first folder open.
-- **Minimap**: Custom `Minimap` widget renders scaled-down overview of document. Detects content types via `QTextCharFormat` properties (font size, bold, anchors, image format, monospace). Theme-aware colors using Catppuccin palette (adapted for light/dark). Toggle via F10, state persisted to `view/showMinimap`.
+- **Minimap**: Custom `Minimap` widget renders scaled-down overview of document. Detects content types via `QTextCharFormat` properties (font size, bold, anchors, image format, monospace). Theme-aware colors using Catppuccin palette (adapted for light/dark). Toggle via F10, state persisted to `view/showMinimap`. Plain text mode (`setPlainTextMode()`) disables markdown-specific detection for .txt and .mdx files.
 - **Auto-reload**: `QFileSystemWatcher` monitors current file. Watching stops on welcome page.
 - **Recent history**: Separate tracking for files (`recentFiles`) and folders (`recentFolders`), each with independent privacy toggles (`privacy/keepRecentFiles`, `privacy/keepRecentFolders`). Max 10 entries each (LIFO), missing entries cleaned up.
 - **Last folder**: `privacy/rememberLastFolder` restores `lastFolder` on startup.
@@ -41,6 +41,7 @@
   - Code: Monospace font or light gray background → Gray
   - Normal text: Default → Gray
   - Background: System button color; colors adapt for light/dark themes (Catppuccin-like palette)
+  - **Plain text mode**: `.txt` and `.mdx` files use `setPlainTextMode(true)` which skips heading/link/list detection to avoid false positives from Qt's default formatting
 - **Code block styling**: **NOT POSSIBLE** — QTextCursor corrupts large documents. Do not attempt.
 - **Welcome page**: Hardcoded HTML/CSS with Consolas (Windows) / DejaVu Sans Mono (Linux) for shortcuts. Not configurable.
 - **Tooltips**: Image tooltips show original + cached absolute paths. Link tooltips use `cursorForPosition()` + `charFormat().anchorHref()` for resolved absolute URL. Both use `QDir::cleanPath()` for relative resolution.
