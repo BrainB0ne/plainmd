@@ -15,6 +15,7 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **Recent files & folders** - Quick access to recently opened files and folders with separate history and privacy toggles
 - **Auto-reload on file change** - Detects external file modifications and prompts to reload
 - **File tree toggle** - Show/hide file browser with F9 for distraction-free reading
+- **Minimap** - Document overview with color-coded content types (images, headings, lists, links, code blocks) and viewport highlight; toggle with F10
 - **Zoom controls** - Zoom in/out with Ctrl++ and Ctrl+-
 - **Find/Search** - Search within documents with Ctrl+F
 - **Print & Export** - Print to physical printer or export directly to PDF (with better emoji support)
@@ -111,6 +112,7 @@ qmake plainmd.pro && make
 | Ctrl+Shift+O | Open folder |
 | Ctrl+F | Find in document |
 | F9 | Toggle file tree |
+| F10 | Toggle minimap |
 | Ctrl+P | Print |
 | Ctrl+Shift+P | Export to PDF |
 | Ctrl++, | Preferences |

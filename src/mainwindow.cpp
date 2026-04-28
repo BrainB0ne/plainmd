@@ -20,6 +20,7 @@
 #include "preferencesdialog.h"
 #include "finddialog.h"
 #include "aboutdialog.h"
+#include "minimap.h"
 
 #include <QApplication>
 #include <QCryptographicHash>
@@ -88,6 +89,18 @@ MainWindow::MainWindow(QWidget *parent)
         m_fileTree->setVisible(showTree);
     }
 
+    // Restore minimap visibility (default to hidden)
+    bool showMinimap = m_settings.value("view/showMinimap", false).toBool();
+    if (m_showMinimapAction) {
+        m_showMinimapAction->setChecked(showMinimap);
+    }
+    if (m_minimap) {
+        m_minimap->setVisible(showMinimap);
+        if (showMinimap) {
+            m_minimap->updateContent();
+        }
+    }
+
     // Setup file watcher for auto-reload
     m_fileWatcher = new QFileSystemWatcher(this);
     connect(m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::onFileChanged);
@@ -138,7 +151,23 @@ void MainWindow::setupEditor()
 
     // Use default Qt markdown styling (no custom CSS)
 
-    m_splitter->addWidget(m_editor);
+    // Create container for editor + minimap
+    m_editorContainer = new QWidget(this);
+    QHBoxLayout *editorLayout = new QHBoxLayout(m_editorContainer);
+    editorLayout->setContentsMargins(0, 0, 0, 0);
+    editorLayout->setSpacing(0);
+    
+    // Add editor
+    editorLayout->addWidget(m_editor, 1);
+    
+    // Add minimap (initially hidden)
+    m_minimap = new Minimap(m_editor, m_editorContainer);
+    m_minimap->setVisible(false);
+    editorLayout->addWidget(m_minimap);
+    
+    // Use default Qt markdown styling (no custom CSS)
+
+    m_splitter->addWidget(m_editorContainer);
     m_splitter->setStretchFactor(1, 1);
 }
 
@@ -217,6 +246,13 @@ void MainWindow::setupMenuBar()
     m_showFileTreeAction->setChecked(true);
     connect(m_showFileTreeAction, &QAction::toggled, this, &MainWindow::onToggleFileTree);
     viewMenu->addAction(m_showFileTreeAction);
+
+    m_showMinimapAction = new QAction(tr("Show &Minimap"), this);
+    m_showMinimapAction->setShortcut(QKeySequence(tr("F10")));
+    m_showMinimapAction->setCheckable(true);
+    m_showMinimapAction->setChecked(false);
+    connect(m_showMinimapAction, &QAction::toggled, this, &MainWindow::onToggleMinimap);
+    viewMenu->addAction(m_showMinimapAction);
 
     viewMenu->addSeparator();
 
@@ -419,16 +455,25 @@ void MainWindow::onClearRecentFolders()
 void MainWindow::onZoomIn()
 {
     m_editor->zoomIn(2);
+    if (m_minimap) {
+        m_minimap->updateContent();
+    }
 }
 
 void MainWindow::onZoomOut()
 {
     m_editor->zoomOut(2);
+    if (m_minimap) {
+        m_minimap->updateContent();
+    }
 }
 
 void MainWindow::onZoomReset()
 {
     applyEditorFont();
+    if (m_minimap) {
+        m_minimap->updateContent();
+    }
 }
 
 void MainWindow::onToggleFileTree(bool visible)
@@ -436,6 +481,17 @@ void MainWindow::onToggleFileTree(bool visible)
     if (m_fileTree) {
         m_fileTree->setVisible(visible);
         m_settings.setValue("view/showFileTree", visible);
+    }
+}
+
+void MainWindow::onToggleMinimap(bool visible)
+{
+    if (m_minimap) {
+        m_minimap->setVisible(visible);
+        m_settings.setValue("view/showMinimap", visible);
+        if (visible) {
+            m_minimap->updateContent();
+        }
     }
 }
 
@@ -1287,6 +1343,18 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
+    // Handle wheel events for Ctrl+Scroll zoom to update minimap
+    if (obj == m_editor->viewport() && event->type() == QEvent::Wheel) {
+        QWheelEvent *wheelEvent = static_cast<QWheelEvent*>(event);
+        if (wheelEvent->modifiers() & Qt::ControlModifier) {
+            // Ctrl+Scroll triggers zoom in QTextEdit, update minimap after
+            if (m_minimap) {
+                // Use a small timer to ensure zoom has been applied
+                QTimer::singleShot(0, m_minimap, &Minimap::updateContent);
+            }
+        }
+    }
+    
     if (obj == m_editor->viewport() && event->type() == QEvent::ToolTip) {
         // Skip custom image tooltips on the welcome page (no file loaded)
         if (m_currentFile.isEmpty())

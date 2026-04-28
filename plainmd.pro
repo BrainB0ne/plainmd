@@ -25,7 +25,8 @@ SOURCES += \
     src/preferencesdialog.cpp \
     src/finddialog.cpp \
     src/aboutdialog.cpp \
-    src/licensedialog.cpp
+    src/licensedialog.cpp \
+    src/minimap.cpp
 
 HEADERS += \
     src/mainwindow.h \
@@ -33,7 +34,8 @@ HEADERS += \
     src/preferencesdialog.h \
     src/finddialog.h \
     src/aboutdialog.h \
-    src/licensedialog.h
+    src/licensedialog.h \
+    src/minimap.h
 
 FORMS += \
     src/aboutdialog.ui \

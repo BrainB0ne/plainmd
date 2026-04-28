@@ -38,6 +38,7 @@
 #include "filterproxymodel.h"
 
 class FindDialog;
+class Minimap;
 
 class MainWindow : public QMainWindow
 {
@@ -67,6 +68,7 @@ private slots:
     void onZoomOut();
     void onZoomReset();
     void onToggleFileTree(bool visible);
+    void onToggleMinimap(bool visible);
     void onAbout();
     void onPrint();
     void onExportToPdf();
@@ -109,6 +111,7 @@ private:
     QAction *m_printAction = nullptr;
     QAction *m_exportPdfAction = nullptr;
     QAction *m_showFileTreeAction = nullptr;
+    QAction *m_showMinimapAction = nullptr;
 
     QString m_currentFile;
     QString m_currentFolder;
@@ -116,6 +119,8 @@ private:
     QHash<QString, QString> m_imageUrlMap; // localPath -> originalUrl
     FindDialog *m_findDialog = nullptr;
     QFileSystemWatcher *m_fileWatcher = nullptr;
+    Minimap *m_minimap = nullptr;
+    QWidget *m_editorContainer = nullptr;
 };
 
 #endif // MAINWINDOW_H
