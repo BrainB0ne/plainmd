@@ -245,14 +245,13 @@ void Minimap::paintEvent(QPaintEvent *event)
         }
         
         // Determine block type based on collected information
-        // (text was already captured above for table detection)
+        // 'text' variable contains the trimmed block text
         
         // Code blocks: high percentage of code formatting or preformatted style
         if (isPreformatted && (hasCode || text.contains("  ") || text.startsWith("    "))) {
             isCodeBlock = true;
         }
         // Check for fenced code block markers in the text itself
-        // (text is already trimmed from table detection above)
         if (text.startsWith("```") || text.startsWith("    ")) {
             isCodeBlock = true;
         }
