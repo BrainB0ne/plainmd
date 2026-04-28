@@ -66,6 +66,7 @@ private slots:
     void onZoomIn();
     void onZoomOut();
     void onZoomReset();
+    void onToggleFileTree(bool visible);
     void onAbout();
     void onPrint();
     void onExportToPdf();
@@ -107,6 +108,7 @@ private:
     QAction *m_clearRecentFoldersAction = nullptr;
     QAction *m_printAction = nullptr;
     QAction *m_exportPdfAction = nullptr;
+    QAction *m_showFileTreeAction = nullptr;
 
     QString m_currentFile;
     QString m_currentFolder;

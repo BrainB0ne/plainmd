@@ -79,6 +79,15 @@ MainWindow::MainWindow(QWidget *parent)
     refreshRecentFilesMenu();
     refreshRecentFoldersMenu();
 
+    // Restore file tree visibility (default to visible)
+    bool showTree = m_settings.value("view/showFileTree", true).toBool();
+    if (m_showFileTreeAction) {
+        m_showFileTreeAction->setChecked(showTree);
+    }
+    if (m_fileTree) {
+        m_fileTree->setVisible(showTree);
+    }
+
     // Setup file watcher for auto-reload
     m_fileWatcher = new QFileSystemWatcher(this);
     connect(m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::onFileChanged);
@@ -199,6 +208,15 @@ void MainWindow::setupMenuBar()
     zoomResetAction->setShortcut(QKeySequence(tr("Ctrl+0")));
     connect(zoomResetAction, &QAction::triggered, this, &MainWindow::onZoomReset);
     viewMenu->addAction(zoomResetAction);
+
+    viewMenu->addSeparator();
+
+    m_showFileTreeAction = new QAction(tr("Show &File Tree"), this);
+    m_showFileTreeAction->setShortcut(QKeySequence(tr("F9")));
+    m_showFileTreeAction->setCheckable(true);
+    m_showFileTreeAction->setChecked(true);
+    connect(m_showFileTreeAction, &QAction::toggled, this, &MainWindow::onToggleFileTree);
+    viewMenu->addAction(m_showFileTreeAction);
 
     viewMenu->addSeparator();
 
@@ -411,6 +429,14 @@ void MainWindow::onZoomOut()
 void MainWindow::onZoomReset()
 {
     applyEditorFont();
+}
+
+void MainWindow::onToggleFileTree(bool visible)
+{
+    if (m_fileTree) {
+        m_fileTree->setVisible(visible);
+        m_settings.setValue("view/showFileTree", visible);
+    }
 }
 
 void MainWindow::onAbout()
