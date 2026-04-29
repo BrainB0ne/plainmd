@@ -332,9 +332,10 @@ void MainWindow::setupStatusBar()
     // File Tree toggle button (icon only)
     m_toggleFileTreeBtn = new QPushButton(this);
     m_toggleFileTreeBtn->setIcon(QIcon(":/images/layout-sidebar.png"));
-    m_toggleFileTreeBtn->setIconSize(QSize(18, 18));
+    m_toggleFileTreeBtn->setIconSize(QSize(20, 20));
     m_toggleFileTreeBtn->setFlat(true);
-    m_toggleFileTreeBtn->setFixedSize(26, 22);
+    m_toggleFileTreeBtn->setFixedSize(24, 24);
+    m_toggleFileTreeBtn->setStyleSheet(QStringLiteral("QPushButton { padding-left: 2px; padding-top: 2px; padding-bottom: 2px; padding-right: 4px; margin: 0px; }"));
     m_toggleFileTreeBtn->setCheckable(true);
     m_toggleFileTreeBtn->setChecked(m_settings.value("view/showFileTree", true).toBool());
     m_toggleFileTreeBtn->setToolTip(tr("Toggle file tree sidebar"));
@@ -343,41 +344,53 @@ void MainWindow::setupStatusBar()
 
     // File loaded message (next to Tree button, auto-clears after 3 sec)
     m_statusFileMsg = new QLabel(this);
-    status->addWidget(m_statusFileMsg);
+    m_statusFileMsg->setMinimumWidth(1);  // Start small, expand when text is set
+    status->addWidget(m_statusFileMsg, 1);  // Stretch factor to take available space
 
     // Timer to clear the file message
     m_statusMsgTimer = new QTimer(this);
     m_statusMsgTimer->setSingleShot(true);
     connect(m_statusMsgTimer, &QTimer::timeout, [this]() {
         if (m_statusFileMsg) {
-            m_statusFileMsg->clear();
+            m_statusFileMsg->hide();  // Hide completely when empty (removes separator)
         }
     });
 
     // Right side (permanent widgets) - Order: [Word Count] [Zoom] [File Type] [Encoding] [Minimap Toggle]
+    // Style with asymmetric padding - extra 2px on right to center text better
+    QString labelStyle = QStringLiteral("QLabel { padding-left: 8px; padding-right: 10px; }");
 
     // Word count
     m_statusWordCount = new QLabel(tr("Words: 0"), this);
+    m_statusWordCount->setStyleSheet(labelStyle);
+    m_statusWordCount->setAlignment(Qt::AlignCenter);
     status->addPermanentWidget(m_statusWordCount);
 
     // Zoom level
     m_statusZoom = new QLabel(tr("100%"), this);
+    m_statusZoom->setStyleSheet(labelStyle);
+    m_statusZoom->setAlignment(Qt::AlignCenter);
     status->addPermanentWidget(m_statusZoom);
 
     // File type
     m_statusFileType = new QLabel(tr("Ready"), this);
+    m_statusFileType->setStyleSheet(labelStyle);
+    m_statusFileType->setAlignment(Qt::AlignCenter);
     status->addPermanentWidget(m_statusFileType);
 
     // Encoding
     m_statusEncoding = new QLabel(tr("UTF-8"), this);
+    m_statusEncoding->setStyleSheet(labelStyle);
+    m_statusEncoding->setAlignment(Qt::AlignCenter);
     status->addPermanentWidget(m_statusEncoding);
 
     // Minimap toggle button (icon only, rightmost)
     m_toggleMinimapBtn = new QPushButton(this);
     m_toggleMinimapBtn->setIcon(QIcon(":/images/layout-sidebar-right.png"));
-    m_toggleMinimapBtn->setIconSize(QSize(18, 18));
+    m_toggleMinimapBtn->setIconSize(QSize(20, 20));
     m_toggleMinimapBtn->setFlat(true);
-    m_toggleMinimapBtn->setFixedSize(26, 22);
+    m_toggleMinimapBtn->setFixedSize(24, 24);
+    m_toggleMinimapBtn->setStyleSheet(QStringLiteral("QPushButton { padding-left: 2px; padding-top: 2px; padding-bottom: 2px; padding-right: 4px; margin: 0px; }"));
     m_toggleMinimapBtn->setCheckable(true);
     m_toggleMinimapBtn->setChecked(m_settings.value("view/showMinimap", false).toBool());
     m_toggleMinimapBtn->setToolTip(tr("Toggle minimap"));
@@ -390,12 +403,14 @@ void MainWindow::setupStatusBar()
 void MainWindow::updateStatusBar()
 {
     if (m_currentFile.isEmpty()) {
-        // Welcome page state - hide file-related status items
-        m_statusFileType->setVisible(false);
-        m_statusEncoding->setVisible(false);
-        m_statusWordCount->setVisible(false);
-        m_statusZoom->setVisible(false);
-        // Minimap toggle disabled on welcome page (no file loaded)
+        // Welcome page state - show only "Ready" in file type, hide others
+        if (m_statusFileType) {
+            m_statusFileType->setText(tr("Ready"));
+            m_statusFileType->setVisible(true);
+        }
+        if (m_statusEncoding) m_statusEncoding->setVisible(false);
+        if (m_statusWordCount) m_statusWordCount->setVisible(false);
+        if (m_statusZoom) m_statusZoom->setVisible(false);
         if (m_toggleMinimapBtn) {
             m_toggleMinimapBtn->setVisible(false);
             m_toggleMinimapBtn->setEnabled(false);
@@ -1200,6 +1215,7 @@ void MainWindow::loadFile(const QString &filePath)
 
     // Brief message for user feedback (shown next to Tree button)
     if (m_statusFileMsg) {
+        m_statusFileMsg->show();  // Make sure it's visible
         m_statusFileMsg->setText(tr("Loaded: %1").arg(QDir::toNativeSeparators(filePath)));
         if (m_statusMsgTimer) {
             m_statusMsgTimer->start(3000);
