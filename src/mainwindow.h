@@ -144,6 +144,9 @@ private:
     // Zoom tracking (percentage, 100 = default)
     int m_zoomLevel = 100;
     int m_baseFontSize = 11;  // Default font size for zoom calculation
+    
+    // Detected file encoding for status bar display
+    QString m_detectedEncoding = QStringLiteral("UTF-8");
 
     // Last search text (from "Search in Files" or Find dialog) for F3 "Find Next"
     QString m_lastSearchText;

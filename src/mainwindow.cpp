@@ -53,6 +53,7 @@
 #include <QTextFragment>
 #include <QTextList>
 #include <QTextStream>
+#include <QStringDecoder>
 #include <QTimer>
 #include <QToolTip>
 #include <QUrl>
@@ -443,8 +444,8 @@ void MainWindow::updateStatusBar()
     }
     m_statusFileType->setText(fileType);
 
-    // Encoding (always UTF-8 for now)
-    m_statusEncoding->setText(tr("UTF-8"));
+    // Encoding (detected during file load)
+    m_statusEncoding->setText(m_detectedEncoding);
 
     // Word count - use plain text for accurate count
     QString plainText = m_editor->toPlainText();
@@ -1121,16 +1122,34 @@ void MainWindow::openFile(const QString &filePath)
 void MainWindow::loadFile(const QString &filePath)
 {
     QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    if (!file.open(QIODevice::ReadOnly)) {
         QMessageBox::critical(this, tr("Error"),
                               tr("Could not open file:\n%1").arg(filePath));
         return;
     }
 
-    QTextStream stream(&file);
-    stream.setEncoding(QStringConverter::Utf8);
-    QString content = stream.readAll();
+    // Detect encoding: try UTF-8 first, fall back to system locale (ANSI/Windows-1252)
+    QByteArray rawData = file.readAll();
     file.close();
+    
+    QString content;
+    QString detectedEncoding;
+    
+    // Try UTF-8 first using QStringDecoder
+    QStringDecoder utf8Decoder(QStringDecoder::Utf8);
+    content = utf8Decoder(rawData);
+    
+    if (!utf8Decoder.hasError()) {
+        // Valid UTF-8
+        detectedEncoding = QStringLiteral("UTF-8");
+    } else {
+        // Fall back to system default encoding (Windows-1252 on Windows, Latin1 on Linux, etc.)
+        QStringDecoder systemDecoder(QStringDecoder::System);
+        content = systemDecoder(rawData);
+        detectedEncoding = QStringLiteral("ANSI");
+    }
+    
+    m_detectedEncoding = detectedEncoding;
 
     m_imageUrlMap.clear();
 
