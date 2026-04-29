@@ -81,6 +81,7 @@ private slots:
     void onFindNext();
     void onSearchInFiles();
     void onFileChanged(const QString &path);
+    void onFileChangeDebounceTriggered();
 
 private:
     void setupUI();
@@ -140,6 +141,8 @@ private:
     QPushButton *m_toggleMinimapBtn = nullptr;
     QLabel *m_statusFileMsg = nullptr;  // Shows "Loaded: ..." message
     QTimer *m_statusMsgTimer = nullptr; // Clears the file message after delay
+    QTimer *m_fileChangeDebounceTimer = nullptr; // Debounce external file change notifications
+    bool m_fileChangeDialogOpen = false; // Prevent multiple file change dialogs
 
     // Zoom tracking (percentage, 100 = default)
     int m_zoomLevel = 100;

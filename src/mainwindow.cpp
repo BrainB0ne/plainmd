@@ -105,6 +105,12 @@ MainWindow::MainWindow(QWidget *parent)
     // Setup file watcher for auto-reload
     m_fileWatcher = new QFileSystemWatcher(this);
     connect(m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::onFileChanged);
+
+    // Setup debounce timer for external file change notifications
+    m_fileChangeDebounceTimer = new QTimer(this);
+    m_fileChangeDebounceTimer->setSingleShot(true);
+    m_fileChangeDebounceTimer->setInterval(500); // 500ms debounce
+    connect(m_fileChangeDebounceTimer, &QTimer::timeout, this, &MainWindow::onFileChangeDebounceTriggered);
 }
 
 void MainWindow::setupUI()
@@ -807,15 +813,32 @@ void MainWindow::onFileChanged(const QString &path)
         return;
     }
 
+    // Debounce the file change notification - restart timer if already running
+    // Don't start timer if dialog is already open
+    if (m_fileChangeDebounceTimer && !m_fileChangeDialogOpen) {
+        m_fileChangeDebounceTimer->start();
+    }
+}
+
+void MainWindow::onFileChangeDebounceTriggered()
+{
+    if (m_currentFile.isEmpty() || !QFile::exists(m_currentFile) || m_fileChangeDialogOpen) {
+        return;
+    }
+
+    m_fileChangeDialogOpen = true;  // Mark dialog as open
+
     // File has been modified externally - ask user if they want to reload
     QMessageBox::StandardButton reply = QMessageBox::question(this,
         tr("File Modified"),
-        tr("The file has been modified externally:\n%1\n\nDo you want to reload it?").arg(QFileInfo(path).fileName()),
+        tr("The file has been modified externally:\n%1\n\nDo you want to reload it?").arg(QFileInfo(m_currentFile).fileName()),
         QMessageBox::Yes | QMessageBox::No,
         QMessageBox::Yes);
 
+    m_fileChangeDialogOpen = false;  // Dialog closed
+
     if (reply == QMessageBox::Yes) {
-        loadFile(path);
+        loadFile(m_currentFile);
     }
 }
 

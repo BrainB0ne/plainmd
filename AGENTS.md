@@ -56,6 +56,7 @@
 - **Find/F3 search persistence**: `m_lastSearchText` stores the last search term from either FindDialog or SearchInDialog. Cleared when switching files via tree click (to reset context), but preserved for F3 within the same file. When opening from Search in Files, the search text is set AFTER `loadFile()` to ensure it's available for both initial highlighting and subsequent F3 presses.
 - **Search highlight clearing**: Escape key handled in `MainWindow::keyPressEvent()` to clear `QTextCursor` selection. Works globally regardless of focus.
 - **Encoding detection**: Uses `QStringDecoder` (Qt 6.0+) to auto-detect file encoding. Tries UTF-8 first via `QStringDecoder::Utf8`, falls back to system encoding (`QStringDecoder::System` which is Windows-1252 on Windows, ISO-8859-1/Latin1 on Linux) if UTF-8 decoding has errors. Detection result stored in `m_detectedEncoding` for status bar display.
+- **Auto-reload debouncing**: `QFileSystemWatcher::fileChanged` can fire multiple times for a single external save operation. A 500ms debounce timer (`m_fileChangeDebounceTimer`) prevents showing multiple "File Modified" dialogs. The timer is restarted on each file change event, and only shows the dialog when the timer expires (after 500ms of no new events). Additionally, `m_fileChangeDialogOpen` flag prevents multiple dialogs from appearing if the user hasn't responded to the first one yet.
 
 ## Platform Differences
 - **Fonts**: Linux defaults to DejaVu Sans (editor) / Noto Sans (emoji). Windows: Segoe UI both. Code font settings removed due to Qt6 bugs.
