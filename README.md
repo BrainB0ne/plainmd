@@ -14,8 +14,9 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **Drag and drop support** - Open files and folders by dragging them into the window
 - **Recent files & folders** - Quick access to recently opened files and folders with separate history and privacy toggles
 - **Auto-reload on file change** - Detects external file modifications and prompts to reload
-- **File tree toggle** - Show/hide file browser with F9 for distraction-free reading
-- **Minimap** - Document overview with color-coded content types (images, headings, lists, links, code blocks) and viewport highlight; toggle with F10. Plain text (.txt) and MDX files show simplified minimap without markdown-specific coloring
+- **File tree toggle** - Show/hide file browser with F9 or status bar button for distraction-free reading
+- **Minimap** - Document overview with color-coded content types (images, headings, lists, links, code blocks) and viewport highlight; toggle with F10 or status bar button. Plain text (.txt) and MDX files show simplified minimap without markdown-specific coloring
+- **Status bar** - Shows word count, zoom level, file type, encoding, and quick-toggle buttons for file tree and minimap
 - **Zoom controls** - Zoom in/out with Ctrl++ and Ctrl+-
 - **Find/Search** - Search within documents with Ctrl+F
 - **Print & Export** - Print to physical printer or export directly to PDF (with better emoji support)
