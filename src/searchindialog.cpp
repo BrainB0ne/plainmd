@@ -16,13 +16,8 @@
  */
 
 #include "searchindialog.h"
+#include "ui_searchindialog.h"
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLineEdit>
-#include <QListWidget>
-#include <QLabel>
-#include <QPushButton>
 #include <QEvent>
 #include <QKeyEvent>
 #include <QDir>
@@ -30,74 +25,43 @@
 #include <QFile>
 #include <QTextStream>
 #include <QRegularExpression>
-#include <QKeyEvent>
 
 SearchInDialog::SearchInDialog(const QString &folderPath, QWidget *parent)
     : QDialog(parent)
+    , ui(new Ui::SearchInDialog)
     , m_folderPath(folderPath)
 {
+    ui->setupUi(this);
     setWindowTitle(tr("Search in Files"));
     resize(500, 400);
-
-    QVBoxLayout *mainLayout = new QVBoxLayout(this);
-
-    // Search row
-    QHBoxLayout *searchLayout = new QHBoxLayout();
     
-    QLabel *searchLabel = new QLabel(tr("Search:"), this);
-    searchLayout->addWidget(searchLabel);
+    ui->statusLabel->setText(tr("Ready to search in: %1").arg(QDir::toNativeSeparators(m_folderPath)));
     
-    m_searchEdit = new QLineEdit(this);
-    m_searchEdit->setPlaceholderText(tr("Enter search text..."));
-    connect(m_searchEdit, &QLineEdit::textChanged, this, &SearchInDialog::on_searchText_changed);
-    connect(m_searchEdit, &QLineEdit::returnPressed, this, &SearchInDialog::on_searchButton_clicked);
-    searchLayout->addWidget(m_searchEdit, 1);
+    // Connect UI signals
+    connect(ui->searchEdit, &QLineEdit::textChanged, this, &SearchInDialog::on_searchText_changed);
+    connect(ui->searchEdit, &QLineEdit::returnPressed, this, &SearchInDialog::on_searchButton_clicked);
+    connect(ui->searchButton, &QPushButton::clicked, this, &SearchInDialog::on_searchButton_clicked);
+    connect(ui->resultsList, &QListWidget::itemClicked, this, &SearchInDialog::on_resultItem_clicked);
+    connect(ui->resultsList, &QListWidget::itemDoubleClicked, this, &SearchInDialog::on_resultItem_doubleClicked);
     
-    m_searchButton = new QPushButton(tr("Search"), this);
-    m_searchButton->setDefault(true);
-    m_searchButton->setEnabled(false);
-    connect(m_searchButton, &QPushButton::clicked, this, &SearchInDialog::on_searchButton_clicked);
-    searchLayout->addWidget(m_searchButton);
-    
-    mainLayout->addLayout(searchLayout);
-
-    // Status label
-    m_statusLabel = new QLabel(tr("Ready to search in: %1").arg(QDir::toNativeSeparators(m_folderPath)), this);
-    m_statusLabel->setWordWrap(true);
-    mainLayout->addWidget(m_statusLabel);
-
-    // Results list
-    m_resultsList = new QListWidget(this);
-    m_resultsList->setSelectionMode(QAbstractItemView::SingleSelection);
-    connect(m_resultsList, &QListWidget::itemClicked, this, &SearchInDialog::on_resultItem_clicked);
-    connect(m_resultsList, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem *item) {
-        on_resultItem_clicked(item);
-        if (!m_selectedFile.isEmpty()) {
-            emit fileSelected(m_selectedFile, m_searchText);
-            hide();  // Hide but keep results for later
-        }
-    });
-    // Handle Enter key in results list
-    m_resultsList->installEventFilter(this);
-    mainLayout->addWidget(m_resultsList, 1);
-
-    // Buttons
-    QHBoxLayout *buttonLayout = new QHBoxLayout();
-    buttonLayout->addStretch();
-    
-    QPushButton *closeButton = new QPushButton(tr("Close"), this);
-    connect(closeButton, &QPushButton::clicked, this, [this]() {
-        hide();  // Hide but keep results for later
-    });
-    buttonLayout->addWidget(closeButton);
-    
-    mainLayout->addLayout(buttonLayout);
-
-    m_searchEdit->setFocus();
+    // Install event filter for keyboard navigation
+    ui->resultsList->installEventFilter(this);
 }
 
 SearchInDialog::~SearchInDialog()
 {
+    delete ui;
+}
+
+void SearchInDialog::setFolderPath(const QString &folderPath)
+{
+    m_folderPath = folderPath;
+    ui->statusLabel->setText(tr("Ready to search in: %1").arg(QDir::toNativeSeparators(m_folderPath)));
+}
+
+void SearchInDialog::on_searchText_changed(const QString &text)
+{
+    ui->searchButton->setEnabled(!text.isEmpty());
 }
 
 void SearchInDialog::on_searchButton_clicked()
@@ -105,30 +69,102 @@ void SearchInDialog::on_searchButton_clicked()
     searchFiles();
 }
 
-void SearchInDialog::on_searchText_changed(const QString &text)
-{
-    m_searchButton->setEnabled(!text.isEmpty());
-}
-
 void SearchInDialog::on_resultItem_clicked(QListWidgetItem *item)
 {
-    if (item) {
-        m_selectedFile = item->data(Qt::UserRole).toString();
+    if (!item) return;
+    
+    // Single click just selects - store the file path for later
+    m_selectedFile = item->data(Qt::UserRole).toString();
+    m_searchText = ui->searchEdit->text();
+    // Don't emit here - wait for double-click or Enter
+}
+
+void SearchInDialog::on_resultItem_doubleClicked(QListWidgetItem *item)
+{
+    if (!item) return;
+    
+    // Double-click emits and hides dialog
+    m_selectedFile = item->data(Qt::UserRole).toString();
+    m_searchText = ui->searchEdit->text();
+    
+    if (!m_selectedFile.isEmpty()) {
+        emit fileSelected(m_selectedFile, m_searchText);
+        hide();  // Hide but keep results for later
     }
+}
+
+bool SearchInDialog::eventFilter(QObject *watched, QEvent *event)
+{
+    // Handle Enter key in results list to open selected file
+    if (watched == ui->resultsList && event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+        if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
+            QListWidgetItem *currentItem = ui->resultsList->currentItem();
+            if (currentItem) {
+                on_resultItem_doubleClicked(currentItem);
+                return true;
+            }
+        }
+    }
+    return QDialog::eventFilter(watched, event);
+}
+
+void SearchInDialog::searchFiles()
+{
+    QString searchText = ui->searchEdit->text();
+    if (searchText.isEmpty()) {
+        return;
+    }
+    
+    m_searchText = searchText;
+    ui->resultsList->clear();
+    ui->statusLabel->setText(tr("Searching in: %1...").arg(QDir::toNativeSeparators(m_folderPath)));
+    ui->searchButton->setEnabled(false);
+    
+    QStringList files = getSearchableFiles();
+    int matchCount = 0;
+    
+    for (const QString &filePath : files) {
+        if (fileContainsText(filePath, searchText)) {
+            int matches = countMatchesInFile(filePath, searchText);
+            QString snippet = getSnippet(filePath, searchText);
+            
+            QString displayText = QString("%1 (%2 matches)\n%3")
+                .arg(QDir::toNativeSeparators(filePath))
+                .arg(matches)
+                .arg(snippet);
+            
+            QListWidgetItem *item = new QListWidgetItem(displayText, ui->resultsList);
+            item->setData(Qt::UserRole, filePath);
+            item->setToolTip(filePath);
+            ui->resultsList->addItem(item);
+            
+            matchCount++;
+            if (matchCount >= MAX_RESULTS) {
+                break;
+            }
+        }
+    }
+    
+    if (matchCount == 0) {
+        ui->statusLabel->setText(tr("No matches found in: %1").arg(QDir::toNativeSeparators(m_folderPath)));
+    } else if (matchCount >= MAX_RESULTS) {
+        ui->statusLabel->setText(tr("Found %1+ matches in: %2 (showing first %1)").arg(MAX_RESULTS).arg(QDir::toNativeSeparators(m_folderPath)));
+    } else {
+        ui->statusLabel->setText(tr("Found %1 matches in: %2").arg(matchCount).arg(QDir::toNativeSeparators(m_folderPath)));
+    }
+    
+    ui->searchButton->setEnabled(true);
 }
 
 QStringList SearchInDialog::getSearchableFiles() const
 {
     QStringList files;
-    QDir dir(m_folderPath);
+    QDirIterator it(m_folderPath, QStringList() << "*.md" << "*.markdown" << "*.mdx" << "*.txt", 
+                     QDir::Files, QDirIterator::Subdirectories);
     
-    QStringList nameFilters;
-    nameFilters << "*.md" << "*.markdown" << "*.mdx" << "*.txt";
-    
-    QDirIterator it(dir.path(), nameFilters, QDir::Files, QDirIterator::Subdirectories);
     while (it.hasNext()) {
-        it.next();
-        files.append(it.filePath());
+        files.append(it.next());
     }
     
     return files;
@@ -142,7 +178,6 @@ bool SearchInDialog::fileContainsText(const QString &filePath, const QString &se
     }
     
     QTextStream stream(&file);
-    stream.setEncoding(QStringConverter::Utf8);
     QString content = stream.readAll().toLower();
     file.close();
     
@@ -157,17 +192,16 @@ int SearchInDialog::countMatchesInFile(const QString &filePath, const QString &s
     }
     
     QTextStream stream(&file);
-    stream.setEncoding(QStringConverter::Utf8);
     QString content = stream.readAll().toLower();
     file.close();
     
-    QString searchLower = searchText.toLower();
+    QString lowerSearch = searchText.toLower();
     int count = 0;
     int pos = 0;
     
-    while ((pos = content.indexOf(searchLower, pos)) != -1) {
+    while ((pos = content.indexOf(lowerSearch, pos)) != -1) {
         count++;
-        pos += searchLower.length();
+        pos += lowerSearch.length();
     }
     
     return count;
@@ -181,22 +215,21 @@ QString SearchInDialog::getSnippet(const QString &filePath, const QString &searc
     }
     
     QTextStream stream(&file);
-    stream.setEncoding(QStringConverter::Utf8);
     QString content = stream.readAll();
     file.close();
     
-    // Find the search text in the content (case-insensitive)
-    QString contentLower = content.toLower();
-    QString searchLower = searchText.toLower();
-    int pos = contentLower.indexOf(searchLower);
+    QString lowerContent = content.toLower();
+    QString lowerSearch = searchText.toLower();
     
+    int pos = lowerContent.indexOf(lowerSearch);
     if (pos == -1) {
         return QString();
     }
     
-    // Extract snippet around the match
+    // Calculate snippet boundaries
     int start = qMax(0, pos - SNIPPET_LENGTH / 2);
-    int end = qMin(content.length(), pos + searchText.length() + SNIPPET_LENGTH / 2);
+    int end = qMin(content.length(), pos + lowerSearch.length() + SNIPPET_LENGTH / 2);
+    
     QString snippet = content.mid(start, end - start);
     
     // Add ellipsis if truncated
@@ -207,91 +240,9 @@ QString SearchInDialog::getSnippet(const QString &filePath, const QString &searc
         snippet = snippet + "...";
     }
     
-    // Clean up newlines for display
-    snippet.replace(QRegularExpression("\\s+"), " ");
+    // Replace newlines with spaces for display
+    snippet.replace('\n', ' ');
+    snippet.replace('\r', ' ');
     
     return snippet.trimmed();
-}
-
-void SearchInDialog::searchFiles()
-{
-    QString searchText = m_searchEdit->text().trimmed();
-    if (searchText.isEmpty()) {
-        return;
-    }
-    
-    m_searchText = searchText;  // Store for retrieval when opening file
-    m_resultsList->clear();
-    m_statusLabel->setText(tr("Searching for \"%1\"...").arg(searchText));
-    
-    QStringList files = getSearchableFiles();
-    int matchCount = 0;
-    
-    for (const QString &filePath : files) {
-        if (fileContainsText(filePath, searchText)) {
-            QString relativePath = QDir(m_folderPath).relativeFilePath(filePath);
-            QString snippet = getSnippet(filePath, searchText);
-            int fileMatches = countMatchesInFile(filePath, searchText);
-            
-            QString displayText = relativePath;
-            // Add match count
-            if (fileMatches > 1) {
-                displayText += tr(" (%1 matches)").arg(fileMatches);
-            } else {
-                displayText += tr(" (1 match)");
-            }
-            if (!snippet.isEmpty()) {
-                displayText += "\n    " + snippet;
-            }
-            
-            QListWidgetItem *item = new QListWidgetItem(displayText);
-            item->setData(Qt::UserRole, filePath);
-            item->setToolTip(QDir::toNativeSeparators(filePath));
-            m_resultsList->addItem(item);
-            
-            matchCount++;
-            if (matchCount >= MAX_RESULTS) {
-                break;
-            }
-        }
-    }
-    
-    if (matchCount == 0) {
-        m_statusLabel->setText(tr("No matches found for \"%1\"").arg(searchText));
-    } else if (matchCount >= MAX_RESULTS) {
-        m_statusLabel->setText(tr("Found %1+ matches for \"%2\" (showing first %1)").arg(MAX_RESULTS).arg(searchText));
-    } else {
-        m_statusLabel->setText(tr("Found %1 matches for \"%2\"").arg(matchCount).arg(searchText));
-    }
-}
-
-void SearchInDialog::setFolderPath(const QString &folderPath)
-{
-    if (m_folderPath != folderPath) {
-        m_folderPath = folderPath;
-        m_statusLabel->setText(tr("Ready to search in: %1").arg(QDir::toNativeSeparators(m_folderPath)));
-        // Clear previous results when folder changes
-        m_resultsList->clear();
-        m_searchText.clear();
-    }
-}
-
-bool SearchInDialog::eventFilter(QObject *watched, QEvent *event)
-{
-    // Handle Enter key in results list to open selected file
-    if (watched == m_resultsList && event->type() == QEvent::KeyPress) {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
-        if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
-            QListWidgetItem *item = m_resultsList->currentItem();
-            if (item) {
-                on_resultItem_clicked(item);
-                if (!m_selectedFile.isEmpty()) {
-                    emit fileSelected(m_selectedFile, m_searchText);
-                    hide();  // Hide but keep results for later
-                }
-            }
-            return true;  // Event handled
-        }
-    }
-    return QDialog::eventFilter(watched, event);
 }

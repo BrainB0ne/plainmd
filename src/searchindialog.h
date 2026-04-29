@@ -21,10 +21,9 @@
 #include <QDialog>
 #include <QListWidgetItem>
 
-class QLineEdit;
-class QListWidget;
-class QLabel;
-class QPushButton;
+QT_BEGIN_NAMESPACE
+namespace Ui { class SearchInDialog; }
+QT_END_NAMESPACE
 
 class SearchInDialog : public QDialog
 {
@@ -46,6 +45,7 @@ private slots:
     void on_searchButton_clicked();
     void on_resultItem_clicked(QListWidgetItem *item);
     void on_searchText_changed(const QString &text);
+    void on_resultItem_doubleClicked(QListWidgetItem *item);
 
 private:
     void searchFiles();
@@ -54,10 +54,7 @@ private:
     int countMatchesInFile(const QString &filePath, const QString &searchText) const;
     QString getSnippet(const QString &filePath, const QString &searchText) const;
 
-    QLineEdit *m_searchEdit = nullptr;
-    QListWidget *m_resultsList = nullptr;
-    QLabel *m_statusLabel = nullptr;
-    QPushButton *m_searchButton = nullptr;
+    Ui::SearchInDialog *ui;
     
     QString m_folderPath;
     QString m_selectedFile;

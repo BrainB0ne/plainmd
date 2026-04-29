@@ -43,7 +43,8 @@ FORMS += \
     src/aboutdialog.ui \
     src/licensedialog.ui \
     src/finddialog.ui \
-    src/preferencesdialog.ui
+    src/preferencesdialog.ui \
+    src/searchindialog.ui
 
 RC_FILE = plainmd.rc
 RESOURCES += plainmd.qrc
