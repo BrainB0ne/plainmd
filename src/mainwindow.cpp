@@ -64,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
     setupUI();
     setupMenuBar();
     setupToolBar();
+    setupStatusBar();
     setAcceptDrops(true);
     setWindowTitle(tr("PlainMD"));
     setWindowIcon(QIcon(":/icon.png"));
@@ -309,6 +310,86 @@ void MainWindow::setupToolBar()
     toolBar->addAction(findAction);
 }
 
+void MainWindow::setupStatusBar()
+{
+    QStatusBar *status = statusBar();
+
+    // All items on the right side to avoid conflict with temporary messages
+    // Order: [Word Count] [Zoom] [File Type] [Encoding]
+
+    // Word count
+    m_statusWordCount = new QLabel(tr("Words: 0"), this);
+    status->addPermanentWidget(m_statusWordCount);
+
+    // Zoom level
+    m_statusZoom = new QLabel(tr("100%"), this);
+    status->addPermanentWidget(m_statusZoom);
+
+    // File type
+    m_statusFileType = new QLabel(tr("Ready"), this);
+    status->addPermanentWidget(m_statusFileType);
+
+    // Encoding
+    m_statusEncoding = new QLabel(tr("UTF-8"), this);
+    status->addPermanentWidget(m_statusEncoding);
+}
+
+void MainWindow::updateStatusBar()
+{
+    if (m_currentFile.isEmpty()) {
+        // Welcome page state - hide all status items
+        m_statusFileType->setVisible(false);
+        m_statusEncoding->setVisible(false);
+        m_statusWordCount->setVisible(false);
+        m_statusZoom->setVisible(false);
+        return;
+    }
+
+    // File loaded - show all status items
+    m_statusFileType->setVisible(true);
+    m_statusEncoding->setVisible(true);
+    m_statusWordCount->setVisible(true);
+    m_statusZoom->setVisible(true);
+
+    // Determine file type
+    QString ext = QFileInfo(m_currentFile).suffix().toLower();
+    QString fileType;
+    if (ext == "md" || ext == "markdown") {
+        fileType = tr("Markdown");
+    } else if (ext == "mdx") {
+        fileType = tr("MDX");
+    } else if (ext == "txt") {
+        fileType = tr("Plain Text");
+    } else {
+        fileType = ext.toUpper();
+    }
+    m_statusFileType->setText(fileType);
+
+    // Encoding (always UTF-8 for now)
+    m_statusEncoding->setText(tr("UTF-8"));
+
+    // Word count - use plain text for accurate count
+    QString plainText = m_editor->toPlainText();
+    int words = countWords(plainText);
+    m_statusWordCount->setText(tr("Words: %1").arg(words));
+}
+
+int MainWindow::countWords(const QString &text) const
+{
+    if (text.isEmpty())
+        return 0;
+
+    // Simple word counting: split on whitespace
+    // This is fast and accurate enough for Markdown
+    QString trimmed = text.trimmed();
+    if (trimmed.isEmpty())
+        return 0;
+
+    // Split on whitespace sequences
+    QStringList words = trimmed.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+    return words.size();
+}
+
 void MainWindow::onOpenFile()
 {
     QString filePath = QFileDialog::getOpenFileName(
@@ -452,6 +533,8 @@ void MainWindow::onClearRecentFolders()
 void MainWindow::onZoomIn()
 {
     m_editor->zoomIn(2);
+    m_zoomLevel = qMin(m_zoomLevel + 10, 500); // Cap at 500%
+    m_statusZoom->setText(QStringLiteral("%1%").arg(m_zoomLevel));
     if (m_minimap) {
         m_minimap->updateContent();
     }
@@ -460,6 +543,8 @@ void MainWindow::onZoomIn()
 void MainWindow::onZoomOut()
 {
     m_editor->zoomOut(2);
+    m_zoomLevel = qMax(m_zoomLevel - 10, 25); // Min at 25%
+    m_statusZoom->setText(QStringLiteral("%1%").arg(m_zoomLevel));
     if (m_minimap) {
         m_minimap->updateContent();
     }
@@ -468,8 +553,20 @@ void MainWindow::onZoomOut()
 void MainWindow::onZoomReset()
 {
     applyEditorFont();
+    m_zoomLevel = 100;
+    m_statusZoom->setText(QStringLiteral("100%"));
     if (m_minimap) {
         m_minimap->updateContent();
+    }
+}
+
+void MainWindow::updateZoomDisplay()
+{
+    // Calculate zoom percentage from current font size vs base font size
+    int currentSize = m_editor->font().pointSize();
+    if (m_baseFontSize > 0) {
+        m_zoomLevel = (currentSize * 100) / m_baseFontSize;
+        m_statusZoom->setText(QStringLiteral("%1%").arg(m_zoomLevel));
     }
 }
 
@@ -557,6 +654,7 @@ void MainWindow::applyEditorFont()
 #endif
     QString family = m_settings.value("editor/fontFamily", defaultFontFamily).toString();
     int size = m_settings.value("editor/fontSize", 11).toInt();
+    m_baseFontSize = size;  // Store base size for zoom calculations
     QFont font(family);
     font.setPointSize(size);
     m_editor->setFont(font);
@@ -678,6 +776,9 @@ void MainWindow::showWelcomePage()
     )").arg(fontFamily, monoFamily);
 
     m_editor->setHtml(html);
+
+    // Reset status bar for welcome page
+    updateStatusBar();
 }
 
 void MainWindow::onPrint()
@@ -919,6 +1020,10 @@ void MainWindow::loadFile(const QString &filePath)
         m_showMinimapAction->setEnabled(true);
     }
 
+    // Update status bar with file info
+    updateStatusBar();
+
+    // Brief message for user feedback
     statusBar()->showMessage(tr("Loaded: %1").arg(QDir::toNativeSeparators(filePath)), 3000);
 }
 
@@ -1364,15 +1469,17 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
-    // Handle wheel events for Ctrl+Scroll zoom to update minimap
+    // Handle wheel events for Ctrl+Scroll zoom to update minimap and status bar
     if (obj == m_editor->viewport() && event->type() == QEvent::Wheel) {
         QWheelEvent *wheelEvent = static_cast<QWheelEvent*>(event);
         if (wheelEvent->modifiers() & Qt::ControlModifier) {
-            // Ctrl+Scroll triggers zoom in QTextEdit, update minimap after
+            // Ctrl+Scroll triggers zoom in QTextEdit, update minimap and zoom display after
             if (m_minimap) {
                 // Use a small timer to ensure zoom has been applied
                 QTimer::singleShot(0, m_minimap, &Minimap::updateContent);
             }
+            // Update zoom level in status bar
+            QTimer::singleShot(0, this, &MainWindow::updateZoomDisplay);
         }
     }
     

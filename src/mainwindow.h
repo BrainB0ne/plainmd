@@ -35,6 +35,7 @@
 #include <QTimer>
 #include <QRegularExpression>
 #include <QFileSystemWatcher>
+#include <QLabel>
 #include "filterproxymodel.h"
 
 class FindDialog;
@@ -121,6 +122,21 @@ private:
     QFileSystemWatcher *m_fileWatcher = nullptr;
     Minimap *m_minimap = nullptr;
     QWidget *m_editorContainer = nullptr;
+
+    // Status bar widgets
+    QLabel *m_statusFileType = nullptr;
+    QLabel *m_statusEncoding = nullptr;
+    QLabel *m_statusWordCount = nullptr;
+    QLabel *m_statusZoom = nullptr;
+
+    // Zoom tracking (percentage, 100 = default)
+    int m_zoomLevel = 100;
+    int m_baseFontSize = 11;  // Default font size for zoom calculation
+
+    void setupStatusBar();
+    void updateStatusBar();
+    void updateZoomDisplay();
+    int countWords(const QString &text) const;
 };
 
 #endif // MAINWINDOW_H
