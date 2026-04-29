@@ -119,7 +119,7 @@ qmake plainmd.pro && make
 | F10 | Toggle minimap |
 | Ctrl+P | Print |
 | Ctrl+Shift+P | Export to PDF |
-| Ctrl++, | Preferences |
+| Ctrl+, | Preferences |
 | Ctrl++ | Zoom in |
 | Ctrl+- | Zoom out |
 | Ctrl+0 | Reset zoom |
