@@ -36,6 +36,7 @@
 #include <QRegularExpression>
 #include <QFileSystemWatcher>
 #include <QLabel>
+#include <QPushButton>
 #include "filterproxymodel.h"
 
 class FindDialog;
@@ -128,6 +129,10 @@ private:
     QLabel *m_statusEncoding = nullptr;
     QLabel *m_statusWordCount = nullptr;
     QLabel *m_statusZoom = nullptr;
+    QPushButton *m_toggleFileTreeBtn = nullptr;
+    QPushButton *m_toggleMinimapBtn = nullptr;
+    QLabel *m_statusFileMsg = nullptr;  // Shows "Loaded: ..." message
+    QTimer *m_statusMsgTimer = nullptr; // Clears the file message after delay
 
     // Zoom tracking (percentage, 100 = default)
     int m_zoomLevel = 100;

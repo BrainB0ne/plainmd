@@ -17,6 +17,8 @@
         <file>images/edit.png</file>
         <file>images/qt.png</file>
         <file>images/brand-tabler.png</file>
+        <file>images/layout-sidebar.png</file>
+        <file>images/layout-sidebar-right.png</file>
         <file>images/LICENSE-ICONS</file>
     </qresource>
 </RCC>

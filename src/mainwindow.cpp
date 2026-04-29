@@ -314,8 +314,33 @@ void MainWindow::setupStatusBar()
 {
     QStatusBar *status = statusBar();
 
-    // All items on the right side to avoid conflict with temporary messages
-    // Order: [Word Count] [Zoom] [File Type] [Encoding]
+    // Left side (temporary widget area)
+    // File Tree toggle button (icon only)
+    m_toggleFileTreeBtn = new QPushButton(this);
+    m_toggleFileTreeBtn->setIcon(QIcon(":/images/layout-sidebar.png"));
+    m_toggleFileTreeBtn->setIconSize(QSize(18, 18));
+    m_toggleFileTreeBtn->setFlat(true);
+    m_toggleFileTreeBtn->setFixedSize(26, 22);
+    m_toggleFileTreeBtn->setCheckable(true);
+    m_toggleFileTreeBtn->setChecked(m_settings.value("view/showFileTree", true).toBool());
+    m_toggleFileTreeBtn->setToolTip(tr("Toggle file tree sidebar"));
+    connect(m_toggleFileTreeBtn, &QPushButton::toggled, this, &MainWindow::onToggleFileTree);
+    status->addWidget(m_toggleFileTreeBtn);
+
+    // File loaded message (next to Tree button, auto-clears after 3 sec)
+    m_statusFileMsg = new QLabel(this);
+    status->addWidget(m_statusFileMsg);
+
+    // Timer to clear the file message
+    m_statusMsgTimer = new QTimer(this);
+    m_statusMsgTimer->setSingleShot(true);
+    connect(m_statusMsgTimer, &QTimer::timeout, [this]() {
+        if (m_statusFileMsg) {
+            m_statusFileMsg->clear();
+        }
+    });
+
+    // Right side (permanent widgets) - Order: [Word Count] [Zoom] [File Type] [Encoding] [Minimap Toggle]
 
     // Word count
     m_statusWordCount = new QLabel(tr("Words: 0"), this);
@@ -332,16 +357,35 @@ void MainWindow::setupStatusBar()
     // Encoding
     m_statusEncoding = new QLabel(tr("UTF-8"), this);
     status->addPermanentWidget(m_statusEncoding);
+
+    // Minimap toggle button (icon only, rightmost)
+    m_toggleMinimapBtn = new QPushButton(this);
+    m_toggleMinimapBtn->setIcon(QIcon(":/images/layout-sidebar-right.png"));
+    m_toggleMinimapBtn->setIconSize(QSize(18, 18));
+    m_toggleMinimapBtn->setFlat(true);
+    m_toggleMinimapBtn->setFixedSize(26, 22);
+    m_toggleMinimapBtn->setCheckable(true);
+    m_toggleMinimapBtn->setChecked(m_settings.value("view/showMinimap", false).toBool());
+    m_toggleMinimapBtn->setToolTip(tr("Toggle minimap"));
+    // Initially disabled on welcome page - will be enabled when file is loaded
+    m_toggleMinimapBtn->setEnabled(!m_currentFile.isEmpty());
+    connect(m_toggleMinimapBtn, &QPushButton::toggled, this, &MainWindow::onToggleMinimap);
+    status->addPermanentWidget(m_toggleMinimapBtn);
 }
 
 void MainWindow::updateStatusBar()
 {
     if (m_currentFile.isEmpty()) {
-        // Welcome page state - hide all status items
+        // Welcome page state - hide file-related status items
         m_statusFileType->setVisible(false);
         m_statusEncoding->setVisible(false);
         m_statusWordCount->setVisible(false);
         m_statusZoom->setVisible(false);
+        // Minimap toggle disabled on welcome page (no file loaded)
+        if (m_toggleMinimapBtn) {
+            m_toggleMinimapBtn->setVisible(false);
+            m_toggleMinimapBtn->setEnabled(false);
+        }
         return;
     }
 
@@ -350,6 +394,11 @@ void MainWindow::updateStatusBar()
     m_statusEncoding->setVisible(true);
     m_statusWordCount->setVisible(true);
     m_statusZoom->setVisible(true);
+    // Enable minimap toggle when file is loaded
+    if (m_toggleMinimapBtn) {
+        m_toggleMinimapBtn->setVisible(true);
+        m_toggleMinimapBtn->setEnabled(true);
+    }
 
     // Determine file type
     QString ext = QFileInfo(m_currentFile).suffix().toLower();
@@ -576,6 +625,13 @@ void MainWindow::onToggleFileTree(bool visible)
         m_fileTree->setVisible(visible);
         m_settings.setValue("view/showFileTree", visible);
     }
+    // Sync status bar button with menu action (avoid infinite loop by checking first)
+    if (m_toggleFileTreeBtn && m_toggleFileTreeBtn->isChecked() != visible) {
+        m_toggleFileTreeBtn->setChecked(visible);
+    }
+    if (m_showFileTreeAction && m_showFileTreeAction->isChecked() != visible) {
+        m_showFileTreeAction->setChecked(visible);
+    }
 }
 
 void MainWindow::onToggleMinimap(bool visible)
@@ -586,6 +642,13 @@ void MainWindow::onToggleMinimap(bool visible)
         if (visible) {
             m_minimap->updateContent();
         }
+    }
+    // Sync status bar button with menu action (avoid infinite loop by checking first)
+    if (m_toggleMinimapBtn && m_toggleMinimapBtn->isChecked() != visible) {
+        m_toggleMinimapBtn->setChecked(visible);
+    }
+    if (m_showMinimapAction && m_showMinimapAction->isChecked() != visible) {
+        m_showMinimapAction->setChecked(visible);
     }
 }
 
@@ -1023,8 +1086,13 @@ void MainWindow::loadFile(const QString &filePath)
     // Update status bar with file info
     updateStatusBar();
 
-    // Brief message for user feedback
-    statusBar()->showMessage(tr("Loaded: %1").arg(QDir::toNativeSeparators(filePath)), 3000);
+    // Brief message for user feedback (shown next to Tree button)
+    if (m_statusFileMsg) {
+        m_statusFileMsg->setText(tr("Loaded: %1").arg(QDir::toNativeSeparators(filePath)));
+        if (m_statusMsgTimer) {
+            m_statusMsgTimer->start(3000);
+        }
+    }
 }
 
 void MainWindow::loadFolder(const QString &folderPath)
