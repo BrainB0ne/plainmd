@@ -24,6 +24,7 @@ SOURCES += \
     src/filterproxymodel.cpp \
     src/preferencesdialog.cpp \
     src/finddialog.cpp \
+    src/searchindialog.cpp \
     src/aboutdialog.cpp \
     src/licensedialog.cpp \
     src/minimap.cpp
@@ -33,6 +34,7 @@ HEADERS += \
     src/filterproxymodel.h \
     src/preferencesdialog.h \
     src/finddialog.h \
+    src/searchindialog.h \
     src/aboutdialog.h \
     src/licensedialog.h \
     src/minimap.h

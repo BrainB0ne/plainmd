@@ -40,6 +40,7 @@
 #include "filterproxymodel.h"
 
 class FindDialog;
+class SearchInDialog;
 class Minimap;
 
 class MainWindow : public QMainWindow
@@ -52,6 +53,7 @@ public:
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
@@ -76,6 +78,8 @@ private slots:
     void onExportToPdf();
     void onPreferences();
     void onFind();
+    void onFindNext();
+    void onSearchInFiles();
     void onFileChanged(const QString &path);
 
 private:
@@ -112,6 +116,8 @@ private:
     QAction *m_clearRecentFoldersAction = nullptr;
     QAction *m_printAction = nullptr;
     QAction *m_exportPdfAction = nullptr;
+    QAction *m_findAction = nullptr;
+    QAction *m_findNextAction = nullptr;
     QAction *m_showFileTreeAction = nullptr;
     QAction *m_showMinimapAction = nullptr;
 
@@ -120,6 +126,7 @@ private:
     QSettings m_settings;
     QHash<QString, QString> m_imageUrlMap; // localPath -> originalUrl
     FindDialog *m_findDialog = nullptr;
+    SearchInDialog *m_searchInDialog = nullptr;
     QFileSystemWatcher *m_fileWatcher = nullptr;
     Minimap *m_minimap = nullptr;
     QWidget *m_editorContainer = nullptr;
@@ -138,10 +145,14 @@ private:
     int m_zoomLevel = 100;
     int m_baseFontSize = 11;  // Default font size for zoom calculation
 
+    // Last search text (from "Search in Files" or Find dialog) for F3 "Find Next"
+    QString m_lastSearchText;
+
     void setupStatusBar();
     void updateStatusBar();
     void updateZoomDisplay();
     int countWords(const QString &text) const;
+    void highlightSearchText(const QString &text);
 };
 
 #endif // MAINWINDOW_H

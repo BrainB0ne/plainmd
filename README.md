@@ -18,7 +18,8 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **Minimap** - Document overview with color-coded content types (images, headings, lists, links, code blocks) and viewport highlight; toggle with F10 or status bar button. Plain text (.txt) and MDX files show simplified minimap without markdown-specific coloring
 - **Status bar** - Shows word count, zoom level, file type, encoding, and quick-toggle buttons for file tree and minimap
 - **Zoom controls** - Zoom in/out with Ctrl++ and Ctrl+-
-- **Find/Search** - Search within documents with Ctrl+F
+- **Find/Search** - Search within documents with Ctrl+F, find next with F3
+- **Search in Files** - Search across all markdown files in the loaded folder with Ctrl+Shift+F. Shows match count per file, snippet preview, and highlights first occurrence when opened
 - **Print & Export** - Print to physical printer or export directly to PDF (with better emoji support)
 - **External editor integration** - Open files with your preferred editor from the context menu
 - **Customizable fonts** - Configure editor font and emoji print font
@@ -112,6 +113,8 @@ qmake plainmd.pro && make
 | Ctrl+O | Open file |
 | Ctrl+Shift+O | Open folder |
 | Ctrl+F | Find in document |
+| F3 | Find next |
+| Ctrl+Shift+F | Search in files |
 | F9 | Toggle file tree |
 | F10 | Toggle minimap |
 | Ctrl+P | Print |
@@ -120,6 +123,7 @@ qmake plainmd.pro && make
 | Ctrl++ | Zoom in |
 | Ctrl+- | Zoom out |
 | Ctrl+0 | Reset zoom |
+| Esc | Clear search highlight |
 
 ## Configuration
 

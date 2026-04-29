@@ -19,6 +19,8 @@
         <file>images/brand-tabler.png</file>
         <file>images/layout-sidebar.png</file>
         <file>images/layout-sidebar-right.png</file>
+        <file>images/file-search.png</file>
+        <file>images/arrow-right.png</file>
         <file>images/LICENSE-ICONS</file>
     </qresource>
 </RCC>

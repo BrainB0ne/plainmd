@@ -28,6 +28,8 @@
 - **File tree lifecycle**: `setupFileTree()` creates widgets but doesn't attach model. `loadFolder()` attaches `m_proxyModel` on first folder open.
 - **Minimap**: Custom `Minimap` widget renders scaled-down overview of document. Detects content types via `QTextCharFormat` properties (font size, bold, anchors, image format, monospace). Theme-aware colors using Catppuccin palette (adapted for light/dark). Toggle via F10 or status bar button, state persisted to `view/showMinimap`. Plain text mode (`setPlainTextMode()`) disables markdown-specific detection for .txt and .mdx files.
 - **Status bar**: `setupStatusBar()` creates widgets in two areas: temporary (left side for file message) and permanent (right-aligned for info/buttons). Shows: word count (calculated once on file load via `countWords()`), zoom level (tracks Ctrl+wheel and button zoom), file type, encoding, and icon-only toggle buttons for file tree (`layout-sidebar.png`) and minimap (`layout-sidebar-right.png`). Widgets hidden on welcome page. Toggle buttons synced with menu actions (F9/F10) and settings.
+- **Search in Files**: `SearchInDialog` provides folder-wide search. Uses `QDirIterator` with filters (`*.md`, `*.markdown`, `*.mdx`, `*.txt`) for recursive file discovery. Case-insensitive search via `QString::toLower()`. Match counting with multiple passes (fileContainsText + countMatchesInFile). Results show filename with match count and snippet preview. Dialog persists (non-modal hide/show) to allow picking multiple results. Keyboard navigation: arrows + Enter to open. Signal `fileSelected` passes path and search text to `MainWindow`.
+- **Find/F3 workflow**: `FindDialog` (Ctrl+F) and `SearchInDialog` (Ctrl+Shift+F) both emit search text to `MainWindow::m_lastSearchText`. `onFindNext()` (F3) wraps around using `QTextEdit::find()` and cursor manipulation. Find actions disabled on welcome page. Escape key clears selection via `keyPressEvent()`.
 - **Auto-reload**: `QFileSystemWatcher` monitors current file. Watching stops on welcome page.
 - **Recent history**: Separate tracking for files (`recentFiles`) and folders (`recentFolders`), each with independent privacy toggles (`privacy/keepRecentFiles`, `privacy/keepRecentFolders`). Max 10 entries each (LIFO), missing entries cleaned up.
 - **Last folder**: `privacy/rememberLastFolder` restores `lastFolder` on startup.
@@ -51,6 +53,8 @@
 - **Fenced code protection**: Image resolution functions skip `` ``` `` blocks (regex-based).
 - **Frontmatter**: Converted to fenced `yaml` code block before rendering.
 - **MDX files**: Rendered as plain text (Qt markdown parser can't handle JSX syntax). Line breaks preserved.
+- **Find/F3 search persistence**: `m_lastSearchText` stores the last search term from either FindDialog or SearchInDialog. Cleared when switching files via tree click (to reset context), but preserved for F3 within the same file. When opening from Search in Files, the search text is set AFTER `loadFile()` to ensure it's available for both initial highlighting and subsequent F3 presses.
+- **Search highlight clearing**: Escape key handled in `MainWindow::keyPressEvent()` to clear `QTextCursor` selection. Works globally regardless of focus.
 
 ## Platform Differences
 - **Fonts**: Linux defaults to DejaVu Sans (editor) / Noto Sans (emoji). Windows: Segoe UI both. Code font settings removed due to Qt6 bugs.

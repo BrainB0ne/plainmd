@@ -34,8 +34,13 @@ public:
     explicit FindDialog(QTextEdit *editor, QWidget *parent = nullptr);
     ~FindDialog();
 
+    QString searchText() const;
+
 protected:
     void showEvent(QShowEvent *event) override;
+
+signals:
+    void searchPerformed(const QString &text);
 
 private slots:
     void on_findButton_clicked();

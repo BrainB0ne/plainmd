@@ -19,6 +19,7 @@
 #include "filterproxymodel.h"
 #include "preferencesdialog.h"
 #include "finddialog.h"
+#include "searchindialog.h"
 #include "aboutdialog.h"
 #include "minimap.h"
 
@@ -35,6 +36,7 @@
 #include <QHeaderView>
 #include <QHelpEvent>
 #include <QIcon>
+#include <QKeyEvent>
 #include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
@@ -254,10 +256,22 @@ void MainWindow::setupMenuBar()
 
     viewMenu->addSeparator();
 
-    QAction *findAction = new QAction(QIcon(":/images/binoculars.png"), tr("&Find..."), this);
-    findAction->setShortcut(QKeySequence::Find);
-    connect(findAction, &QAction::triggered, this, &MainWindow::onFind);
-    viewMenu->addAction(findAction);
+    m_findAction = new QAction(QIcon(":/images/binoculars.png"), tr("&Find..."), this);
+    m_findAction->setShortcut(QKeySequence::Find);
+    m_findAction->setEnabled(false); // Disabled on welcome page
+    connect(m_findAction, &QAction::triggered, this, &MainWindow::onFind);
+    viewMenu->addAction(m_findAction);
+
+    m_findNextAction = new QAction(QIcon(":/images/arrow-right.png"), tr("Find &Next"), this);
+    m_findNextAction->setShortcut(QKeySequence(tr("F3")));
+    m_findNextAction->setEnabled(false); // Disabled on welcome page
+    connect(m_findNextAction, &QAction::triggered, this, &MainWindow::onFindNext);
+    viewMenu->addAction(m_findNextAction);
+
+    QAction *searchInFilesAction = new QAction(QIcon(":/images/file-search.png"), tr("Search in &Files..."), this);
+    searchInFilesAction->setShortcut(QKeySequence(tr("Ctrl+Shift+F")));
+    connect(searchInFilesAction, &QAction::triggered, this, &MainWindow::onSearchInFiles);
+    viewMenu->addAction(searchInFilesAction);
 
     viewMenu->addSeparator();
 
@@ -437,6 +451,23 @@ int MainWindow::countWords(const QString &text) const
     // Split on whitespace sequences
     QStringList words = trimmed.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
     return words.size();
+}
+
+void MainWindow::highlightSearchText(const QString &text)
+{
+    if (text.isEmpty() || !m_editor)
+        return;
+
+    // Use QTextEdit's find() to locate and select the first occurrence
+    // This works with both plain text and markdown rendered content
+    if (m_editor->find(text)) {
+        // Found at least one occurrence - QTextEdit will select it
+        // The selection will be visible with the default selection colors
+        // (usually blue highlight with white text on most themes)
+        
+        // Ensure the selected text is visible by scrolling to it
+        m_editor->ensureCursorVisible();
+    }
 }
 
 void MainWindow::onOpenFile()
@@ -684,10 +715,74 @@ void MainWindow::onFind()
 {
     if (!m_findDialog) {
         m_findDialog = new FindDialog(m_editor, this);
+        // Connect to update last search text for F3 "Find Next" support
+        connect(m_findDialog, &FindDialog::searchPerformed, this, [this](const QString &text) {
+            m_lastSearchText = text;
+        });
     }
     m_findDialog->show();
     m_findDialog->raise();
     m_findDialog->activateWindow();
+}
+
+void MainWindow::onFindNext()
+{
+    if (!m_editor || m_currentFile.isEmpty() || m_lastSearchText.isEmpty()) {
+        return;
+    }
+
+    // Try to find next occurrence
+    bool found = m_editor->find(m_lastSearchText);
+    
+    // If not found, wrap around to beginning
+    if (!found) {
+        QTextCursor cursor = m_editor->textCursor();
+        cursor.movePosition(QTextCursor::Start);
+        m_editor->setTextCursor(cursor);
+        
+        // Search from beginning
+        found = m_editor->find(m_lastSearchText);
+        
+        if (found) {
+            // Brief feedback that we wrapped around
+            if (m_statusFileMsg) {
+                m_statusFileMsg->setText(tr("Wrapped to beginning"));
+                if (m_statusMsgTimer) {
+                    m_statusMsgTimer->start(1500);
+                }
+            }
+        }
+    }
+}
+
+void MainWindow::onSearchInFiles()
+{
+    // Need a folder loaded to search
+    if (m_currentFolder.isEmpty()) {
+        QMessageBox::information(this, tr("Search in Files"),
+                                   tr("Please open a folder first to search through its files."));
+        return;
+    }
+
+    // Create dialog if not exists, or update folder path if changed
+    if (!m_searchInDialog) {
+        m_searchInDialog = new SearchInDialog(m_currentFolder, this);
+        connect(m_searchInDialog, &SearchInDialog::fileSelected, this, [this](const QString &filePath, const QString &searchText) {
+            // Load file first (this may clear m_lastSearchText when switching files)
+            loadFile(filePath);
+            // Set search text AFTER loadFile so it's available for F3
+            m_lastSearchText = searchText;
+            // Highlight the first occurrence
+            highlightSearchText(searchText);
+        });
+    } else {
+        // Update folder path if it changed
+        m_searchInDialog->setFolderPath(m_currentFolder);
+    }
+
+    m_searchInDialog->show();
+    m_searchInDialog->raise();
+    m_searchInDialog->activateWindow();
 }
 
 void MainWindow::onFileChanged(const QString &path)
@@ -729,12 +824,18 @@ void MainWindow::showWelcomePage()
     m_currentFile.clear();
     setWindowTitle(tr("PlainMD"));
 
-    // Disable print and export actions on welcome page
+    // Disable print, export, and find actions on welcome page
     if (m_printAction) {
         m_printAction->setEnabled(false);
     }
     if (m_exportPdfAction) {
         m_exportPdfAction->setEnabled(false);
+    }
+    if (m_findAction) {
+        m_findAction->setEnabled(false);
+    }
+    if (m_findNextAction) {
+        m_findNextAction->setEnabled(false);
     }
 
     // Stop watching files when showing welcome page
@@ -1044,6 +1145,11 @@ void MainWindow::loadFile(const QString &filePath)
         }
     }
 
+    // Clear last search text when switching to a different file (regular Find context)
+    if (!m_currentFile.isEmpty() && m_currentFile != filePath) {
+        m_lastSearchText.clear();
+    }
+
     m_currentFile = filePath;
     setWindowTitle(tr("%1 - PlainMD").arg(QFileInfo(filePath).fileName()));
 
@@ -1055,12 +1161,18 @@ void MainWindow::loadFile(const QString &filePath)
         m_fileWatcher->addPath(filePath);
     }
 
-    // Enable print and export actions when a file is loaded
+    // Enable print, export, and find actions when a file is loaded
     if (m_printAction) {
         m_printAction->setEnabled(true);
     }
     if (m_exportPdfAction) {
         m_exportPdfAction->setEnabled(true);
+    }
+    if (m_findAction) {
+        m_findAction->setEnabled(true);
+    }
+    if (m_findNextAction) {
+        m_findNextAction->setEnabled(true);
     }
 
     // Select the file in the tree if visible
@@ -1654,4 +1766,19 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         }
     }
     return QMainWindow::eventFilter(obj, event);
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    // Handle Escape key to clear search selection in editor
+    if (event->key() == Qt::Key_Escape && m_editor) {
+        QTextCursor cursor = m_editor->textCursor();
+        if (cursor.hasSelection()) {
+            // Clear selection by moving cursor to end of selection
+            cursor.setPosition(cursor.selectionEnd());
+            m_editor->setTextCursor(cursor);
+            return;  // Event handled
+        }
+    }
+    QMainWindow::keyPressEvent(event);
 }

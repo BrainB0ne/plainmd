@@ -38,6 +38,11 @@ FindDialog::~FindDialog()
     delete ui;
 }
 
+QString FindDialog::searchText() const
+{
+    return ui->searchEdit->text();
+}
+
 void FindDialog::showEvent(QShowEvent *event)
 {
     QDialog::showEvent(event);
@@ -74,6 +79,9 @@ bool FindDialog::performFind(bool fromStart)
 
     QString text = ui->searchEdit->text();
     if (text.isEmpty()) return false;
+
+    // Emit signal to notify MainWindow of search text (for F3 support)
+    emit searchPerformed(text);
 
     QTextDocument::FindFlags flags;
     if (ui->caseSensitiveCheck->isChecked())
