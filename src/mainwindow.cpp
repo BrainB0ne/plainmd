@@ -408,12 +408,14 @@ void MainWindow::setupStatusBar()
     m_statusWordCount = new QLabel(tr("Words: 0"), this);
     m_statusWordCount->setStyleSheet(labelStyle);
     m_statusWordCount->setAlignment(Qt::AlignCenter);
+    m_statusWordCount->setToolTip(tr("Word count"));
     status->addPermanentWidget(m_statusWordCount);
 
     // Zoom level
     m_statusZoom = new QLabel(tr("100%"), this);
     m_statusZoom->setStyleSheet(labelStyle);
     m_statusZoom->setAlignment(Qt::AlignCenter);
+    m_statusZoom->setToolTip(tr("Zoom level"));
     status->addPermanentWidget(m_statusZoom);
 
     // File type
@@ -426,6 +428,7 @@ void MainWindow::setupStatusBar()
     m_statusEncoding = new QLabel(tr("UTF-8"), this);
     m_statusEncoding->setStyleSheet(labelStyle);
     m_statusEncoding->setAlignment(Qt::AlignCenter);
+    m_statusEncoding->setToolTip(tr("File encoding"));
     status->addPermanentWidget(m_statusEncoding);
 
     // Word wrap toggle button (icon only)
@@ -469,6 +472,7 @@ void MainWindow::updateStatusBar()
         if (m_statusFileType) {
             m_statusFileType->setText(tr("Ready"));
             m_statusFileType->setVisible(true);
+            m_statusFileType->setToolTip(QString());  // No tooltip on welcome page
         }
         if (m_statusEncoding) m_statusEncoding->setVisible(false);
         if (m_statusWordCount) m_statusWordCount->setVisible(false);
@@ -486,6 +490,7 @@ void MainWindow::updateStatusBar()
 
     // File loaded - show all status items
     m_statusFileType->setVisible(true);
+    m_statusFileType->setToolTip(tr("File type"));
     m_statusEncoding->setVisible(true);
     m_statusWordCount->setVisible(true);
     m_statusZoom->setVisible(true);
