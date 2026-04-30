@@ -21,7 +21,7 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **Find/Search** - Search within documents with Ctrl+F, find next with F3
 - **Search in Files** - Search across all markdown files in the loaded folder with Ctrl+Shift+F. Shows match count per file, snippet preview, and highlights first occurrence when opened
 - **Print & Export** - Print to physical printer or export directly to PDF (with better emoji support)
-- **External editor integration** - Open files with your preferred editor from the context menu
+- **Copy Code** - Right-click on code blocks or inline code to copy to clipboard
 - **Customizable fonts** - Configure editor font and emoji print font
 - **Privacy options** - Toggle external image loading, recent files/folders history, and last opened folder memory independently
 - **Folder protection** - Blocks opening root drives and system folders (Windows, Program Files, /usr, etc.) to prevent UI freezing; warns when opening empty folders; shows progress indicator while scanning

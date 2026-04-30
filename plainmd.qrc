@@ -23,6 +23,9 @@
         <file>images/arrow-right.png</file>
         <file>images/text-wrap.png</file>
         <file>images/text-wrap-disabled.png</file>
+        <file>images/copy.png</file>
+        <file>images/codeblock.png</file>
+        <file>images/select-all.png</file>
         <file>images/LICENSE-ICONS</file>
     </qresource>
 </RCC>

@@ -24,6 +24,7 @@
 #include "minimap.h"
 
 #include <QApplication>
+#include <QClipboard>
 #include <QCryptographicHash>
 #include <QDialog>
 #include <QDialogButtonBox>
@@ -166,6 +167,10 @@ void MainWindow::setupEditor()
     m_editor->setMouseTracking(true);
     m_editor->viewport()->setMouseTracking(true);
     m_editor->viewport()->installEventFilter(this);
+
+    // Set up custom context menu for code block copying
+    m_editor->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_editor, &QTextEdit::customContextMenuRequested, this, &MainWindow::onEditorContextMenu);
 
     // Apply word wrap setting (default: enabled)
     bool wordWrap = m_settings.value("view/wordWrap", true).toBool();
@@ -626,6 +631,121 @@ void MainWindow::onFileTreeContextMenu(const QPoint &pos)
 
     contextMenu.exec(m_fileTree->viewport()->mapToGlobal(pos));
 }
+
+void MainWindow::onEditorContextMenu(const QPoint &pos)
+{
+    if (!m_editor || m_currentFile.isEmpty()) return;
+
+    // Get cursor at click position to check formatting
+    QTextCursor cursor = m_editor->cursorForPosition(pos);
+    int cursorPos = cursor.position();
+
+    // Check if cursor is in code by looking at surrounding characters
+    // We scan a small window around the click position to find monospace text
+    QString text = m_editor->toPlainText();
+    bool inCode = false;
+    int codeStart = -1;
+    int codeEnd = -1;
+
+    // Scan up to 5 characters in each direction from click position
+    for (int offset = 0; offset <= 5; offset++) {
+        // Check at click position ± offset
+        for (int direction : {0, -1, 1}) {
+            int checkPos = cursorPos + (offset * direction);
+            if (checkPos < 0 || checkPos >= text.length()) continue;
+
+            // Get format of character AT checkPos (not before)
+            QTextCursor checkCursor(m_editor->document());
+            checkCursor.setPosition(checkPos);
+            // For a cursor at position P, charFormat() returns format of character at P-1 (if at block start, returns block char format)
+            // To get format at position P, we need to select the character at P
+            if (checkPos < text.length()) {
+                checkCursor.setPosition(checkPos);
+                checkCursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
+            }
+            QTextCharFormat checkFormat = checkCursor.charFormat();
+            QString checkFont = checkFormat.font().family();
+
+            if (checkFont.contains("Mono", Qt::CaseInsensitive) ||
+                checkFont.contains("Consolas", Qt::CaseInsensitive) ||
+                checkFont.contains("Courier", Qt::CaseInsensitive)) {
+                // Found monospace text, now expand to find full boundaries
+                inCode = true;
+
+                // Find start by going backward - check each character individually
+                codeStart = checkPos;
+                while (codeStart > 0) {
+                    QTextCursor startCursor(m_editor->document());
+                    startCursor.setPosition(codeStart - 1);
+                    startCursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
+                    QTextCharFormat startFormat = startCursor.charFormat();
+                    QString startFont = startFormat.font().family();
+                    if (!(startFont.contains("Mono", Qt::CaseInsensitive) ||
+                          startFont.contains("Consolas", Qt::CaseInsensitive) ||
+                          startFont.contains("Courier", Qt::CaseInsensitive))) {
+                        break;
+                    }
+                    codeStart--;
+                }
+
+                // Find end by going forward - check each character individually
+                codeEnd = checkPos + 1;
+                while (codeEnd < text.length()) {
+                    QTextCursor endCursor(m_editor->document());
+                    endCursor.setPosition(codeEnd);
+                    endCursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
+                    QTextCharFormat endFormat = endCursor.charFormat();
+                    QString endFont = endFormat.font().family();
+                    if (!(endFont.contains("Mono", Qt::CaseInsensitive) ||
+                          endFont.contains("Consolas", Qt::CaseInsensitive) ||
+                          endFont.contains("Courier", Qt::CaseInsensitive))) {
+                        break;
+                    }
+                    codeEnd++;
+                }
+
+                // We found and bounded the code
+                break;
+            }
+        }
+        if (inCode) break;
+    }
+
+    // Create custom context menu (not using standard one so we can control icons)
+    QMenu menu(this);
+
+    // Add "Copy Code" action at the top if in code (inline or block)
+    if (inCode && codeStart >= 0 && codeEnd > codeStart) {
+        QString codeContent = text.mid(codeStart, codeEnd - codeStart);
+        // Trim leading/trailing whitespace but preserve internal formatting
+        codeContent = codeContent.trimmed();
+        if (!codeContent.isEmpty()) {
+            QAction *copyCodeAction = menu.addAction(QIcon(":/images/codeblock.png"), tr("Copy Code"));
+            connect(copyCodeAction, &QAction::triggered, this, [codeContent]() {
+                QClipboard *clipboard = QApplication::clipboard();
+                clipboard->setText(codeContent);
+            });
+            menu.addSeparator();
+        }
+    }
+
+    // Add Copy and Select All actions with custom icons (read-only, so no Cut/Paste)
+    bool hasSelection = m_editor->textCursor().hasSelection();
+
+    QAction *copyAction = menu.addAction(QIcon(":/images/copy.png"), tr("Copy"));
+    copyAction->setEnabled(hasSelection);
+    connect(copyAction, &QAction::triggered, m_editor, &QTextEdit::copy);
+
+    menu.addSeparator();
+
+    QAction *selectAllAction = menu.addAction(QIcon(":/images/select-all.png"), tr("Select All"));
+    connect(selectAllAction, &QAction::triggered, m_editor, &QTextEdit::selectAll);
+
+    // Show the menu
+    menu.exec(m_editor->viewport()->mapToGlobal(pos));
+}
+
+
 
 void MainWindow::onOpenWithExternalEditor()
 {
