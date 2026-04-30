@@ -18,11 +18,13 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **Minimap** - Document overview with color-coded content types (images, headings, lists, links, code blocks) and viewport highlight; toggle with F10 or status bar button. Plain text (.txt) and MDX files show simplified minimap without markdown-specific coloring
 - **Status bar** - Shows word count, zoom level, file type, encoding (auto-detected UTF-8 or ANSI), word wrap toggle, and quick-toggle buttons for file tree and minimap
 - **Zoom controls** - Zoom in/out with Ctrl++ and Ctrl+-
+- **Word wrap toggle** - Toggle line wrapping with Ctrl+W or status bar button
 - **Find/Search** - Search within documents with Ctrl+F, find next with F3
 - **Search in Files** - Search across all markdown files in the loaded folder with Ctrl+Shift+F. Shows match count per file, snippet preview, and highlights first occurrence when opened
 - **Print & Export** - Print to physical printer or export directly to PDF (with better emoji support)
-- **Copy Code** - Right-click on code blocks or inline code to copy to clipboard
+- **Copy Code** - Right-click on code blocks or inline code to copy to clipboard with custom context menu
 - **Customizable fonts** - Configure editor font and emoji print font
+- **Window title format** - Choose between filename only or full path in window title
 - **Privacy options** - Toggle external image loading, recent files/folders history, last opened file, and last opened folder memory independently
 - **Folder protection** - Blocks opening root drives and system folders (Windows, Program Files, /usr, etc.) to prevent UI freezing; warns when opening empty folders; shows progress indicator while scanning
 - **URL tooltips** - Hover over links to see the resolved absolute path
@@ -118,6 +120,7 @@ qmake plainmd.pro && make
 | Ctrl+Shift+F | Search in files |
 | F9 | Toggle file tree |
 | F10 | Toggle minimap |
+| Ctrl+W | Toggle word wrap |
 | Ctrl+P | Print |
 | Ctrl+Shift+P | Export to PDF |
 | Ctrl+, | Preferences |
@@ -133,7 +136,8 @@ Access preferences via **View → Preferences** (Ctrl+,):
 - **Editor Font** - Main text font
 - **Emoji Print Font** - Font for emoji characters when printing (use a Nerd Font for best results)
 - **External Editor** - Path to your preferred external editor
-- **Privacy** - Toggle external image preview, recent files/folders history, and last opened folder memory independently
+- **Window Title** - Choose between filename only or full path format
+- **Privacy** - Toggle external image preview, recent files/folders history, last opened file, and last opened folder memory independently
 
 ### Emoji Printing on Windows (Experimental)
 
@@ -159,10 +163,14 @@ Color emoji fonts (like Segoe UI Emoji) may not render correctly when printing t
 PlainMD/
 ├── src/                    # Source code
 │   ├── main.cpp
-│   ├── mainwindow.cpp/h
-│   ├── preferencesdialog.cpp/h
-│   ├── finddialog.cpp/h
-│   └── filterproxymodel.cpp/h
+│   ├── mainwindow.cpp/h    # Main window and UI
+│   ├── preferencesdialog.cpp/h/ui # Preferences dialog
+│   ├── finddialog.cpp/h/ui         # Find in document dialog
+│   ├── searchindialog.cpp/h/ui       # Search in files dialog
+│   ├── aboutdialog.cpp/h/ui        # About dialog with license viewer
+│   ├── licensedialog.cpp/h/ui      # License viewer dialog
+│   ├── minimap.cpp/h       # Document minimap widget
+│   └── filterproxymodel.cpp/h      # File tree filtering
 ├── images/                 # Application icons (Tabler Icons)
 ├── samples/                # Sample markdown files
 ├── .zed/                   # Zed Editor configuration
