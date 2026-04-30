@@ -1217,7 +1217,15 @@ void MainWindow::loadFile(const QString &filePath)
     }
 
     m_currentFile = filePath;
-    setWindowTitle(tr("%1 - PlainMD").arg(QFileInfo(filePath).fileName()));
+    // Format window title based on user preference
+    int titleFormat = m_settings.value("view/windowTitleFormat", 0).toInt();
+    if (titleFormat == 1) {
+        // Full path format: "PlainMD - E:\\path\\to\\file.md"
+        setWindowTitle(tr("PlainMD - %1").arg(QDir::toNativeSeparators(filePath)));
+    } else {
+        // Filename only format (default): "PlainMD - file.md"
+        setWindowTitle(tr("PlainMD - %1").arg(QFileInfo(filePath).fileName()));
+    }
 
     // Watch the file for external changes
     if (m_fileWatcher) {

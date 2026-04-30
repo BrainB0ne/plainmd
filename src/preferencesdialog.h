@@ -44,6 +44,7 @@ public:
     QString externalEditor() const;
     bool useNerdFontForEmoji() const;
     QFont printEmojiFont() const;
+    int windowTitleFormat() const;  // 0 = filename only, 1 = full path
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;

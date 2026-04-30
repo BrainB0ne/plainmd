@@ -94,27 +94,57 @@
       </item>
      </layout>
     </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="privacyGroup">
-     <property name="title">
-      <string>Privacy</string>
-     </property>
-     <layout class="QVBoxLayout" name="privacyLayout">
-      <item>
-       <widget class="QCheckBox" name="previewCheck">
-        <property name="text">
-         <string>Preview external images</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="keepRecentCheck">
-        <property name="text">
-         <string>Keep recent files history</string>
-        </property>
-       </widget>
-      </item>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="viewGroup">
+      <property name="title">
+       <string>View</string>
+      </property>
+      <layout class="QGridLayout" name="viewLayout">
+       <item row="0" column="0">
+        <widget class="QLabel" name="windowTitleLabel">
+         <property name="text">
+          <string>Window Title:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="windowTitleCombo">
+         <item>
+          <property name="text">
+           <string>Filename only</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Full path</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="privacyGroup">
+      <property name="title">
+       <string>Privacy</string>
+      </property>
+      <layout class="QVBoxLayout" name="privacyLayout">
+       <item>
+        <widget class="QCheckBox" name="previewCheck">
+         <property name="text">
+          <string>Preview external images</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="keepRecentCheck">
+         <property name="text">
+          <string>Keep recent files history</string>
+         </property>
+        </widget>
+       </item>
        <item>
         <widget class="QCheckBox" name="keepRecentFoldersCheck">
          <property name="text">
@@ -132,15 +162,15 @@
       </layout>
      </widget>
     </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </spacer>
-   </item>
-   <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="standardButtons">
       <set>QDialogButtonBox::Ok|QDialogButtonBox::Cancel</set>
      </property>

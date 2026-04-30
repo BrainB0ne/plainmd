@@ -78,6 +78,9 @@ void PreferencesDialog::loadSettings()
     ui->keepRecentCheck->setChecked(settings.value("privacy/keepRecentFiles", true).toBool());
     ui->keepRecentFoldersCheck->setChecked(settings.value("privacy/keepRecentFolders", true).toBool());
     ui->rememberLastFolderCheck->setChecked(settings.value("privacy/rememberLastFolder", true).toBool());
+
+    // Load window title format (0 = filename only, 1 = full path)
+    ui->windowTitleCombo->setCurrentIndex(settings.value("view/windowTitleFormat", 0).toInt());
 }
 
 void PreferencesDialog::saveSettings()
@@ -94,6 +97,7 @@ void PreferencesDialog::saveSettings()
     settings.setValue("privacy/keepRecentFiles", ui->keepRecentCheck->isChecked());
     settings.setValue("privacy/keepRecentFolders", ui->keepRecentFoldersCheck->isChecked());
     settings.setValue("privacy/rememberLastFolder", ui->rememberLastFolderCheck->isChecked());
+    settings.setValue("view/windowTitleFormat", ui->windowTitleCombo->currentIndex());
 }
 
 QString PreferencesDialog::fontFamily() const
@@ -174,6 +178,11 @@ void PreferencesDialog::browseExternalEditor()
     if (!path.isEmpty()) {
         ui->externalEditorEdit->setText(QDir::toNativeSeparators(path));
     }
+}
+
+int PreferencesDialog::windowTitleFormat() const
+{
+    return ui->windowTitleCombo->currentIndex();
 }
 
 bool PreferencesDialog::eventFilter(QObject *watched, QEvent *event)
