@@ -349,6 +349,15 @@ void MainWindow::setupStatusBar()
     connect(m_toggleFileTreeBtn, &QPushButton::toggled, this, &MainWindow::onToggleFileTree);
     status->addWidget(m_toggleFileTreeBtn);
 
+    // Progress bar for folder loading (hidden by default, left side)
+    m_statusProgress = new QProgressBar(this);
+    m_statusProgress->setMaximumWidth(80);
+    m_statusProgress->setMaximumHeight(14);
+    m_statusProgress->setTextVisible(false);
+    m_statusProgress->setRange(0, 0);  // Indeterminate mode
+    m_statusProgress->hide();
+    status->addWidget(m_statusProgress);
+
     // File loaded message (next to Tree button, auto-clears after 3 sec)
     m_statusFileMsg = new QLabel(this);
     m_statusFileMsg->setMinimumWidth(1);  // Start small, expand when text is set
@@ -1472,8 +1481,19 @@ bool MainWindow::isMarkdownFile(const QString &filePath) const
     return suffix == "md" || suffix == "markdown" || suffix == "mdx" || suffix == "txt";
 }
 
-bool MainWindow::folderHasValidFiles(const QString &folderPath) const
+bool MainWindow::folderHasValidFiles(const QString &folderPath)
 {
+    // Show progress bar (indeterminate mode = busy indicator)
+    if (m_statusProgress) {
+        // Ensure progress bar is visible and animate
+        m_statusProgress->setValue(0);
+        m_statusProgress->setRange(0, 0);  // Reset to indeterminate mode
+        m_statusProgress->show();
+        m_statusProgress->repaint();  // Force immediate paint
+        statusBar()->repaint();  // Force status bar repaint
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    }
+
     // Recursive check with depth limit and file count limit
     // to avoid scanning massive folders
     const int maxDepth = 3;  // Check up to 3 levels deep
@@ -1509,7 +1529,14 @@ bool MainWindow::folderHasValidFiles(const QString &folderPath) const
         return filesFound > 0;
     };
     
-    return checkRecursive(folderPath, 0);
+    bool result = checkRecursive(folderPath, 0);
+    
+    // Hide progress bar
+    if (m_statusProgress) {
+        m_statusProgress->hide();
+    }
+    
+    return result;
 }
 
 QString MainWindow::resolveExternalImages(const QString &markdownContent, bool previewEnabled)

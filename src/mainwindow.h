@@ -36,6 +36,7 @@
 #include <QRegularExpression>
 #include <QFileSystemWatcher>
 #include <QLabel>
+#include <QProgressBar>
 #include <QPushButton>
 #include "filterproxymodel.h"
 
@@ -97,7 +98,7 @@ private:
     void refreshRecentFoldersMenu();
 
     bool isMarkdownFile(const QString &filePath) const;
-    bool folderHasValidFiles(const QString &folderPath) const;
+    bool folderHasValidFiles(const QString &folderPath);
     QString resolveExternalImages(const QString &markdownContent, bool previewEnabled);
     QString resolveRelativeImages(const QString &markdownContent, const QString &basePath);
     QString resolveFrontMatter(const QString &markdownContent);
@@ -136,6 +137,7 @@ private:
     // Status bar widgets
     QLabel *m_statusFileType = nullptr;
     QLabel *m_statusEncoding = nullptr;
+    QProgressBar *m_statusProgress = nullptr;  // Folder loading progress
     QLabel *m_statusWordCount = nullptr;
     QLabel *m_statusZoom = nullptr;
     QPushButton *m_toggleFileTreeBtn = nullptr;
