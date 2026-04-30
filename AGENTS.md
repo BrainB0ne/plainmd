@@ -57,6 +57,12 @@
 - **Search highlight clearing**: Escape key handled in `MainWindow::keyPressEvent()` to clear `QTextCursor` selection. Works globally regardless of focus.
 - **Encoding detection**: Uses `QStringDecoder` (Qt 6.0+) to auto-detect file encoding. Tries UTF-8 first via `QStringDecoder::Utf8`, falls back to system encoding (`QStringDecoder::System` which is Windows-1252 on Windows, ISO-8859-1/Latin1 on Linux) if UTF-8 decoding has errors. Detection result stored in `m_detectedEncoding` for status bar display.
 - **Auto-reload debouncing**: `QFileSystemWatcher::fileChanged` can fire multiple times for a single external save operation. A 500ms debounce timer (`m_fileChangeDebounceTimer`) prevents showing multiple "File Modified" dialogs. The timer is restarted on each file change event, and only shows the dialog when the timer expires (after 500ms of no new events). Additionally, `m_fileChangeDialogOpen` flag prevents multiple dialogs from appearing if the user hasn't responded to the first one yet.
+- **Folder protection**: `loadFolder()` validates folders before loading:
+  - Empty folder check: `folderHasValidFiles()` scans recursively up to 3 levels deep, stopping at 100 files. Shows status bar warning if no markdown files found.
+  - Root drive blocking: `QDir::isRoot()` blocks opening `C:\`, `/`, etc. with warning dialog.
+  - System folder blocking: Exact path matching blocks Windows system folders (Windows, Program Files, ProgramData) and Linux system folders (/bin, /usr, /etc, /lib, etc.) with warning dialog.
+  - Subfolders allowed: System folder subfolders (e.g., `C:\ProgramData\YourApp`) can be opened.
+- **FilterProxyModel**: `hasMatchingFiles()` limited to 1000 files to prevent scanning massive folders. Checks only immediate children + one subdirectory level (not recursive) to prevent blocking the UI.
 
 ## Platform Differences
 - **Fonts**: Linux defaults to DejaVu Sans (editor) / Noto Sans (emoji). Windows: Segoe UI both. Code font settings removed due to Qt6 bugs.

@@ -97,6 +97,7 @@ private:
     void refreshRecentFoldersMenu();
 
     bool isMarkdownFile(const QString &filePath) const;
+    bool folderHasValidFiles(const QString &folderPath) const;
     QString resolveExternalImages(const QString &markdownContent, bool previewEnabled);
     QString resolveRelativeImages(const QString &markdownContent, const QString &basePath);
     QString resolveFrontMatter(const QString &markdownContent);

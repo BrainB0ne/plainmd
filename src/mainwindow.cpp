@@ -1269,6 +1269,56 @@ void MainWindow::loadFolder(const QString &folderPath)
 {
     if (!QDir(folderPath).exists()) return;
 
+    // Block root drives (cheap check first)
+    QDir dir(folderPath);
+    if (dir.isRoot()) {
+        QMessageBox::warning(this, tr("Large Folder"),
+            tr("Opening the root drive (%1) may cause the application to become unresponsive.\n\n"
+               "Please open a specific folder instead.").arg(QDir::toNativeSeparators(folderPath)));
+        return;
+    }
+
+    // Block only exact system root folders (not subfolders)
+    QString pathLower = QDir::cleanPath(folderPath).toLower();
+#ifdef Q_OS_WIN
+    QStringList systemRoots = QStringList() << "c:/windows" << "c:/program files" << "c:/program files (x86)"
+                                              << "c:/programdata";
+    if (systemRoots.contains(pathLower)) {
+        QMessageBox::warning(this, tr("System Folder"),
+            tr("Opening %1 directly may cause the application to become unresponsive.\n\n"
+               "Please open a specific subfolder instead (e.g., %2\\YourApp)."
+               ).arg(QDir::toNativeSeparators(folderPath))
+                .arg(QDir::toNativeSeparators(folderPath)));
+        return;
+    }
+    if (pathLower.contains("/system volume information")) {
+        QMessageBox::warning(this, tr("System Folder"),
+            tr("Cannot open system folder (%1).").arg(QDir::toNativeSeparators(folderPath)));
+        return;
+    }
+#else
+    QStringList systemRoots = QStringList() << "/bin" << "/sbin" << "/usr" << "/etc" << "/lib"
+                                            << "/lib64" << "/dev" << "/proc" << "/sys" << "/boot";
+    if (systemRoots.contains(pathLower)) {
+        QMessageBox::warning(this, tr("System Folder"),
+            tr("Opening %1 directly may cause the application to become unresponsive.\n\n"
+               "Please open a specific subfolder instead."
+               ).arg(QDir::toNativeSeparators(folderPath)));
+        return;
+    }
+#endif
+
+    // Check if folder has any valid markdown files (expensive scan - do last)
+    if (!folderHasValidFiles(folderPath)) {
+        // No valid files found - show info but don't change tree
+        if (m_statusFileMsg) {
+            m_statusFileMsg->show();
+            m_statusFileMsg->setText(tr("No markdown files found in: %1").arg(QDir::toNativeSeparators(folderPath)));
+            m_statusMsgTimer->start(3000);
+        }
+        return;
+    }
+
     if (!m_fileTree->model()) {
         m_fileTree->setModel(m_proxyModel);
         m_fileTree->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
@@ -1420,6 +1470,46 @@ bool MainWindow::isMarkdownFile(const QString &filePath) const
 {
     QString suffix = QFileInfo(filePath).suffix().toLower();
     return suffix == "md" || suffix == "markdown" || suffix == "mdx" || suffix == "txt";
+}
+
+bool MainWindow::folderHasValidFiles(const QString &folderPath) const
+{
+    // Recursive check with depth limit and file count limit
+    // to avoid scanning massive folders
+    const int maxDepth = 3;  // Check up to 3 levels deep
+    const int maxFiles = 100; // Stop after finding 100 files
+    
+    std::function<bool(const QString&, int)> checkRecursive;
+    int filesFound = 0;
+    
+    checkRecursive = [&](const QString &path, int depth) -> bool {
+        if (depth > maxDepth || filesFound >= maxFiles) {
+            return filesFound > 0;
+        }
+        
+        QDir dir(path);
+        // Check files in current directory
+        QFileInfoList entries = dir.entryInfoList(QStringList() << "*.md" << "*.markdown" << "*.mdx" << "*.txt",
+                                                    QDir::Files, QDir::Name);
+        if (!entries.isEmpty()) {
+            filesFound += entries.size();
+            if (filesFound >= maxFiles) {
+                return true;
+            }
+        }
+        
+        // Check subdirectories
+        QFileInfoList subdirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+        for (const QFileInfo &subdir : subdirs) {
+            if (checkRecursive(subdir.filePath(), depth + 1)) {
+                return true;
+            }
+        }
+        
+        return filesFound > 0;
+    };
+    
+    return checkRecursive(folderPath, 0);
 }
 
 QString MainWindow::resolveExternalImages(const QString &markdownContent, bool previewEnabled)
