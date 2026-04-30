@@ -59,6 +59,7 @@
 - **Auto-reload debouncing**: `QFileSystemWatcher::fileChanged` can fire multiple times for a single external save operation. A 500ms debounce timer (`m_fileChangeDebounceTimer`) prevents showing multiple "File Modified" dialogs. The timer is restarted on each file change event, and only shows the dialog when the timer expires (after 500ms of no new events). Additionally, `m_fileChangeDialogOpen` flag prevents multiple dialogs from appearing if the user hasn't responded to the first one yet.
 - **Folder protection**: `loadFolder()` validates folders before loading:
   - Empty folder check: `folderHasValidFiles()` scans recursively up to 3 levels deep, stopping at 100 files. Shows status bar warning if no markdown files found.
+  - Progress indicator: `m_statusProgress` (QProgressBar in indeterminate mode) shows while scanning. Located on left side of status bar (temporary area), hidden when scan completes. Force repaint with `repaint()` and `QCoreApplication::processEvents()` to ensure visibility.
   - Root drive blocking: `QDir::isRoot()` blocks opening `C:\`, `/`, etc. with warning dialog.
   - System folder blocking: Exact path matching blocks Windows system folders (Windows, Program Files, ProgramData) and Linux system folders (/bin, /usr, /etc, /lib, etc.) with warning dialog.
   - Subfolders allowed: System folder subfolders (e.g., `C:\ProgramData\YourApp`) can be opened.
