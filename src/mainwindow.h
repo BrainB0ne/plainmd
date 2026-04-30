@@ -74,6 +74,7 @@ private slots:
     void onZoomReset();
     void onToggleFileTree(bool visible);
     void onToggleMinimap(bool visible);
+    void onToggleWordWrap(bool enabled);
     void onAbout();
     void onPrint();
     void onExportToPdf();
@@ -123,6 +124,7 @@ private:
     QAction *m_findNextAction = nullptr;
     QAction *m_showFileTreeAction = nullptr;
     QAction *m_showMinimapAction = nullptr;
+    QAction *m_wordWrapAction = nullptr;
 
     QString m_currentFile;
     QString m_currentFolder;
@@ -137,6 +139,7 @@ private:
     // Status bar widgets
     QLabel *m_statusFileType = nullptr;
     QLabel *m_statusEncoding = nullptr;
+    QPushButton *m_statusWrapBtn = nullptr;  // Word wrap toggle button
     QProgressBar *m_statusProgress = nullptr;  // Folder loading progress
     QLabel *m_statusWordCount = nullptr;
     QLabel *m_statusZoom = nullptr;

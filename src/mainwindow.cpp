@@ -102,6 +102,19 @@ MainWindow::MainWindow(QWidget *parent)
     }
     // Minimap stays hidden on welcome page - will be shown when a file is loaded in loadFile()
 
+    // Restore word wrap setting (default: enabled)
+    bool wordWrap = m_settings.value("view/wordWrap", true).toBool();
+    if (m_wordWrapAction) {
+        m_wordWrapAction->blockSignals(true);
+        m_wordWrapAction->setChecked(wordWrap);
+        m_wordWrapAction->blockSignals(false);
+    }
+    // Update status bar button to match restored setting
+    if (m_statusWrapBtn) {
+        m_statusWrapBtn->setChecked(wordWrap);
+        m_statusWrapBtn->setIcon(QIcon(wordWrap ? ":/images/text-wrap.png" : ":/images/text-wrap-disabled.png"));
+    }
+
     // Setup file watcher for auto-reload
     m_fileWatcher = new QFileSystemWatcher(this);
     connect(m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::onFileChanged);
@@ -153,6 +166,10 @@ void MainWindow::setupEditor()
     m_editor->setMouseTracking(true);
     m_editor->viewport()->setMouseTracking(true);
     m_editor->viewport()->installEventFilter(this);
+
+    // Apply word wrap setting (default: enabled)
+    bool wordWrap = m_settings.value("view/wordWrap", true).toBool();
+    m_editor->setLineWrapMode(wordWrap ? QTextEdit::WidgetWidth : QTextEdit::NoWrap);
 
     applyEditorFont();
 
@@ -260,6 +277,12 @@ void MainWindow::setupMenuBar()
     m_showMinimapAction->setChecked(false);
     connect(m_showMinimapAction, &QAction::toggled, this, &MainWindow::onToggleMinimap);
     viewMenu->addAction(m_showMinimapAction);
+
+    m_wordWrapAction = new QAction(tr("&Word Wrap"), this);
+    m_wordWrapAction->setShortcut(QKeySequence(tr("Ctrl+W")));
+    m_wordWrapAction->setCheckable(true);
+    connect(m_wordWrapAction, &QAction::toggled, this, &MainWindow::onToggleWordWrap);
+    viewMenu->addAction(m_wordWrapAction);
 
     viewMenu->addSeparator();
 
@@ -400,6 +423,24 @@ void MainWindow::setupStatusBar()
     m_statusEncoding->setAlignment(Qt::AlignCenter);
     status->addPermanentWidget(m_statusEncoding);
 
+    // Word wrap toggle button (icon only)
+    m_statusWrapBtn = new QPushButton(this);
+    bool wordWrapDefault = m_settings.value("view/wordWrap", true).toBool();
+    m_statusWrapBtn->setIcon(QIcon(wordWrapDefault ? ":/images/text-wrap.png" : ":/images/text-wrap-disabled.png"));
+    m_statusWrapBtn->setIconSize(QSize(20, 20));
+    m_statusWrapBtn->setFlat(true);
+    m_statusWrapBtn->setFixedSize(24, 24);
+    m_statusWrapBtn->setStyleSheet(QStringLiteral(
+        "QPushButton { padding-left: 2px; padding-top: 2px; padding-bottom: 2px; padding-right: 4px; margin: 0px; border: none; background: transparent; }"
+        "QPushButton:checked { background: transparent; }"));
+    m_statusWrapBtn->setCheckable(true);
+    m_statusWrapBtn->setChecked(wordWrapDefault);
+    m_statusWrapBtn->setToolTip(tr("Toggle word wrap"));
+    // Initially disabled on welcome page - will be enabled when file is loaded
+    m_statusWrapBtn->setEnabled(!m_currentFile.isEmpty());
+    connect(m_statusWrapBtn, &QPushButton::toggled, this, &MainWindow::onToggleWordWrap);
+    status->addPermanentWidget(m_statusWrapBtn);
+
     // Minimap toggle button (icon only, rightmost)
     m_toggleMinimapBtn = new QPushButton(this);
     m_toggleMinimapBtn->setIcon(QIcon(":/images/layout-sidebar-right.png"));
@@ -431,6 +472,10 @@ void MainWindow::updateStatusBar()
             m_toggleMinimapBtn->setVisible(false);
             m_toggleMinimapBtn->setEnabled(false);
         }
+        if (m_statusWrapBtn) {
+            m_statusWrapBtn->setVisible(false);
+            m_statusWrapBtn->setEnabled(false);
+        }
         return;
     }
 
@@ -439,10 +484,14 @@ void MainWindow::updateStatusBar()
     m_statusEncoding->setVisible(true);
     m_statusWordCount->setVisible(true);
     m_statusZoom->setVisible(true);
-    // Enable minimap toggle when file is loaded
+    // Enable minimap and word wrap toggles when file is loaded
     if (m_toggleMinimapBtn) {
         m_toggleMinimapBtn->setVisible(true);
         m_toggleMinimapBtn->setEnabled(true);
+    }
+    if (m_statusWrapBtn) {
+        m_statusWrapBtn->setVisible(true);
+        m_statusWrapBtn->setEnabled(true);
     }
 
     // Determine file type
@@ -711,6 +760,25 @@ void MainWindow::onToggleMinimap(bool visible)
     }
     if (m_showMinimapAction && m_showMinimapAction->isChecked() != visible) {
         m_showMinimapAction->setChecked(visible);
+    }
+}
+
+void MainWindow::onToggleWordWrap(bool enabled)
+{
+    if (m_editor) {
+        m_editor->setLineWrapMode(enabled ? QTextEdit::WidgetWidth : QTextEdit::NoWrap);
+    }
+    m_settings.setValue("view/wordWrap", enabled);
+    // Sync menu action with button (avoid infinite loop by checking first)
+    if (m_wordWrapAction && m_wordWrapAction->isChecked() != enabled) {
+        m_wordWrapAction->setChecked(enabled);
+    }
+    if (m_statusWrapBtn) {
+        if (m_statusWrapBtn->isChecked() != enabled) {
+            m_statusWrapBtn->setChecked(enabled);
+        }
+        // Update icon based on state
+        m_statusWrapBtn->setIcon(QIcon(enabled ? ":/images/text-wrap.png" : ":/images/text-wrap-disabled.png"));
     }
 }
 
