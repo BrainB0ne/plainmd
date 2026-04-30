@@ -23,7 +23,7 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **Print & Export** - Print to physical printer or export directly to PDF (with better emoji support)
 - **Copy Code** - Right-click on code blocks or inline code to copy to clipboard
 - **Customizable fonts** - Configure editor font and emoji print font
-- **Privacy options** - Toggle external image loading, recent files/folders history, and last opened folder memory independently
+- **Privacy options** - Toggle external image loading, recent files/folders history, last opened file, and last opened folder memory independently
 - **Folder protection** - Blocks opening root drives and system folders (Windows, Program Files, /usr, etc.) to prevent UI freezing; warns when opening empty folders; shows progress indicator while scanning
 - **URL tooltips** - Hover over links to see the resolved absolute path
 - **YAML frontmatter display** - Shows frontmatter as a code block

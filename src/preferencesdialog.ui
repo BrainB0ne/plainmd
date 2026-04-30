@@ -145,23 +145,30 @@
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QCheckBox" name="keepRecentFoldersCheck">
-         <property name="text">
-          <string>Keep recent folders history</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="rememberLastFolderCheck">
-         <property name="text">
-          <string>Remember last opened folder</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
+        <item>
+         <widget class="QCheckBox" name="keepRecentFoldersCheck">
+          <property name="text">
+           <string>Keep recent folders history</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="rememberLastFileCheck">
+          <property name="text">
+           <string>Remember last opened file</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="rememberLastFolderCheck">
+          <property name="text">
+           <string>Remember last opened folder</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
     <item>
      <spacer name="verticalSpacer">
       <property name="orientation">

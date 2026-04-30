@@ -50,7 +50,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    void openFile(const QString &filePath);
+    void openFile(const QString &filePath, bool loadFileFolder = true);
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
@@ -93,7 +93,7 @@ private:
     void setupFileTree();
     void setupEditor();
     void loadFile(const QString &filePath);
-    void loadFolder(const QString &folderPath);
+    void loadFolder(const QString &folderPath, bool rememberAsLastFolder = true);
     void updateRecentFiles(const QString &filePath);
     void updateRecentFolders(const QString &folderPath);
     void refreshRecentFilesMenu();

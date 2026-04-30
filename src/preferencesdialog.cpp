@@ -78,6 +78,7 @@ void PreferencesDialog::loadSettings()
     ui->keepRecentCheck->setChecked(settings.value("privacy/keepRecentFiles", true).toBool());
     ui->keepRecentFoldersCheck->setChecked(settings.value("privacy/keepRecentFolders", true).toBool());
     ui->rememberLastFolderCheck->setChecked(settings.value("privacy/rememberLastFolder", true).toBool());
+    ui->rememberLastFileCheck->setChecked(settings.value("privacy/rememberLastFile", true).toBool());
 
     // Load window title format (0 = filename only, 1 = full path)
     ui->windowTitleCombo->setCurrentIndex(settings.value("view/windowTitleFormat", 0).toInt());
@@ -97,6 +98,7 @@ void PreferencesDialog::saveSettings()
     settings.setValue("privacy/keepRecentFiles", ui->keepRecentCheck->isChecked());
     settings.setValue("privacy/keepRecentFolders", ui->keepRecentFoldersCheck->isChecked());
     settings.setValue("privacy/rememberLastFolder", ui->rememberLastFolderCheck->isChecked());
+    settings.setValue("privacy/rememberLastFile", ui->rememberLastFileCheck->isChecked());
     settings.setValue("view/windowTitleFormat", ui->windowTitleCombo->currentIndex());
 }
 

@@ -74,14 +74,36 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowIcon(QIcon(":/icon.png"));
     resize(1200, 800);
 
+    // Track if we should show welcome page (folder loaded but no file opened)
+    bool folderLoadedNoFile = false;
+
+    // Restore last opened folder if privacy setting allows (do this first)
     if (m_settings.value("privacy/rememberLastFolder", true).toBool()) {
         QString lastFolder = m_settings.value("lastFolder").toString();
         if (!lastFolder.isEmpty() && QDir(lastFolder).exists()) {
             loadFolder(lastFolder);
+            folderLoadedNoFile = true;  // Folder loaded, but no file yet
         }
     }
 
-    showWelcomePage();
+    // Restore last opened file if privacy setting allows (loads file's folder only if no lastFolder)
+    if (m_settings.value("privacy/rememberLastFile", true).toBool()) {
+        QString lastFile = m_settings.value("lastFile").toString();
+        if (!lastFile.isEmpty() && QFile::exists(lastFile)) {
+            // If no folder was loaded, openFile will load the file's folder
+            // If a folder was already loaded, don't load the file's folder (keep lastFolder)
+            openFile(lastFile, m_currentFolder.isEmpty());
+            folderLoadedNoFile = false;  // File was opened
+        }
+    }
+
+    // If no file/folder was restored, show welcome page
+    // Also show welcome page if folder was loaded but no file was opened (rememberLastFile is OFF)
+    if (m_currentFile.isEmpty() && m_currentFolder.isEmpty()) {
+        showWelcomePage();
+    } else if (folderLoadedNoFile && m_currentFile.isEmpty()) {
+        showWelcomePage();
+    }
     refreshRecentFilesMenu();
     refreshRecentFoldersMenu();
 
@@ -1325,7 +1347,7 @@ void MainWindow::onExportToPdf()
                              tr("Document exported to:\n%1").arg(QDir::toNativeSeparators(filePath)));
 }
 
-void MainWindow::openFile(const QString &filePath)
+void MainWindow::openFile(const QString &filePath, bool loadFileFolder)
 {
     if (!QFile::exists(filePath)) {
         QMessageBox::warning(this, tr("Error"),
@@ -1342,9 +1364,11 @@ void MainWindow::openFile(const QString &filePath)
 
     loadFile(filePath);
 
-    QString folderPath = info.absolutePath();
-    if (folderPath != m_currentFolder) {
-        loadFolder(folderPath);
+    if (loadFileFolder) {
+        QString folderPath = info.absolutePath();
+        if (folderPath != m_currentFolder) {
+            loadFolder(folderPath, false);  // Don't remember as lastFolder (file takes priority)
+        }
     }
 
     if (m_settings.value("privacy/keepRecentFiles", true).toBool()) {
@@ -1418,6 +1442,12 @@ void MainWindow::loadFile(const QString &filePath)
     }
 
     m_currentFile = filePath;
+
+    // Save last opened file if privacy setting allows
+    if (m_settings.value("privacy/rememberLastFile", true).toBool()) {
+        m_settings.setValue("lastFile", filePath);
+    }
+
     // Format window title based on user preference
     int titleFormat = m_settings.value("view/windowTitleFormat", 0).toInt();
     if (titleFormat == 1) {
@@ -1483,7 +1513,7 @@ void MainWindow::loadFile(const QString &filePath)
     }
 }
 
-void MainWindow::loadFolder(const QString &folderPath)
+void MainWindow::loadFolder(const QString &folderPath, bool rememberAsLastFolder)
 {
     if (!QDir(folderPath).exists()) return;
 
@@ -1548,7 +1578,7 @@ void MainWindow::loadFolder(const QString &folderPath)
     m_currentFolder = folderPath;
     m_proxyModel->setExemptPath(folderPath);
     m_fileModel->setRootPath(folderPath);
-    if (m_settings.value("privacy/rememberLastFolder", true).toBool()) {
+    if (rememberAsLastFolder && m_settings.value("privacy/rememberLastFolder", true).toBool()) {
         m_settings.setValue("lastFolder", folderPath);
     }
 

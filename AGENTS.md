@@ -33,7 +33,8 @@
 - **Auto-reload**: `QFileSystemWatcher` monitors current file. Watching stops on welcome page.
 - **Recent history**: Separate tracking for files (`recentFiles`) and folders (`recentFolders`), each with independent privacy toggles (`privacy/keepRecentFiles`, `privacy/keepRecentFolders`). Max 10 entries each (LIFO), missing entries cleaned up.
 - **Last folder**: `privacy/rememberLastFolder` restores `lastFolder` on startup.
-- **QSettings**: IniFormat, UserScope, org=org name, app=app name. All keys: `recentFiles`, `recentFolders`, `lastFolder`, `privacy/*`, `editor/*`, `view/*` (showFileTree, showMinimap, windowTitleFormat, wordWrap), `geometry`, `windowState`, `splitterState`.
+- **Last file**: `privacy/rememberLastFile` restores `lastFile` on startup. `openFile()` has optional `loadFileFolder` parameter - when opening a file from a different folder, the file's folder is loaded without overwriting `lastFolder` setting. On startup: first `lastFolder` is loaded (if enabled), then `lastFile` is opened (if enabled). If folder loaded but file not opened (rememberLastFile OFF), welcome page is shown.
+- **QSettings**: IniFormat, UserScope, org=org name, app=app name. All keys: `recentFiles`, `recentFolders`, `lastFolder`, `lastFile`, `privacy/*`, `editor/*`, `view/*` (showFileTree, showMinimap, windowTitleFormat, wordWrap), `geometry`, `windowState`, `splitterState`.
 
 ## Critical Implementation Details
 - **Minimap color coding**: Content types detected from `QTextCharFormat` during paint:
