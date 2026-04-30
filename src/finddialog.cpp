@@ -105,6 +105,11 @@ bool FindDialog::performFind(bool fromStart)
         found = m_editor->find(text, flags);
     }
 
+    // Set focus so the selection is shown in color (not grey)
+    if (found) {
+        m_editor->setFocus();
+    }
+
     return found;
 }
 

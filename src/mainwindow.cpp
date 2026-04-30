@@ -557,6 +557,9 @@ void MainWindow::highlightSearchText(const QString &text)
         
         // Ensure the selected text is visible by scrolling to it
         m_editor->ensureCursorVisible();
+        
+        // Set focus so the selection is shown in color (not grey)
+        m_editor->setFocus();
     }
 }
 
@@ -957,16 +960,16 @@ void MainWindow::onFindNext()
 
     // Try to find next occurrence
     bool found = m_editor->find(m_lastSearchText);
-    
+
     // If not found, wrap around to beginning
     if (!found) {
         QTextCursor cursor = m_editor->textCursor();
         cursor.movePosition(QTextCursor::Start);
         m_editor->setTextCursor(cursor);
-        
+
         // Search from beginning
         found = m_editor->find(m_lastSearchText);
-        
+
         if (found) {
             // Brief feedback that we wrapped around
             if (m_statusFileMsg) {
@@ -976,6 +979,11 @@ void MainWindow::onFindNext()
                 }
             }
         }
+    }
+
+    // Set focus so the selection is shown in color (not grey)
+    if (found) {
+        m_editor->setFocus();
     }
 }
 
