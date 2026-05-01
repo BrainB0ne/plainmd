@@ -282,6 +282,12 @@ void MainWindow::setupMenuBar()
     connect(openFolderAction, &QAction::triggered, this, &MainWindow::onOpenFolder);
     fileMenu->addAction(openFolderAction);
 
+    m_closeFileAction = new QAction(QIcon(":/images/file-x.png"), tr("&Close File"), this);
+    m_closeFileAction->setShortcut(QKeySequence(tr("Ctrl+F4")));
+    m_closeFileAction->setEnabled(false); // Disabled on welcome page
+    connect(m_closeFileAction, &QAction::triggered, this, &MainWindow::onCloseFile);
+    fileMenu->addAction(m_closeFileAction);
+
     fileMenu->addSeparator();
 
     m_printAction = new QAction(QIcon(":/images/printer.png"), tr("&Print..."), this);
@@ -1137,7 +1143,7 @@ void MainWindow::showWelcomePage()
     m_currentFile.clear();
     setWindowTitle(tr("PlainMD"));
 
-    // Disable print, export, and find actions on welcome page
+    // Disable print, export, find, and close file actions on welcome page
     if (m_printAction) {
         m_printAction->setEnabled(false);
     }
@@ -1149,6 +1155,9 @@ void MainWindow::showWelcomePage()
     }
     if (m_findNextAction) {
         m_findNextAction->setEnabled(false);
+    }
+    if (m_closeFileAction) {
+        m_closeFileAction->setEnabled(false);
     }
 
     // Stop watching files when showing welcome page
@@ -1389,6 +1398,59 @@ void MainWindow::onExportToPdf()
                              tr("Document exported to:\n%1").arg(QDir::toNativeSeparators(filePath)));
 }
 
+void MainWindow::onCloseFile()
+{
+    // Disable close when welcome page is shown (no file loaded)
+    if (m_currentFile.isEmpty()) {
+        return;
+    }
+
+    // Stop watching the file
+    if (m_fileWatcher) {
+        m_fileWatcher->removePaths(m_fileWatcher->files());
+    }
+
+    // Clear current file state
+    m_currentFile.clear();
+
+    // Clear last search text
+    m_lastSearchText.clear();
+
+    // Clear editor content
+    m_editor->clear();
+
+    // Reset window title
+    setWindowTitle(tr("PlainMD"));
+
+    // Show welcome page
+    showWelcomePage();
+
+    // Update status bar - will show "Ready" state since m_currentFile is now empty
+    updateStatusBar();
+
+    // Disable file-related actions
+    if (m_printAction) {
+        m_printAction->setEnabled(false);
+    }
+    if (m_exportPdfAction) {
+        m_exportPdfAction->setEnabled(false);
+    }
+    if (m_findAction) {
+        m_findAction->setEnabled(false);
+    }
+    if (m_findNextAction) {
+        m_findNextAction->setEnabled(false);
+    }
+    if (m_closeFileAction) {
+        m_closeFileAction->setEnabled(false);
+    }
+
+    // Hide minimap on welcome page
+    if (m_minimap) {
+        m_minimap->hide();
+    }
+}
+
 void MainWindow::openFile(const QString &filePath, bool loadFileFolder)
 {
     if (!QFile::exists(filePath)) {
@@ -1508,7 +1570,7 @@ void MainWindow::loadFile(const QString &filePath)
         m_fileWatcher->addPath(filePath);
     }
 
-    // Enable print, export, and find actions when a file is loaded
+    // Enable print, export, find, and close file actions when a file is loaded
     if (m_printAction) {
         m_printAction->setEnabled(true);
     }
@@ -1520,6 +1582,9 @@ void MainWindow::loadFile(const QString &filePath)
     }
     if (m_findNextAction) {
         m_findNextAction->setEnabled(true);
+    }
+    if (m_closeFileAction) {
+        m_closeFileAction->setEnabled(true);
     }
 
     // Select the file in the tree if visible

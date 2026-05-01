@@ -80,6 +80,7 @@ private slots:
     void onAbout();
     void onPrint();
     void onExportToPdf();
+    void onCloseFile();
     void onPreferences();
     void onFind();
     void onFindNext();
@@ -123,6 +124,7 @@ private:
     QAction *m_clearRecentFoldersAction = nullptr;
     QAction *m_printAction = nullptr;
     QAction *m_exportPdfAction = nullptr;
+    QAction *m_closeFileAction = nullptr;
     QAction *m_findAction = nullptr;
     QAction *m_findNextAction = nullptr;
     QAction *m_showFileTreeAction = nullptr;
