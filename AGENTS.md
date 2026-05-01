@@ -47,7 +47,7 @@
   - Background: System button color; colors adapt for light/dark themes (Catppuccin-like palette)
   - **Plain text mode**: `.txt` and `.mdx` files use `setPlainTextMode(true)` which skips heading/link/list detection to avoid false positives from Qt's default formatting
 - **Code block styling**: **NOT POSSIBLE** — QTextCursor corrupts large documents. Do not attempt.
-- **Welcome page**: Hardcoded HTML/CSS with Consolas (Windows) / DejaVu Sans Mono (Linux) for shortcuts. Not configurable.
+- **Welcome page**: Shown in file tree when no folder is loaded. Uses `folder-open.png` icon (Tabler Icons) embedded via resource path `:/images/folder-open.png` at 48x48px. Centered both horizontally and vertically in the viewport. Rich text content includes shortcuts with Consolas (Windows) / DejaVu Sans Mono (Linux) font.
 - **Tooltips**: Image tooltips show original + cached absolute paths. Link tooltips use `cursorForPosition()` + `charFormat().anchorHref()` for resolved absolute URL. Both use `QDir::cleanPath()` for relative resolution.
 - **External images**: Downloaded **synchronously** (10s timeout via `QEventLoop`) to `%TEMP%\plainmd_images\`. Privacy toggle `privacy/previewExternalImages` disables network entirely.
 - **Relative images for printing**: `setBaseUrl()` alone fails for print. `resolveRelativeImages()` converts relative paths to `file:///` URLs before `setMarkdown()`.

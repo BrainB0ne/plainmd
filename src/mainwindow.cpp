@@ -59,6 +59,8 @@
 #include <QToolTip>
 #include <QUrl>
 #include <QVBoxLayout>
+#include <QStackedWidget>
+#include <QSizePolicy>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -115,6 +117,11 @@ MainWindow::MainWindow(QWidget *parent)
     if (m_fileTree) {
         m_fileTree->setVisible(showTree);
     }
+    
+    // Show/hide welcome label based on whether folder is loaded
+    if (m_fileTreeWelcome) {
+        m_fileTreeWelcome->setVisible(m_currentFolder.isEmpty());
+    }
 
     // Restore minimap action state (but keep it hidden on welcome page until a file is loaded)
     bool showMinimap = m_settings.value("view/showMinimap", false).toBool();
@@ -160,6 +167,7 @@ void MainWindow::setupUI()
 
 void MainWindow::setupFileTree()
 {
+    // Create the file tree
     m_fileTree = new QTreeView(this);
     m_fileTree->setSortingEnabled(true);
     m_fileTree->setAnimated(true);
@@ -176,6 +184,40 @@ void MainWindow::setupFileTree()
     connect(m_fileTree, &QTreeView::activated, this, &MainWindow::onFileTreeClicked);
     m_fileTree->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_fileTree, &QTreeView::customContextMenuRequested, this, &MainWindow::onFileTreeContextMenu);
+
+    // Create welcome page as a child of the tree view (shown when tree is empty)
+    m_fileTreeWelcome = new QLabel(m_fileTree->viewport());
+    m_fileTreeWelcome->setObjectName("fileTreeWelcome");
+    m_fileTreeWelcome->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    m_fileTreeWelcome->setWordWrap(true);
+    
+    // Build rich text welcome content
+    QString welcomeText = tr(
+        "<center>"
+        "<div style='margin-bottom: 20px;'><img src=':/images/folder-open.png' width='48' height='48'></div>"
+        "<div style='font-size: 16px; font-weight: bold; margin-bottom: 12px;'>No folder opened</div>"
+        "<div style='font-size: 13px; color: palette(text); margin-bottom: 20px;'>"
+        "Open a folder to browse your<br>markdown files here"
+        "</div>"
+        "<div style='font-size: 12px; color: palette(highlight);'>"
+        "Ctrl+Shift+O to open folder"
+        "</div>"
+        "</center>"
+    );
+    m_fileTreeWelcome->setText(welcomeText);
+    m_fileTreeWelcome->setTextFormat(Qt::RichText);
+    m_fileTreeWelcome->setStyleSheet("background: palette(base); padding: 20px;");
+    m_fileTreeWelcome->show();
+    
+    // Install event filter on viewport to handle resize events
+    m_fileTree->viewport()->installEventFilter(this);
+    
+    // Delay geometry update until viewport has proper size
+    QTimer::singleShot(0, this, [this]() {
+        if (m_fileTreeWelcome && m_fileTreeWelcome->isVisible()) {
+            m_fileTreeWelcome->setGeometry(m_fileTree->viewport()->rect());
+        }
+    });
 
     m_splitter->addWidget(m_fileTree);
 }
@@ -1586,6 +1628,12 @@ void MainWindow::loadFolder(const QString &folderPath, bool rememberAsLastFolder
     QModelIndex proxyRoot = m_proxyModel->mapFromSource(sourceRoot);
     m_fileTree->setRootIndex(proxyRoot);
 
+    // Hide welcome page and show file tree
+    if (m_fileTreeWelcome) {
+        m_fileTreeWelcome->hide();
+    }
+    m_fileTree->show();
+
     // Track recent folder
     if (m_settings.value("privacy/keepRecentFolders", true).toBool()) {
         updateRecentFolders(folderPath);
@@ -2063,6 +2111,13 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
+    // Handle file tree viewport resize to update welcome label geometry
+    if (obj == m_fileTree->viewport() && event->type() == QEvent::Resize) {
+        if (m_fileTreeWelcome && m_fileTreeWelcome->isVisible()) {
+            m_fileTreeWelcome->setGeometry(m_fileTree->viewport()->rect());
+        }
+    }
+    
     // Handle wheel events for Ctrl+Scroll zoom to update minimap and status bar
     if (obj == m_editor->viewport() && event->type() == QEvent::Wheel) {
         QWheelEvent *wheelEvent = static_cast<QWheelEvent*>(event);

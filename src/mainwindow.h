@@ -38,6 +38,7 @@
 #include <QLabel>
 #include <QProgressBar>
 #include <QPushButton>
+#include <QStackedWidget>
 #include "filterproxymodel.h"
 
 class FindDialog;
@@ -108,6 +109,7 @@ private:
     void showWelcomePage();
 
     QTextEdit *m_editor = nullptr;
+    QLabel *m_fileTreeWelcome = nullptr;  // Welcome page shown when no folder loaded
     QTreeView *m_fileTree = nullptr;
     QFileSystemModel *m_fileModel = nullptr;
     FilterProxyModel *m_proxyModel = nullptr;
