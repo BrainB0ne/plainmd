@@ -49,3 +49,7 @@ plainmd
 # Distribution packages
 dist/
 
+# Development tools
+scripts/dev.ahk
+scripts/*.exe
+
