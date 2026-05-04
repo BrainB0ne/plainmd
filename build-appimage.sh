@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 
 # Package version
-PKG_VERSION="1.3.0"
+PKG_VERSION="1.3.1"
 
 # ---------------------------------------------------------------------------
 # 1. Locate system qmake and build against it
