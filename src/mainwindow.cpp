@@ -501,6 +501,13 @@ void MainWindow::setupStatusBar()
     m_statusEncoding->setToolTip(tr("File encoding"));
     status->addPermanentWidget(m_statusEncoding);
 
+    // Line endings
+    m_statusLineEndings = new QLabel(tr("LF"), this);
+    m_statusLineEndings->setStyleSheet(labelStyle);
+    m_statusLineEndings->setAlignment(Qt::AlignCenter);
+    m_statusLineEndings->setToolTip(tr("Line endings (LF or CRLF)"));
+    status->addPermanentWidget(m_statusLineEndings);
+
     // Word wrap toggle button (icon only)
     m_statusWrapBtn = new QPushButton(this);
     bool wordWrapDefault = m_settings.value("view/wordWrap", true).toBool();
@@ -545,6 +552,7 @@ void MainWindow::updateStatusBar()
             m_statusFileType->setToolTip(QString());  // No tooltip on welcome page
         }
         if (m_statusEncoding) m_statusEncoding->setVisible(false);
+        if (m_statusLineEndings) m_statusLineEndings->setVisible(false);
         if (m_statusWordCount) m_statusWordCount->setVisible(false);
         if (m_statusZoom) m_statusZoom->setVisible(false);
         if (m_toggleMinimapBtn) {
@@ -562,6 +570,7 @@ void MainWindow::updateStatusBar()
     m_statusFileType->setVisible(true);
     m_statusFileType->setToolTip(tr("File type"));
     m_statusEncoding->setVisible(true);
+    m_statusLineEndings->setVisible(true);
     m_statusWordCount->setVisible(true);
     m_statusZoom->setVisible(true);
     // Enable minimap and word wrap toggles when file is loaded
@@ -590,6 +599,9 @@ void MainWindow::updateStatusBar()
 
     // Encoding (detected during file load)
     m_statusEncoding->setText(m_detectedEncoding);
+
+    // Line endings (detected during file load)
+    m_statusLineEndings->setText(m_detectedLineEndings);
 
     // Word count - use plain text for accurate count
     QString plainText = m_editor->toPlainText();
@@ -1511,6 +1523,19 @@ void MainWindow::loadFile(const QString &filePath)
     }
     
     m_detectedEncoding = detectedEncoding;
+
+    // Detect line endings - sample first 8KB to avoid scanning huge files
+    const int sampleSize = qMin(8192, rawData.size());
+    QByteArray sample = rawData.left(sampleSize);
+    if (sample.contains("\r\n")) {
+        m_detectedLineEndings = QStringLiteral("CRLF");
+    } else if (sample.contains("\n")) {
+        // Has newlines but no CRLF, so it's LF
+        m_detectedLineEndings = QStringLiteral("LF");
+    } else {
+        // No newlines detected, assume LF (Unix default)
+        m_detectedLineEndings = QStringLiteral("LF");
+    }
 
     m_imageUrlMap.clear();
 

@@ -144,6 +144,7 @@ private:
     // Status bar widgets
     QLabel *m_statusFileType = nullptr;
     QLabel *m_statusEncoding = nullptr;
+    QLabel *m_statusLineEndings = nullptr;  // Line endings (CRLF/LF)
     QPushButton *m_statusWrapBtn = nullptr;  // Word wrap toggle button
     QProgressBar *m_statusProgress = nullptr;  // Folder loading progress
     QLabel *m_statusWordCount = nullptr;
@@ -161,6 +162,9 @@ private:
     
     // Detected file encoding for status bar display
     QString m_detectedEncoding = QStringLiteral("UTF-8");
+    
+    // Detected line endings for status bar display
+    QString m_detectedLineEndings = QStringLiteral("LF");
 
     // Last search text (from "Search in Files" or Find dialog) for F3 "Find Next"
     QString m_lastSearchText;
