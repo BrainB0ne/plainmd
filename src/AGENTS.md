@@ -21,11 +21,12 @@ src/
 | Task | File | Notes |
 |------|------|-------|
 | Add menu/action | `mainwindow.cpp/h` | All menus, toolbars, actions defined here |
-| File loading/rendering | `mainwindow.cpp` | `loadFile()`, `resolveRelativeImages()`, `resolveExternalImages()` |
-| Status bar | `mainwindow.cpp` | `setupStatusBar()`, 7 widgets |
+| File loading/rendering | `mainwindow.cpp` | `loadFile()`, `resolveRelativeImages()`, `resolveExternalImages()`, line endings detection |
+| Status bar | `mainwindow.cpp` | `setupStatusBar()`, 8 widgets (word count, zoom, file type, encoding, line endings, wrap, toggles) |
 | Auto-reload | `mainwindow.cpp` | `QFileSystemWatcher` with 500ms debounce |
 | Drag & drop | `mainwindow.cpp` | `dragEnterEvent()`, `dropEvent()` |
 | Copy code | `mainwindow.cpp` | Context menu, monospace detection |
+| Close File | `mainwindow.cpp` | File → Close File (Ctrl+F4), `onCloseFile()` |
 | Zoom | `mainwindow.cpp` | `zoomIn(2)`/`zoomOut(2)` — Qt6 only |
 | Minimap colors | `minimap.cpp` | Catppuccin palette, content type detection |
 | Minimap click/scroll | `minimap.cpp` | `mousePressEvent()`, `mouseMoveEvent()` |

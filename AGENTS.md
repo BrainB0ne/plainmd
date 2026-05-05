@@ -30,6 +30,7 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 | Find in document | `src/finddialog.cpp/h/ui` | Ctrl+F modal |
 | Search across files | `src/searchindialog.cpp/h/ui` | Ctrl+Shift+F, non-modal |
 | Preferences | `src/preferencesdialog.cpp/h/ui` | Ctrl+, |
+| Close File | `src/mainwindow.cpp` | File → Close File (Ctrl+F4), clears editor, keeps folder |
 | App icons | `images/*.png` | Copy from `tabler-icons/png/outline/` |
 | Windows installer | `installer.iss` | Inno Setup |
 | Build scripts | `build.bat` / `build.sh` | Full build pipelines |
@@ -90,3 +91,4 @@ build-installer.bat # Build installer
 - `scripts/dev.ahk` is gitignored (Windows AutoHotkey dev hotkeys).
 - Version hardcoded in: `plainmd.rc`, `build-deb.sh`, `build-appimage.sh`, `installer.iss`.
 - `archive-release.sh`/`.bat` extract version dynamically from `src/main.cpp`.
+- Welcome page uses `QApplication::applicationVersion()` dynamically (not hardcoded).
