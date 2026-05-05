@@ -53,3 +53,5 @@ dist/
 scripts/dev.ahk
 scripts/*.exe
 
+# OMO
+.sisyphus/
