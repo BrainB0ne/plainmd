@@ -1,0 +1,45 @@
+# Agent Notes: src/
+
+## OVERVIEW
+Flat source directory — all C++ code, UI forms, and the entry point. No subdirectories.
+
+## STRUCTURE
+```
+src/
+├── main.cpp              # Entry point (36 lines)
+├── mainwindow.cpp/h      # Core app window (2343/179 lines)
+├── minimap.cpp/h         # Document minimap (351/63 lines)
+├── filterproxymodel.cpp/h # File tree filter (93/47 lines)
+├── finddialog.cpp/h/ui   # Find in document (123/58 lines)
+├── searchindialog.cpp/h/ui # Search in files (248/67 lines)
+├── preferencesdialog.cpp/h/ui # Settings (201/64 lines)
+├── aboutdialog.cpp/h/ui  # About dialog (47/43 lines)
+└── licensedialog.cpp/h/ui # License viewer (47/41 lines)
+```
+
+## WHERE TO LOOK
+| Task | File | Notes |
+|------|------|-------|
+| Add menu/action | `mainwindow.cpp/h` | All menus, toolbars, actions defined here |
+| File loading/rendering | `mainwindow.cpp` | `loadFile()`, `resolveRelativeImages()`, `resolveExternalImages()` |
+| Status bar | `mainwindow.cpp` | `setupStatusBar()`, 7 widgets |
+| Auto-reload | `mainwindow.cpp` | `QFileSystemWatcher` with 500ms debounce |
+| Drag & drop | `mainwindow.cpp` | `dragEnterEvent()`, `dropEvent()` |
+| Copy code | `mainwindow.cpp` | Context menu, monospace detection |
+| Zoom | `mainwindow.cpp` | `zoomIn(2)`/`zoomOut(2)` — Qt6 only |
+| Minimap colors | `minimap.cpp` | Catppuccin palette, content type detection |
+| Minimap click/scroll | `minimap.cpp` | `mousePressEvent()`, `mouseMoveEvent()` |
+| File tree filter | `filterproxymodel.cpp` | `hasMatchingFiles()` limited to 1000 files |
+| Find wrap-around | `finddialog.cpp` | `QTextEdit::find()` with cursor manipulation |
+| Search results | `searchindialog.cpp` | `QDirIterator`, match counting, snippet preview |
+| Preferences UI | `preferencesdialog.cpp` | `QSettings` read/write |
+
+## CONVENTIONS
+- **Flat structure** — No `ui/`, `models/`, `widgets/` subdirectories. All files in `src/`.
+- **UI files** — `.ui` forms for dialogs only. MainWindow is code-only.
+- **Signal naming** — `fileSelected(path, text)` from SearchInDialog to MainWindow.
+- **Member prefix** — `m_` for all private members (`m_editor`, `m_proxyModel`, etc.).
+
+## ANTI-PATTERNS
+- **Do not add subdirectories** — qmake handles flat fine; subdirs complicate `.pro`.
+- See root `AGENTS.md` for Qt6 API and QTextCursor restrictions.

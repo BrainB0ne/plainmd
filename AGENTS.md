@@ -1,89 +1,92 @@
 # Agent Notes: plainmd
 
-## Build System
+**Generated:** 2026-05-05
+**Commit:** 7d795f2
+**Branch:** master
+
+## OVERVIEW
+Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
+
+## STRUCTURE
+```
+.
+├── src/                    # 22 files, flat — all C++ source
+├── images/                 # 25 Tabler Icon PNGs + LICENSE
+├── samples/                # Test markdown files
+├── plainmd.pro             # qmake — sole build system
+├── plainmd.qrc             # Qt resources
+├── AGENTS.md               # This file
+└── [build scripts]         # .bat (Win), .sh (Linux)
+```
+
+## WHERE TO LOOK
+| Task | Location | Notes |
+|------|----------|-------|
+| Add new source file | `plainmd.pro` | Must add to SOURCES/HEADERS |
+| Main app logic | `src/mainwindow.cpp` | 2343 lines, 58% of codebase |
+| Entry point | `src/main.cpp` | QApplication + MainWindow |
+| File tree filtering | `src/filterproxymodel.cpp/h` | QSortFilterProxyModel subclass |
+| Document minimap | `src/minimap.cpp/h` | Custom paint widget |
+| Find in document | `src/finddialog.cpp/h/ui` | Ctrl+F modal |
+| Search across files | `src/searchindialog.cpp/h/ui` | Ctrl+Shift+F, non-modal |
+| Preferences | `src/preferencesdialog.cpp/h/ui` | Ctrl+, |
+| App icons | `images/*.png` | Copy from `tabler-icons/png/outline/` |
+| Windows installer | `installer.iss` | Inno Setup |
+| Build scripts | `build.bat` / `build.sh` | Full build pipelines |
+
+## CODE MAP
+
+| Symbol | Type | File | Lines | Role |
+|--------|------|------|-------|------|
+| MainWindow | class | mainwindow.cpp/h | 2343/179 | Core orchestrator: UI, file I/O, search, print, settings |
+| Minimap | class | minimap.cpp/h | 351/63 | Scaled document overview with color-coded content types |
+| FilterProxyModel | class | filterproxymodel.cpp/h | 93/47 | Hides non-markdown files and empty directories |
+| FindDialog | class | finddialog.cpp/h/ui | 123/58 | In-document search (Ctrl+F) |
+| SearchInDialog | class | searchindialog.cpp/h/ui | 248/67 | Folder-wide search (Ctrl+Shift+F) |
+| PreferencesDialog | class | preferencesdialog.cpp/h/ui | 201/64 | Settings dialog (Ctrl+,) |
+| AboutDialog | class | aboutdialog.cpp/h/ui | 47/43 | App info |
+| LicenseDialog | class | licensedialog.cpp/h/ui | 47/41 | GPLv3 text viewer |
+
+## CONVENTIONS
 - **qmake only** — `plainmd.pro` is the source of truth. Do not add CMake.
-- **Windows (MSVC)**: Must run `vcvarsall.bat x64` before `qmake`/`nmake`.
-  - `build.bat` — Full build (vcvarsall + qmake + nmake)
-  - `clean.bat` — Clean all build artifacts
-  - Manual: `setenv.bat && qmake plainmd.pro && nmake`
-- **Linux**: `qmake plainmd.pro && make` → `release/plainmd`.
-  - `build.sh` / `clean.sh` convenience wrappers.
-- **Installer**: `build-installer.bat` (Windows → `dist/plainmd-<version>-x64-setup.exe`), `build-deb.sh` / `build-appimage.sh` (Linux → `dist/`).
-- **Checksums**: `make-checksums.bat` / `make-checksums.sh` after building packages.
-- **Editor Integration**: `.zed/tasks.json` (Zed) and `.vscode/tasks.json` (VS Code) have build/deploy/run tasks.
-- **Output**: `release/` (MSVC/Linux release), `debug/` (MSVC debug). DESTDIR, MOC_DIR, RCC_DIR, UI_DIR all dump into the same folder.
+- **Flat src/** — No subdirectories. All .cpp/.h/.ui coexist in `src/`.
+- **New files** — Must add to SOURCES/HEADERS/FORMS in `plainmd.pro`.
+- **C++17** — `CONFIG += c++17` in `.pro`.
+- **Tabler Icons** — Copy new icons from `tabler-icons/png/outline/` to `images/` before embedding.
+- **Verify by building** — No tests, no CI. Build and run to verify.
 
-## Qt6 Quirks
-- `QTextEdit::setZoomFactor()` **does not exist in Qt6**. Use `zoomIn(2)` / `zoomOut(2)`. Zoom reset re-applies the editor font at base point size.
-- **QTextDocument CSS limitation**: ignores `background-color`, `border-radius`, `padding` on block elements.
-- **Document corruption bug**: QTextCursor operations (setBlockFormat/setCharFormat) on documents >5000 bytes corrupt the document. Do not use QTextCursor formatting post-render.
-- **Emoji printing**: Color emoji fonts (Segoe UI Emoji) render incorrectly through Windows print spooler. Use Nerd Fonts (CaskaydiaCove, JetBrainsMono) via `editor/printEmojiFont` setting.
-- **Export to PDF vs Print**: `QPrinter::PdfFormat` (export) bypasses Windows print drivers — emoji works. `QPrintDialog` (print) goes through spooler — emoji broken. Export to PDF is preferred.
+## ANTI-PATTERNS (THIS PROJECT)
+- `QTextEdit::setZoomFactor()` — does not exist in Qt6. Use `zoomIn(2)` / `zoomOut(2)`.
+- **QTextCursor post-render** — `setBlockFormat`/`setCharFormat` on docs >5000 bytes corrupts the document. Do not use.
+- **Code block styling** — NOT POSSIBLE via QTextCursor. Do not attempt.
+- **QTextDocument CSS** — ignores `background-color`, `border-radius`, `padding` on block elements.
+- **CMake** — Do not add. qmake only.
 
-## Architecture
-- Single-window app. Entry: `src/main.cpp` → `MainWindow`.
-- `QSplitter` with `QTreeView` (file tree) + read-only `QTextEdit` (renderer).
-- `QFileSystemModel` wrapped by `FilterProxyModel` (hides empty folders). Root folder exempted via `setExemptPath()`.
-- File filter: `*.md`, `*.markdown`, `*.mdx`, `*.txt`.
-- **File tree lifecycle**: `setupFileTree()` creates widgets but doesn't attach model. `loadFolder()` attaches `m_proxyModel` on first folder open.
-- **Minimap**: Custom `Minimap` widget renders scaled-down overview of document. Detects content types via `QTextCharFormat` properties (font size, bold, anchors, image format, monospace). Theme-aware colors using Catppuccin palette (adapted for light/dark). Toggle via F10 or status bar button, state persisted to `view/showMinimap`. Plain text mode (`setPlainTextMode()`) disables markdown-specific detection for .txt and .mdx files.
-- **Status bar**: `setupStatusBar()` creates widgets in two areas: temporary (left side for file message) and permanent (right-aligned for info/buttons). Shows: word count (calculated once on file load via `countWords()`), zoom level (tracks Ctrl+wheel and button zoom), file type, encoding (auto-detected UTF-8 or ANSI using `QStringDecoder`), line endings (CRLF/LF detected from first 8KB), word wrap toggle (`text-wrap.png`/`text-wrap-disabled.png`), and icon-only toggle buttons for file tree (`layout-sidebar.png`) and minimap (`layout-sidebar-right.png`). Widgets hidden on welcome page (shows "Ready" in file type to avoid empty separator). Asymmetric padding (8px left, 10px right) on labels for visual centering compensating for Qt's 2px separator. Toggle buttons synced with menu actions (F9/F10) and settings. All labels have tooltips ("Word count", "Zoom level", "File type", "File encoding", "Line endings") for clarity; file type tooltip only appears when a file is loaded.
-- **Search in Files**: `SearchInDialog` (defined in `src/searchindialog.ui`) provides folder-wide search. Uses `QDirIterator` with filters (`*.md`, `*.markdown`, `*.mdx`, `*.txt`) for recursive file discovery. Case-insensitive search via `QString::toLower()`. Match counting with multiple passes (fileContainsText + countMatchesInFile). Results show filename with match count and snippet preview. Dialog persists (non-modal hide/show) to allow picking multiple results. Keyboard navigation: arrows + Enter to open, single-click selects, double-click opens. Signal `fileSelected` passes path and search text to `MainWindow`.
-- **Find/F3 workflow**: `FindDialog` (Ctrl+F) and `SearchInDialog` (Ctrl+Shift+F) both emit search text to `MainWindow::m_lastSearchText`. `onFindNext()` (F3) wraps around using `QTextEdit::find()` and cursor manipulation. Find actions disabled on welcome page. Escape key clears selection via `keyPressEvent()`.
-- **Auto-reload**: `QFileSystemWatcher` monitors current file. Watching stops on welcome page.
-- **Recent history**: Separate tracking for files (`recentFiles`) and folders (`recentFolders`), each with independent privacy toggles (`privacy/keepRecentFiles`, `privacy/keepRecentFolders`). Max 10 entries each (LIFO), missing entries cleaned up.
-- **Last folder**: `privacy/rememberLastFolder` restores `lastFolder` on startup.
-- **Last file**: `privacy/rememberLastFile` restores `lastFile` on startup. `openFile()` has optional `loadFileFolder` parameter - when opening a file from a different folder, the file's folder is loaded without overwriting `lastFolder` setting. On startup: first `lastFolder` is loaded (if enabled), then `lastFile` is opened (if enabled). If folder loaded but file not opened (rememberLastFile OFF), welcome page is shown.
-- **QSettings**: IniFormat, UserScope, org=org name, app=app name. All keys: `recentFiles`, `recentFolders`, `lastFolder`, `lastFile`, `privacy/*`, `editor/*`, `view/*` (showFileTree, showMinimap, windowTitleFormat, wordWrap), `geometry`, `windowState`, `splitterState`.
+## CRITICAL DETAILS
+- **Encoding**: Auto-detected UTF-8 → fallback to system (Windows-1252/ISO-8859-1). `QStringDecoder`.
+- **Line endings**: Sampled from first 8KB. CRLF = Windows, LF = Unix.
+- **External images**: Downloaded synchronously (10s timeout) to `%TEMP%\plainmd_images\`.
+- **Relative images for print**: `resolveRelativeImages()` converts to `file:///` before `setMarkdown()`.
+- **Auto-reload debounce**: 500ms timer + `m_fileChangeDialogOpen` flag.
+- **Search text lifecycle**: `m_lastSearchText` cleared on file switch, preserved for F3.
+- **Folder protection**: Blocks root drives and system folders. `folderHasValidFiles()` limits to 1000 files, 3 levels deep.
 
-## Critical Implementation Details
-- **Minimap color coding**: Content types detected from `QTextCharFormat` during paint:
-  - Images: `isImageFormat()` with valid name → Coral rose
-  - Headings: Font size ≥14pt or bold → Blue/Green/Peach (H1/H2/H3)
-  - Lists: `block.textList() != nullptr` → Yellow
-  - Links: `isAnchor()` or underline + blue → Teal  
-  - Code: Monospace font or light gray background → Gray
-  - Normal text: Default → Gray
-  - Background: System button color; colors adapt for light/dark themes (Catppuccin-like palette)
-  - **Plain text mode**: `.txt` and `.mdx` files use `setPlainTextMode(true)` which skips heading/link/list detection to avoid false positives from Qt's default formatting
-- **Code block styling**: **NOT POSSIBLE** — QTextCursor corrupts large documents. Do not attempt.
-- **Welcome page**: Shown in file tree when no folder is loaded. Uses `folder-open.png` icon (Tabler Icons) embedded via resource path `:/images/folder-open.png` at 48x48px. Centered both horizontally and vertically in the viewport. Rich text content includes shortcuts with Consolas (Windows) / DejaVu Sans Mono (Linux) font.
-- **Tooltips**: Image tooltips show original + cached absolute paths. Link tooltips use `cursorForPosition()` + `charFormat().anchorHref()` for resolved absolute URL. Both use `QDir::cleanPath()` for relative resolution.
-- **External images**: Downloaded **synchronously** (10s timeout via `QEventLoop`) to `%TEMP%\plainmd_images\`. Privacy toggle `privacy/previewExternalImages` disables network entirely.
-- **Relative images for printing**: `setBaseUrl()` alone fails for print. `resolveRelativeImages()` converts relative paths to `file:///` URLs before `setMarkdown()`.
-- **Fenced code protection**: Image resolution functions skip `` ``` `` blocks (regex-based).
-- **Frontmatter**: Converted to fenced `yaml` code block before rendering.
-- **MDX files**: Rendered as plain text (Qt markdown parser can't handle JSX syntax). Line breaks preserved.
-- **Find/F3 search persistence**: `m_lastSearchText` stores the last search term from either FindDialog or SearchInDialog. Cleared when switching files via tree click (to reset context), but preserved for F3 within the same file. When opening from Search in Files, the search text is set AFTER `loadFile()` to ensure it's available for both initial highlighting and subsequent F3 presses.
-- **Search highlight clearing**: Escape key handled in `MainWindow::keyPressEvent()` to clear `QTextCursor` selection. Works globally regardless of focus. `setFocus()` called after finding text (in `FindDialog::performFind()`, `onFindNext()`, `highlightSearchText()`) ensures selection appears in color rather than inactive grey.
-- **Encoding detection**: Uses `QStringDecoder` (Qt 6.0+) to auto-detect file encoding. Tries UTF-8 first via `QStringDecoder::Utf8`, falls back to system encoding (`QStringDecoder::System` which is Windows-1252 on Windows, ISO-8859-1/Latin1 on Linux) if UTF-8 decoding has errors. Detection result stored in `m_detectedEncoding` for status bar display.
-- **Line endings detection**: Samples first 8KB of raw file data to detect CRLF (`\r\n`) vs LF (`\n`) line endings. If CRLF found → displays "CRLF" (Windows style). If only LF found or no newlines → displays "LF" (Unix style). Efficient sampling prevents scanning huge files while maintaining accuracy for typical documents where line endings are consistent throughout.
-- **Auto-reload debouncing**: `QFileSystemWatcher::fileChanged` can fire multiple times for a single external save operation. A 500ms debounce timer (`m_fileChangeDebounceTimer`) prevents showing multiple "File Modified" dialogs. The timer is restarted on each file change event, and only shows the dialog when the timer expires (after 500ms of no new events). Additionally, `m_fileChangeDialogOpen` flag prevents multiple dialogs from appearing if the user hasn't responded to the first one yet.
-- **Word wrap**: Toggle via `View → Word Wrap` (Ctrl+W) or status bar button. `QTextEdit::setLineWrapMode()` switches between `WidgetWidth` (wrap at window edge) and `NoWrap` (horizontal scrollbar). Status bar button (`m_statusWrapBtn`) uses Tabler Icons: `text-wrap.png` (ON) and `text-wrap-disabled.png` (OFF). Button has transparent background for both states; only icon changes. Button hidden on welcome page (no file loaded). Setting persisted to `view/wordWrap` (default: ON).
-- **Copy Code**: Right-click on code (inline or fenced block) to show "Copy Code" in context menu. Detects code by monospace font family. Custom context menu with Tabler Icons: `codeblock.png` (Copy Code), `copy.png` (Copy), `select-all.png` (Select All). Code content is extracted by scanning character-by-character to find monospace boundaries, then trimmed to remove extra whitespace.
-- **Folder protection**: `loadFolder()` validates folders before loading:
-  - Empty folder check: `folderHasValidFiles()` scans recursively up to 3 levels deep, stopping at 100 files. Shows status bar warning if no markdown files found.
-  - Progress indicator: `m_statusProgress` (QProgressBar in indeterminate mode) shows while scanning. Located on left side of status bar (temporary area), hidden when scan completes. Force repaint with `repaint()` and `QCoreApplication::processEvents()` to ensure visibility.
-  - Root drive blocking: `QDir::isRoot()` blocks opening `C:\`, `/`, etc. with warning dialog.
-  - System folder blocking: Exact path matching blocks Windows system folders (Windows, Program Files, ProgramData) and Linux system folders (/bin, /usr, /etc, /lib, etc.) with warning dialog.
-  - Subfolders allowed: System folder subfolders (e.g., `C:\ProgramData\YourApp`) can be opened.
-- **FilterProxyModel**: `hasMatchingFiles()` limited to 1000 files to prevent scanning massive folders. Checks only immediate children + one subdirectory level (not recursive) to prevent blocking the UI.
+## COMMANDS
+```bash
+# Linux
+./build.sh          # Build release/plainmd
+./clean.sh          # Remove build artifacts
+./build-deb.sh      # Build .deb package
+./build-appimage.sh # Build AppImage
 
-## Platform Differences
-- **Fonts**: Linux defaults to DejaVu Sans (editor) / Noto Sans (emoji). Windows: Segoe UI both. Code font settings removed due to Qt6 bugs.
-- **Path separators**: Display with `QDir::toNativeSeparators()`, store normalized (forward slashes).
-- **Reveal in folder**: `explorer` (Windows), `xdg-open` (Linux).
-- **Menu bar**: File / View / Help only. Preferences under View (Ctrl+,).
-- **AppImage**: `build-appimage.sh` bundles `qgtk3` platform theme plugin for native GTK styling on X11/Wayland.
+# Windows (MSVC)
+build.bat           # Full build
+build-installer.bat # Build installer
+```
 
-## Resources
-- `plainmd.rc` + `icon.ico` → Windows exe icon.
-- `plainmd.qrc` + `images/*.png` → runtime icons (Tabler Icons, MIT licensed).
-- `tabler-icons/` in `.gitignore`. Copy new icons from `tabler-icons/png/outline/` to `images/` before embedding.
-
-## Verification
-- No tests, no CI, no lint config. **Verify by building and running.**
-- Samples: `samples/sample.md`, `samples/sample-frontmatter.md`, `samples/image_test.md`.
-- C++17 (`CONFIG += c++17` in `.pro`).
-- New source/header files must be added to `SOURCES`/`HEADERS` in `plainmd.pro`.
-- Build with `build.bat` (Windows) or `build.sh` (Linux).
+## NOTES
+- `tabler-icons/` is gitignored (5039 PNG stash). Only `images/` is embedded.
+- `.qtcreator/` has stale `.pro.user` files from historical renames.
+- `scripts/dev.ahk` is gitignored (Windows AutoHotkey dev hotkeys).
+- Version hardcoded in: `plainmd.rc`, `build-deb.sh`, `build-appimage.sh`, `installer.iss`.
+- `archive-release.sh`/`.bat` extract version dynamically from `src/main.cpp`.
