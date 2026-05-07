@@ -2202,14 +2202,16 @@ void MainWindow::closeEvent(QCloseEvent *event)
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
     // Handle file tree viewport resize to update welcome label geometry
-    if (obj == m_fileTree->viewport() && event->type() == QEvent::Resize) {
+    // Guard against early initialization when m_fileTree may not be fully set up
+    if (m_fileTree && obj == m_fileTree->viewport() && event->type() == QEvent::Resize) {
         if (m_fileTreeWelcome && m_fileTreeWelcome->isVisible()) {
             m_fileTreeWelcome->setGeometry(m_fileTree->viewport()->rect());
         }
     }
     
     // Handle wheel events for Ctrl+Scroll zoom to update minimap and status bar
-    if (obj == m_editor->viewport() && event->type() == QEvent::Wheel) {
+    // Guard against early initialization when m_editor may not be fully set up
+    if (m_editor && obj == m_editor->viewport() && event->type() == QEvent::Wheel) {
         QWheelEvent *wheelEvent = static_cast<QWheelEvent*>(event);
         if (wheelEvent->modifiers() & Qt::ControlModifier) {
             // Ctrl+Scroll triggers zoom in QTextEdit, update minimap and zoom display after
@@ -2222,7 +2224,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         }
     }
     
-    if (obj == m_editor->viewport() && event->type() == QEvent::ToolTip) {
+    if (m_editor && obj == m_editor->viewport() && event->type() == QEvent::ToolTip) {
         // Skip custom image tooltips on the welcome page (no file loaded)
         if (m_currentFile.isEmpty())
             return QMainWindow::eventFilter(obj, event);
