@@ -109,6 +109,18 @@ sudo apt install qt6-base-dev build-essential
 qmake plainmd.pro && make
 
 # Output: release/plainmd
+
+# Create .deb package (Debian/Ubuntu, optional)
+# Output: dist/plainmd_<version>_amd64.deb
+./build-deb.sh
+
+# Create AppImage (universal Linux, optional)
+# Output: dist/plainmd-<version>-x86_64.AppImage
+./build-appimage.sh
+
+# Create Flatpak (optional, requires flatpak-builder)
+# Output: dist/plainmd-<version>-<arch>.flatpak
+./build-flatpak.sh
 ```
 
 ## Usage
