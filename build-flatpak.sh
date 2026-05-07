@@ -15,12 +15,16 @@ if [ -z "$VERSION" ]; then
     VERSION="unknown"
 fi
 
-OUTPUT_FILE="plainmd-${VERSION}.flatpak"
+# Detect architecture
+ARCH=$(uname -m)
+
+OUTPUT_FILE="plainmd-${VERSION}-${ARCH}.flatpak"
 
 echo "=========================================="
 echo "Building Flatpak package"
 echo "=========================================="
 echo "Version: ${VERSION}"
+echo "Arch:    ${ARCH}"
 echo "App ID:  eu.brainbytez.plainmd"
 echo "Output:  dist/${OUTPUT_FILE}"
 echo "=========================================="
