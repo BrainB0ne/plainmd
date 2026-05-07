@@ -213,6 +213,7 @@ PlainMD/
 ├── clean.bat               # Windows clean script
 ├── setenv.bat              # Set up MSVC environment
 ├── build-installer.bat     # Windows installer builder (outputs to dist/)
+├── build-zip.bat           # Windows portable ZIP builder (outputs to dist/)
 ├── make-checksums.bat      # Generate SHA256 checksums for dist packages (Windows)
 ├── build.sh                # Linux build script
 ├── clean.sh                # Linux clean script
@@ -220,11 +221,13 @@ PlainMD/
 ├── install-deb.sh          # Debian install helper
 ├── uninstall-deb.sh        # Debian uninstall helper
 ├── build-appimage.sh       # AppImage builder (outputs to dist/)
+├── build-flatpak.sh        # Flatpak builder (outputs to dist/)
 ├── make-checksums.sh       # Generate SHA256 checksums for dist packages (Linux)
 ├── archive-release.sh      # Create versioned zip archive of dist/ folder (Linux)
 ├── archive-release.bat     # Create versioned zip archive of dist/ folder (Windows)
-├── dist/                   # Distribution packages (.exe, .deb, .AppImage, .sha256)
+├── dist/                   # Distribution packages (.exe, .zip, .deb, .AppImage, .flatpak, .sha256)
 ├── installer.iss           # Inno Setup installer script
+├── eu.brainbytez.plainmd.yaml # Flatpak manifest
 ├── .gitattributes          # Git line ending rules (for WSL/cross-platform dev)
 ├── README.md               # User documentation
 └── AGENTS.md               # Developer documentation
