@@ -34,6 +34,18 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 ![PlainMD Screenshot](screenshots/plainmd-screenshot.png)
 ![PlainMD Screenshot](screenshots/plainmd-screenshot-v1-3-0.png)
 
+## System Requirements
+
+### Windows
+- Windows 10 or later (64-bit)
+- [Visual C++ Redistributable 2022](https://aka.ms/vs/17/release/vc_redist.x64.exe) (most systems already have this installed)
+
+**Note:** If PlainMD fails to start with a missing DLL error, install the Visual C++ Redistributable from the link above. This is a one-time system requirement.
+
+### Linux
+- Qt 6.x runtime libraries
+- Standard desktop environment (X11 or Wayland)
+
 ## Building from Source
 
 ### Prerequisites
