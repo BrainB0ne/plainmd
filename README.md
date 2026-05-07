@@ -81,6 +81,10 @@ windeployqt release\plainmd.exe
 :: Create installer (optional, requires Inno Setup)
 :: Output: dist\plainmd-<version>-x64-setup.exe
 build-installer.bat
+
+:: Create portable ZIP (optional)
+:: Output: dist\plainmd-<version>-x64-portable.zip
+build-zip.bat
 ```
 
 **Editor integration:** Build tasks are configured for Zed (`.zed/tasks.json`) and VS Code (`.vscode/tasks.json`) for integrated development.
