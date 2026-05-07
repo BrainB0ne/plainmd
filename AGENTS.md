@@ -10,13 +10,14 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 ## STRUCTURE
 ```
 .
-├── src/                    # 22 files, flat — all C++ source
-├── images/                 # 25 Tabler Icon PNGs + LICENSE
-├── samples/                # Test markdown files
-├── plainmd.pro             # qmake — sole build system
-├── plainmd.qrc             # Qt resources
-├── AGENTS.md               # This file
-└── [build scripts]         # .bat (Win), .sh (Linux)
+├── src/                               # 22 files, flat — all C++ source
+├── images/                            # 25 Tabler Icon PNGs + LICENSE
+├── samples/                           # Test markdown files
+├── plainmd.pro                        # qmake — sole build system
+├── plainmd.qrc                      # Qt resources
+├── eu.brainbytez.plainmd.yaml      # Flatpak manifest
+├── AGENTS.md                         # This file
+└── [build scripts]                   # .bat (Win), .sh (Linux)
 ```
 
 ## WHERE TO LOOK
@@ -75,10 +76,12 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 ## COMMANDS
 ```bash
 # Linux
-./build.sh          # Build release/plainmd
-./clean.sh          # Remove build artifacts
-./build-deb.sh      # Build .deb package
-./build-appimage.sh # Build AppImage
+./build.sh           # Build release/plainmd
+./clean.sh           # Remove build artifacts
+./build-deb.sh       # Build .deb package
+./build-appimage.sh  # Build AppImage
+./build-flatpak.sh   # Build Flatpak (outputs to dist/)
+./uninstall-flatpak.sh  # Remove Flatpak from system
 
 # Windows (MSVC)
 build.bat           # Full build
@@ -89,6 +92,7 @@ build-installer.bat # Build installer
 - `tabler-icons/` is gitignored (5039 PNG stash). Only `images/` is embedded.
 - `.qtcreator/` has stale `.pro.user` files from historical renames.
 - `scripts/dev.ahk` is gitignored (Windows AutoHotkey dev hotkeys).
-- Version hardcoded in: `plainmd.rc`, `build-deb.sh`, `build-appimage.sh`, `installer.iss`.
+- Version hardcoded in: `plainmd.rc`, `build-deb.sh`, `build-appimage.sh`, `build-flatpak.sh`, `installer.iss`.
 - `archive-release.sh`/`.bat` extract version dynamically from `src/main.cpp`.
 - Welcome page uses `QApplication::applicationVersion()` dynamically (not hardcoded).
+- Flatpak uses KDE Platform 6.7 runtime with Qt6, app ID: `eu.brainbytez.plainmd`.

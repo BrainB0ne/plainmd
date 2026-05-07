@@ -49,6 +49,12 @@ plainmd
 # Distribution packages
 dist/
 
+# Flatpak build artifacts
+build-dir/
+repo/
+.flatpak-builder/
+*.flatpak
+
 # Development tools
 scripts/dev.ahk
 scripts/*.exe

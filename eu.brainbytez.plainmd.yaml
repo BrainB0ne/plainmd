@@ -1,0 +1,62 @@
+app-id: eu.brainbytez.plainmd
+runtime: org.kde.Platform
+runtime-version: '6.7'
+sdk: org.kde.Sdk
+command: plainmd
+
+finish-args:
+  # X11 + Wayland support
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  # Open user files
+  - --filesystem=home:rw
+  # For better font rendering and hardware acceleration
+  - --device=dri
+  # Network for external image loading (optional, can be disabled)
+  - --share=network
+  # Suppress locale warnings by using C.UTF-8
+  - --env=LC_ALL=C.UTF-8
+
+modules:
+  - name: plainmd
+    buildsystem: simple
+    build-commands:
+      - qmake PREFIX=/app plainmd.pro
+      - make -j$(nproc)
+      - make install
+    sources:
+      - type: dir
+        path: .
+        skip:
+          - .git
+          - .qtcreator
+          - .vscode
+          - .zed
+          - .gitattributes
+          - .gitignore
+          - debug
+          - dist
+          - release
+          - samples
+          - screenshots
+          - tabler-icons
+          - .qmake.stash
+          - Makefile
+          - Makefile.Release
+          - Makefile.Debug
+          - '*.deb'
+          - '*.AppImage'
+          - '*.exe'
+          - '*.zip'
+          - '*.flatpak'
+          - '*.tar.gz'
+
+    cleanup:
+      - /share/man
+      - /share/doc
+      - /include
+      - /lib/cmake
+      - /lib/pkgconfig
+      - '*.a'
+      - '*.la'

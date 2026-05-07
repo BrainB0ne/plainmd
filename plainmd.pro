@@ -48,3 +48,15 @@ FORMS += \
 
 RC_FILE = plainmd.rc
 RESOURCES += plainmd.qrc
+
+# Installation target (Unix/Linux only, not used on Windows)
+!win32 {
+    # For Flatpak, PREFIX is set to /app via build-flatpak.sh
+    isEmpty(PREFIX) {
+        PREFIX = /usr/local
+    }
+
+    # Binary installation
+    target.path = $$PREFIX/bin
+    INSTALLS += target
+}

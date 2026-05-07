@@ -30,4 +30,9 @@ rm -f *~
 rm -f core
 rm -f *.core
 
+# Flatpak build artifacts
+rm -rf build-dir/
+rm -rf repo/
+rm -rf .flatpak-builder/
+
 echo "Done."
