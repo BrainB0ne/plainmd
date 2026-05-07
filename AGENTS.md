@@ -34,6 +34,7 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 | Close File | `src/mainwindow.cpp` | File → Close File (Ctrl+F4), clears editor, keeps folder |
 | App icons | `images/*.png` | Copy from `tabler-icons/png/outline/` |
 | Windows installer | `installer.iss` | Inno Setup |
+| Windows portable ZIP | `build-zip.bat` | Creates portable distribution |
 | Build scripts | `build.bat` / `build.sh` | Full build pipelines |
 
 ## CODE MAP
@@ -86,12 +87,14 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 # Windows (MSVC)
 build.bat           # Full build
 build-installer.bat # Build installer
+build-zip.bat       # Build portable ZIP distribution
 ```
 
 ## NOTES
 - `tabler-icons/` is gitignored (5039 PNG stash). Only `images/` is embedded.
 - `.qtcreator/` has stale `.pro.user` files from historical renames.
 - `scripts/dev.ahk` is gitignored (Windows AutoHotkey dev hotkeys).
+- Portable ZIP (`build-zip.bat`) includes all Qt6 DLLs, plugins, and `README-PORTABLE.txt`.
 - Version hardcoded in: `plainmd.rc`, `build-deb.sh`, `build-appimage.sh`, `build-flatpak.sh`, `installer.iss`.
 - `archive-release.sh`/`.bat` extract version dynamically from `src/main.cpp`.
 - Welcome page uses `QApplication::applicationVersion()` dynamically (not hardcoded).
