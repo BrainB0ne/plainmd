@@ -302,6 +302,24 @@ void MainWindow::setupMenuBar()
     connect(m_exportPdfAction, &QAction::triggered, this, &MainWindow::onExportToPdf);
     fileMenu->addAction(m_exportPdfAction);
 
+    // Export to HTML submenu
+    QMenu *exportHtmlMenu = fileMenu->addMenu(QIcon(":/images/file-type-html.png"), tr("Export to &HTML"));
+    
+    QAction *exportSimpleHtmlAction = new QAction(tr("&Simple HTML..."), this);
+    exportSimpleHtmlAction->setShortcut(QKeySequence(tr("Ctrl+Shift+H")));
+    exportSimpleHtmlAction->setEnabled(false);
+    connect(exportSimpleHtmlAction, &QAction::triggered, this, &MainWindow::onExportSimpleHtml);
+    exportHtmlMenu->addAction(exportSimpleHtmlAction);
+    
+    QAction *exportSelfContainedHtmlAction = new QAction(tr("&Self-contained HTML..."), this);
+    exportSelfContainedHtmlAction->setEnabled(false);
+    connect(exportSelfContainedHtmlAction, &QAction::triggered, this, &MainWindow::onExportSelfContainedHtml);
+    exportHtmlMenu->addAction(exportSelfContainedHtmlAction);
+    
+    // Store references for enable/disable
+    m_exportHtmlSimpleAction = exportSimpleHtmlAction;
+    m_exportHtmlSelfContainedAction = exportSelfContainedHtmlAction;
+
     fileMenu->addSeparator();
 
     m_recentMenu = fileMenu->addMenu(tr("Recent &Files"));
@@ -1410,6 +1428,246 @@ void MainWindow::onExportToPdf()
                              tr("Document exported to:\n%1").arg(QDir::toNativeSeparators(filePath)));
 }
 
+void MainWindow::onExportSimpleHtml()
+{
+    exportToHtml(false); // false = simple HTML
+}
+
+void MainWindow::onExportSelfContainedHtml()
+{
+    exportToHtml(true); // true = self-contained HTML
+}
+
+void MainWindow::exportToHtml(bool selfContained)
+{
+    // Disable export when welcome page is shown (no file loaded)
+    if (m_currentFile.isEmpty()) {
+        return;
+    }
+    
+    QString dialogTitle = selfContained ? tr("Export Self-contained HTML") : tr("Export Simple HTML");
+    QString defaultFileName = QFileInfo(m_currentFile).baseName() + ".html";
+    QString filePath = QFileDialog::getSaveFileName(this, dialogTitle,
+                                                    QFileInfo(m_currentFile).dir().absoluteFilePath(defaultFileName),
+                                                    tr("HTML Files (*.html *.htm)"));
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    // Ensure .html extension
+    if (!filePath.endsWith(".html", Qt::CaseInsensitive) && !filePath.endsWith(".htm", Qt::CaseInsensitive)) {
+        filePath += ".html";
+    }
+
+    QString htmlContent;
+    
+    if (selfContained) {
+        // Self-contained: embed all images as base64
+        htmlContent = generateSelfContainedHtml();
+    } else {
+        // Simple: convert absolute paths back to relative
+        htmlContent = generateSimpleHtml(filePath);
+    }
+
+    // Write to file
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, tr("Export Failed"),
+                              tr("Could not write to file:\n%1").arg(filePath));
+        return;
+    }
+
+    QTextStream stream(&file);
+    stream.setEncoding(QStringConverter::Utf8);
+    stream << htmlContent;
+    file.close();
+
+    // Show success message
+    QString formatText = selfContained ? tr("Self-contained HTML") : tr("Simple HTML");
+    QMessageBox::information(this, tr("Export Successful"),
+                             tr("Document exported as %1 to:\n%2").arg(formatText, QDir::toNativeSeparators(filePath)));
+}
+
+QString MainWindow::generateSimpleHtml(const QString &outputFilePath)
+{
+    // Get the base HTML from the editor
+    QString html = m_editor->toHtml();
+    
+    // Get the output directory for calculating relative paths
+    QDir outputDir = QFileInfo(outputFilePath).dir();
+    
+    // Find all image sources in the HTML (handle both single and double quotes)
+    QRegularExpression imgRegex("<img[^>]+src=[\"']([^\"']+)[\"']");
+    QRegularExpressionMatchIterator matches = imgRegex.globalMatch(html);
+    
+    // Collect all replacements first
+    QHash<QString, QString> replacements;
+    while (matches.hasNext()) {
+        QRegularExpressionMatch match = matches.next();
+        QString src = match.captured(1);
+        
+        // Skip already embedded images (data URIs) and processed ones
+        if (src.startsWith("data:") || replacements.contains(src)) {
+            continue;
+        }
+        
+        // Convert file:// URL to local path
+        QString localPath;
+        if (src.startsWith("file:///")) {
+            // On Windows: file:///C:/path/image.png -> C:/path/image.png
+            // On Linux: file:///home/user/path/image.png -> /home/user/path/image.png
+            localPath = src.mid(8); // Remove "file:///" prefix
+            localPath = QDir::fromNativeSeparators(localPath);
+        } else {
+            localPath = src;
+        }
+        
+        // Calculate relative path from output file to image
+        QString relativePath = outputDir.relativeFilePath(localPath);
+        
+        // Normalize to forward slashes for HTML compatibility
+        relativePath = relativePath.replace("\\", "/");
+        
+        // If relative path starts with "../", it's truly relative
+        // If it doesn't start with "../" and contains ":", it's absolute (different drive)
+        if (!relativePath.startsWith("../") && relativePath.contains(":")) {
+            // Different drive, can't make relative - keep as-is or use filename only
+            relativePath = QFileInfo(localPath).fileName();
+        }
+        
+        replacements.insert(src, relativePath);
+    }
+    
+    // Apply replacements after collecting all (safe to modify HTML now)
+    for (auto it = replacements.begin(); it != replacements.end(); ++it) {
+        html.replace(it.key(), it.value());
+    }
+    
+    // Add CSS to ensure images are displayed as block elements with spacing
+    QString imageCss = R"(
+<style>
+    img { display: block; margin: 5px 0; max-width: 100%; height: auto; }
+    ul, ol { margin: 4px 0; padding-left: 24px; }
+    li { margin: 1px 0; }
+</style>
+)";
+    
+    // Insert CSS before </head> tag, or after <head> if </head> not found
+    if (html.contains("</head>")) {
+        html.replace("</head>", imageCss + "\n</head>");
+    } else if (html.contains("<head>")) {
+        html.replace("<head>", "<head>\n" + imageCss);
+    } else {
+        // No head tag, insert after <html> or at the beginning
+        if (html.contains("<html>")) {
+            html.replace("<html>", "<html>\n<head>\n" + imageCss + "</head>");
+        } else {
+            html = "<html><head>\n" + imageCss + "</head>\n<body>\n" + html + "\n</body></html>";
+        }
+    }
+    
+    return html;
+}
+
+QString MainWindow::generateSelfContainedHtml()
+{
+    // Get the base HTML from the editor
+    QString html = m_editor->toHtml();
+    
+    // Find all image sources in the HTML (handle both single and double quotes)
+    QRegularExpression imgRegex("<img[^>]+src=[\"']([^\"']+)[\"']");
+    QRegularExpressionMatchIterator matches = imgRegex.globalMatch(html);
+    
+    // Collect all unique image sources first (to avoid modifying while iterating)
+    QHash<QString, QString> replacements;
+    while (matches.hasNext()) {
+        QRegularExpressionMatch match = matches.next();
+        QString src = match.captured(1);
+        
+        // Skip already embedded images (data URIs) and processed ones
+        if (src.startsWith("data:") || replacements.contains(src)) {
+            continue;
+        }
+        
+        // Convert file:// URL to local path if needed
+        QString imagePath;
+        if (src.startsWith("file:///")) {
+            // file:///C:/path/image.png -> C:/path/image.png
+            imagePath = QUrl(src).toLocalFile();
+        } else if (QFileInfo(src).isRelative()) {
+            // Relative path: resolve against markdown file's directory
+            imagePath = QFileInfo(m_currentFile).dir().absoluteFilePath(src);
+        } else {
+            imagePath = src;
+        }
+        
+        // Normalize path separators for consistent comparison
+        imagePath = QDir::toNativeSeparators(imagePath);
+        
+        // Try to embed the image
+        if (QFile::exists(imagePath)) {
+            QFile imgFile(imagePath);
+            if (imgFile.open(QIODevice::ReadOnly)) {
+                QByteArray imgData = imgFile.readAll();
+                imgFile.close();
+                
+                // Get MIME type based on extension
+                QString mimeType = getMimeType(imagePath);
+                if (!mimeType.isEmpty()) {
+                    QString base64Data = imgData.toBase64();
+                    QString dataUri = QString("data:%1;base64,%2").arg(mimeType, base64Data);
+                    replacements.insert(src, dataUri);
+                }
+            }
+        }
+    }
+    
+    // Apply replacements after collecting all (safe to modify HTML now)
+    for (auto it = replacements.begin(); it != replacements.end(); ++it) {
+        html.replace(it.key(), it.value());
+    }
+    
+    // Add CSS to ensure images are displayed as block elements with spacing
+    QString imageCss = R"(
+<style>
+    img { display: block; margin: 5px 0; max-width: 100%; height: auto; }
+    ul, ol { margin: 4px 0; padding-left: 24px; }
+    li { margin: 1px 0; }
+</style>
+)";
+    
+    // Insert CSS before </head> tag, or after <head> if </head> not found
+    if (html.contains("</head>")) {
+        html.replace("</head>", imageCss + "\n</head>");
+    } else if (html.contains("<head>")) {
+        html.replace("<head>", "<head>\n" + imageCss);
+    } else {
+        // No head tag, insert after <html> or at the beginning
+        if (html.contains("<html>")) {
+            html.replace("<html>", "<html>\n<head>\n" + imageCss + "</head>");
+        } else {
+            html = "<html><head>\n" + imageCss + "</head>\n<body>\n" + html + "\n</body></html>";
+        }
+    }
+    
+    return html;
+}
+
+QString MainWindow::getMimeType(const QString &filePath) const
+{
+    QString suffix = QFileInfo(filePath).suffix().toLower();
+    
+    if (suffix == "png") return "image/png";
+    if (suffix == "jpg" || suffix == "jpeg") return "image/jpeg";
+    if (suffix == "gif") return "image/gif";
+    if (suffix == "svg") return "image/svg+xml";
+    if (suffix == "bmp") return "image/bmp";
+    if (suffix == "webp") return "image/webp";
+    if (suffix == "ico") return "image/x-icon";
+    
+    return QString(); // Unknown type
+}
+
 void MainWindow::onCloseFile()
 {
     // Disable close when welcome page is shown (no file loaded)
@@ -1446,6 +1704,12 @@ void MainWindow::onCloseFile()
     }
     if (m_exportPdfAction) {
         m_exportPdfAction->setEnabled(false);
+    }
+    if (m_exportHtmlSimpleAction) {
+        m_exportHtmlSimpleAction->setEnabled(false);
+    }
+    if (m_exportHtmlSelfContainedAction) {
+        m_exportHtmlSelfContainedAction->setEnabled(false);
     }
     if (m_findAction) {
         m_findAction->setEnabled(false);
@@ -1601,6 +1865,12 @@ void MainWindow::loadFile(const QString &filePath)
     }
     if (m_exportPdfAction) {
         m_exportPdfAction->setEnabled(true);
+    }
+    if (m_exportHtmlSimpleAction) {
+        m_exportHtmlSimpleAction->setEnabled(true);
+    }
+    if (m_exportHtmlSelfContainedAction) {
+        m_exportHtmlSelfContainedAction->setEnabled(true);
     }
     if (m_findAction) {
         m_findAction->setEnabled(true);

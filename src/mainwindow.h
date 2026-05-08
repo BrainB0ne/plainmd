@@ -80,6 +80,8 @@ private slots:
     void onAbout();
     void onPrint();
     void onExportToPdf();
+    void onExportSimpleHtml();
+    void onExportSelfContainedHtml();
     void onCloseFile();
     void onPreferences();
     void onFind();
@@ -108,6 +110,10 @@ private:
     QString resolveFrontMatter(const QString &markdownContent);
     void applyEditorFont();
     void showWelcomePage();
+    void exportToHtml(bool selfContained);
+    QString generateSimpleHtml(const QString &outputFilePath);
+    QString generateSelfContainedHtml();
+    QString getMimeType(const QString &filePath) const;
 
     QTextEdit *m_editor = nullptr;
     QLabel *m_fileTreeWelcome = nullptr;  // Welcome page shown when no folder loaded
@@ -124,6 +130,8 @@ private:
     QAction *m_clearRecentFoldersAction = nullptr;
     QAction *m_printAction = nullptr;
     QAction *m_exportPdfAction = nullptr;
+    QAction *m_exportHtmlSimpleAction = nullptr;
+    QAction *m_exportHtmlSelfContainedAction = nullptr;
     QAction *m_closeFileAction = nullptr;
     QAction *m_findAction = nullptr;
     QAction *m_findNextAction = nullptr;
