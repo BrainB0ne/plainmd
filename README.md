@@ -32,6 +32,7 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 
 ## Screenshots
 ![PlainMD Screenshot](screenshots/plainmd-screenshot.png)
+
 ![PlainMD Screenshot](screenshots/plainmd-screenshot-v1-3-0.png)
 
 ## System Requirements
