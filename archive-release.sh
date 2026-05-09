@@ -49,14 +49,28 @@ cd dist
 # Remove old archive if exists
 rm -f "${OUTPUT_FILE}"
 
+# Stage files in a versioned prefix directory for clean archive root
+PREFIX="plainmd-${VERSION}"
+STAGING_DIR="${SCRIPT_DIR}/.archive-staging-$$"
+TAR_FILE="${OUTPUT_FILE%.zip}.tar.gz"
+
+trap 'rm -rf "${STAGING_DIR}"' EXIT INT TERM
+mkdir -p "${STAGING_DIR}/${PREFIX}"
+
+for item in *; do
+    [ -e "$item" ] || continue
+    [ "$item" = "${OUTPUT_FILE}" ] && continue
+    [ "$item" = "${TAR_FILE}" ] && continue
+    cp -r "$item" "${STAGING_DIR}/${PREFIX}/"
+done
+
 # Prefer zip, fall back to tar.gz if zip is unavailable
 if command -v zip >/dev/null 2>&1; then
-    zip -r "${OUTPUT_FILE}" . -x "${OUTPUT_FILE}"
+    (cd "${STAGING_DIR}" && zip -r "${SCRIPT_DIR}/dist/${OUTPUT_FILE}" "${PREFIX}")
 else
     echo "'zip' not found, falling back to tar.gz..."
-    TAR_FILE="${OUTPUT_FILE%.zip}.tar.gz"
     rm -f "${TAR_FILE}"
-    tar -czf "${TAR_FILE}" --exclude="${OUTPUT_FILE}" --exclude="${TAR_FILE}" --warning=no-file-changed --transform='s,^\./,,' .
+    (cd "${STAGING_DIR}" && tar -czf "${SCRIPT_DIR}/dist/${TAR_FILE}" "${PREFIX}")
     OUTPUT_FILE="${TAR_FILE}"
 fi
 
