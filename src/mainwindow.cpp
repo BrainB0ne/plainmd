@@ -303,18 +303,19 @@ void MainWindow::setupMenuBar()
     fileMenu->addAction(m_exportPdfAction);
 
     // Export to HTML submenu
-    QMenu *exportHtmlMenu = fileMenu->addMenu(QIcon(":/images/file-type-html.png"), tr("Export to &HTML"));
+    m_exportHtmlMenu = fileMenu->addMenu(QIcon(":/images/file-type-html.png"), tr("Export to &HTML"));
+    m_exportHtmlMenu->setEnabled(false); // Disabled on welcome page
     
     QAction *exportSimpleHtmlAction = new QAction(tr("&Simple HTML..."), this);
     exportSimpleHtmlAction->setShortcut(QKeySequence(tr("Ctrl+Shift+H")));
     exportSimpleHtmlAction->setEnabled(false);
     connect(exportSimpleHtmlAction, &QAction::triggered, this, &MainWindow::onExportSimpleHtml);
-    exportHtmlMenu->addAction(exportSimpleHtmlAction);
+    m_exportHtmlMenu->addAction(exportSimpleHtmlAction);
     
     QAction *exportSelfContainedHtmlAction = new QAction(tr("&Self-contained HTML..."), this);
     exportSelfContainedHtmlAction->setEnabled(false);
     connect(exportSelfContainedHtmlAction, &QAction::triggered, this, &MainWindow::onExportSelfContainedHtml);
-    exportHtmlMenu->addAction(exportSelfContainedHtmlAction);
+    m_exportHtmlMenu->addAction(exportSelfContainedHtmlAction);
     
     // Store references for enable/disable
     m_exportHtmlSimpleAction = exportSimpleHtmlAction;
@@ -1711,6 +1712,9 @@ void MainWindow::onCloseFile()
     if (m_exportHtmlSelfContainedAction) {
         m_exportHtmlSelfContainedAction->setEnabled(false);
     }
+    if (m_exportHtmlMenu) {
+        m_exportHtmlMenu->setEnabled(false);
+    }
     if (m_findAction) {
         m_findAction->setEnabled(false);
     }
@@ -1871,6 +1875,9 @@ void MainWindow::loadFile(const QString &filePath)
     }
     if (m_exportHtmlSelfContainedAction) {
         m_exportHtmlSelfContainedAction->setEnabled(true);
+    }
+    if (m_exportHtmlMenu) {
+        m_exportHtmlMenu->setEnabled(true);
     }
     if (m_findAction) {
         m_findAction->setEnabled(true);

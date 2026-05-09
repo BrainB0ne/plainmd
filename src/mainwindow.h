@@ -124,6 +124,7 @@ private:
 
     QMenu *m_recentMenu = nullptr;
     QMenu *m_recentFoldersMenu = nullptr;
+    QMenu *m_exportHtmlMenu = nullptr;
     QList<QAction*> m_recentActions;
     QList<QAction*> m_recentFolderActions;
     QAction *m_clearRecentAction = nullptr;
