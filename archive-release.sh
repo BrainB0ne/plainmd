@@ -2,7 +2,7 @@
 set -e
 
 # Archive the dist folder into a versioned zip file
-# Output: dist/plainmd-<version>-release.zip
+# Output: dist/plainmd-<version>-linux-release.zip
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
@@ -33,7 +33,7 @@ if [ -z "$VERSION" ]; then
     VERSION="unknown"
 fi
 
-OUTPUT_FILE="plainmd-${VERSION}-release.zip"
+OUTPUT_FILE="plainmd-${VERSION}-linux-release.zip"
 
 echo "=========================================="
 echo "Creating release archive"

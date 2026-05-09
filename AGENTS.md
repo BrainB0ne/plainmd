@@ -78,17 +78,19 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 ## COMMANDS
 ```bash
 # Linux
-./build.sh           # Build release/plainmd
-./clean.sh           # Remove build artifacts
-./build-deb.sh       # Build .deb package
-./build-appimage.sh  # Build AppImage
-./build-flatpak.sh   # Build Flatpak (outputs to dist/)
+./build.sh              # Build release/plainmd
+./clean.sh              # Remove build artifacts
+./build-deb.sh          # Build .deb package
+./build-appimage.sh     # Build AppImage
+./build-flatpak.sh      # Build Flatpak (outputs to dist/)
+./build-release.sh      # All-in-one: .deb + AppImage + Flatpak + checksums + archive
 ./uninstall-flatpak.sh  # Remove Flatpak from system
 
 # Windows (MSVC)
-build.bat           # Full build
-build-installer.bat # Build installer
-build-zip.bat       # Build portable ZIP distribution
+build.bat              # Full build
+build-installer.bat    # Build installer
+build-zip.bat          # Build portable ZIP distribution
+build-release.bat      # All-in-one: installer + ZIP + checksums + archive
 ```
 
 ## NOTES

@@ -86,6 +86,10 @@ build-installer.bat
 :: Create portable ZIP (optional)
 :: Output: dist\plainmd-<version>-x64-portable.zip
 build-zip.bat
+
+:: All-in-one release build (optional)
+:: Output: dist\plainmd-<version>-release.zip
+build-release.bat
 ```
 
 **Editor integration:** Build tasks are configured for Zed (`.zed/tasks.json`) and VS Code (`.vscode/tasks.json`) for integrated development.
@@ -122,6 +126,10 @@ qmake plainmd.pro && make
 # Create Flatpak (optional, requires flatpak-builder)
 # Output: dist/plainmd-<version>-<arch>.flatpak
 ./build-flatpak.sh
+
+# All-in-one release build (optional)
+# Output: dist/plainmd-<version>-release.zip
+./build-release.sh
 ```
 
 ## Usage
@@ -215,16 +223,8 @@ PlainMD/
 ├── setenv.bat              # Set up MSVC environment
 ├── build-installer.bat     # Windows installer builder (outputs to dist/)
 ├── build-zip.bat           # Windows portable ZIP builder (outputs to dist/)
+├── build-release.bat       # Windows all-in-one release pipeline
 ├── make-checksums.bat      # Generate SHA256 checksums for dist packages (Windows)
-├── build.sh                # Linux build script
-├── clean.sh                # Linux clean script
-├── build-deb.sh            # Debian package builder (outputs to dist/)
-├── install-deb.sh          # Debian install helper
-├── uninstall-deb.sh        # Debian uninstall helper
-├── build-appimage.sh       # AppImage builder (outputs to dist/)
-├── build-flatpak.sh        # Flatpak builder (outputs to dist/)
-├── make-checksums.sh       # Generate SHA256 checksums for dist packages (Linux)
-├── archive-release.sh      # Create versioned zip archive of dist/ folder (Linux)
 ├── archive-release.bat     # Create versioned zip archive of dist/ folder (Windows)
 ├── dist/                   # Distribution packages (.exe, .zip, .deb, .AppImage, .flatpak, .sha256)
 ├── installer.iss           # Inno Setup installer script
