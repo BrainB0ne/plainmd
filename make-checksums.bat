@@ -124,3 +124,4 @@ echo   certutil -hashfile dist\package.exe SHA256
 echo.
 echo Or open the .sha256 file and compare values.
 echo ============================================
+exit /b 0
