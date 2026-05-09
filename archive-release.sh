@@ -56,7 +56,7 @@ else
     echo "'zip' not found, falling back to tar.gz..."
     TAR_FILE="${OUTPUT_FILE%.zip}.tar.gz"
     rm -f "${TAR_FILE}"
-    tar -czf "${TAR_FILE}" --exclude="${OUTPUT_FILE}" --exclude="${TAR_FILE}" .
+    tar -czf "${TAR_FILE}" --exclude="${OUTPUT_FILE}" --exclude="${TAR_FILE}" --transform='s,^\./,,' .
     OUTPUT_FILE="${TAR_FILE}"
 fi
 
