@@ -91,7 +91,7 @@ echo.
 
 :: Deploy Qt dependencies
 echo Deploying Qt dependencies with windeployqt...
-windeployqt release\plainmd.exe
+windeployqt --no-translations release\plainmd.exe
 if errorlevel 1 (
     echo WARNING: windeployqt reported errors, continuing anyway...
 )
