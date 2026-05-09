@@ -9,7 +9,7 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-if ! dpkg -l plainmd >/dev/null 2>&1; then
+if ! dpkg -s plainmd >/dev/null 2>&1; then
     echo "Package 'plainmd' is not installed."
     exit 0
 fi

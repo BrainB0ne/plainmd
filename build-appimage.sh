@@ -7,8 +7,14 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 
-# Package version
-PKG_VERSION="1.3.2"
+# Package version (extracted from src/main.cpp)
+PKG_VERSION=$(grep -oP 'setApplicationVersion\("\K[0-9]+\.[0-9]+\.[0-9]+' src/main.cpp 2>/dev/null || echo "")
+if [ -z "$PKG_VERSION" ]; then
+    echo "Error: Could not extract version from src/main.cpp"
+    exit 1
+fi
+
+echo "Package version: $PKG_VERSION"
 
 # ---------------------------------------------------------------------------
 # 1. Locate system qmake and build against it
@@ -32,7 +38,7 @@ fi
 
 echo "Building release binary with system Qt ($SYS_QMAKE)..."
 $SYS_QMAKE plainmd.pro CONFIG+=release
-make -f Makefile.Release
+make -f Makefile.Release -j$(nproc)
 
 if [ ! -x "release/plainmd" ]; then
     echo "Error: release/plainmd was not built."

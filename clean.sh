@@ -30,7 +30,9 @@ rm -f *~
 rm -f core
 rm -f *.core
 
-# Flatpak build artifacts
+# Linux distribution build artifacts
+rm -rf AppDir/
+rm -rf build-deb/
 rm -rf build-dir/
 rm -rf repo/
 rm -rf .flatpak-builder/

@@ -44,13 +44,21 @@ echo "Output:  dist/${OUTPUT_FILE}"
 echo "=========================================="
 echo ""
 
-# Create zip archive inside dist folder
+# Create archive inside dist folder
 cd dist
 # Remove old archive if exists
 rm -f "${OUTPUT_FILE}"
 
-# Create zip excluding the zip file itself
-zip -r "${OUTPUT_FILE}" . -x "${OUTPUT_FILE}"
+# Prefer zip, fall back to tar.gz if zip is unavailable
+if command -v zip >/dev/null 2>&1; then
+    zip -r "${OUTPUT_FILE}" . -x "${OUTPUT_FILE}"
+else
+    echo "'zip' not found, falling back to tar.gz..."
+    TAR_FILE="${OUTPUT_FILE%.zip}.tar.gz"
+    rm -f "${TAR_FILE}"
+    tar -czf "${TAR_FILE}" --exclude="${OUTPUT_FILE}" --exclude="${TAR_FILE}" .
+    OUTPUT_FILE="${TAR_FILE}"
+fi
 
 echo ""
 echo "=========================================="
@@ -59,4 +67,9 @@ echo "=========================================="
 ls -lh "${OUTPUT_FILE}"
 echo ""
 echo "Archive contents:"
-unzip -l "${OUTPUT_FILE}" | tail -4
+if [[ "${OUTPUT_FILE}" == *.zip ]] && command -v unzip >/dev/null 2>&1; then
+    unzip -l "${OUTPUT_FILE}" | tail -4
+else
+    tar -tzf "${OUTPUT_FILE}" | head -10
+    echo "..."
+fi

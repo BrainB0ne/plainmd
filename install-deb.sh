@@ -5,24 +5,26 @@ set -e
 # Installs the local .deb package and resolves dependencies automatically.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEB_FILE="${SCRIPT_DIR}/plainmd_1.3.2_amd64.deb"
 
 if [ "$EUID" -ne 0 ]; then
     echo "This script must be run as root (use sudo)."
     exit 1
 fi
 
-if [ ! -f "$DEB_FILE" ]; then
-    echo "Error: Package not found: $DEB_FILE"
+# Find the .deb package in dist/
+DEB_FILE=$(ls -t "${SCRIPT_DIR}/dist/plainmd_"*"_amd64.deb" 2>/dev/null | head -n 1)
+
+if [ -z "$DEB_FILE" ] || [ ! -f "$DEB_FILE" ]; then
+    echo "Error: .deb package not found in dist/."
     echo "Run ./build-deb.sh first to build the .deb package."
     exit 1
 fi
 
-echo "Installing plainmd..."
+echo "Installing: $(basename "$DEB_FILE")"
 
 # apt's sandboxed _apt user cannot read files in user home directories.
 # Copy to /tmp first to avoid the "unsandboxed as root" warning.
-TMP_DEB="/tmp/plainmd_1.3.2_amd64.deb"
+TMP_DEB="/tmp/plainmd_install.deb"
 cp "$DEB_FILE" "$TMP_DEB"
 
 # apt install resolves dependencies automatically; dpkg -i does not.

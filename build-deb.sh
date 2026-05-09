@@ -8,7 +8,18 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 
 # ---------------------------------------------------------------------------
-# 1. Locate system qmake (avoid local Qt installations)
+# 1. Extract version from src/main.cpp
+# ---------------------------------------------------------------------------
+PKG_VERSION=$(grep -oP 'setApplicationVersion\("\K[0-9]+\.[0-9]+\.[0-9]+' src/main.cpp 2>/dev/null || echo "")
+if [ -z "$PKG_VERSION" ]; then
+    echo "Error: Could not extract version from src/main.cpp"
+    exit 1
+fi
+
+echo "Package version: $PKG_VERSION"
+
+# ---------------------------------------------------------------------------
+# 2. Locate system qmake (avoid local Qt installations)
 # ---------------------------------------------------------------------------
 QMAKE=""
 for candidate in /usr/bin/qmake6 /usr/lib/qt6/bin/qmake /usr/bin/qmake; do
@@ -30,11 +41,11 @@ fi
 echo "Using qmake: $QMAKE  (Qt $ver)"
 
 # ---------------------------------------------------------------------------
-# 2. Build release binary against system Qt
+# 3. Build release binary against system Qt
 # ---------------------------------------------------------------------------
 echo "Building release binary..."
 $QMAKE plainmd.pro CONFIG+=release
-make -f Makefile.Release
+make -f Makefile.Release -j$(nproc)
 
 if [ ! -x "release/plainmd" ]; then
     echo "Error: release/plainmd was not built."
@@ -52,10 +63,9 @@ fi
 echo "Binary links to system Qt — OK."
 
 # ---------------------------------------------------------------------------
-# 3. Package metadata
+# 4. Package metadata
 # ---------------------------------------------------------------------------
 PKG_NAME="plainmd"
-PKG_VERSION="1.3.2"
 PKG_ARCH="amd64"
 BUILD_DIR="build-deb"
 PKG_DIR="${BUILD_DIR}/${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}"
