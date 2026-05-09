@@ -70,11 +70,8 @@ echo Output:  dist\!OUTPUT_FILE!
 echo ============================================
 echo.
 
-REM Change to dist folder
-cd dist
-
 REM Remove old archive if exists
-if exist "!OUTPUT_FILE!" del /f "!OUTPUT_FILE!"
+if exist "dist\!OUTPUT_FILE!" del /f "dist\!OUTPUT_FILE!"
 
 REM Check if tar command is available (Windows 10+)
 tar --version >nul 2>&1
@@ -90,22 +87,46 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM Create zip archive using tar
-REM -cf = create file, --exclude to exclude the zip itself
-tar -acf "!OUTPUT_FILE!" --exclude="!OUTPUT_FILE!" *
+REM Stage files in a versioned prefix directory for clean archive root
+set "PREFIX=plainmd-!VERSION!"
+set "STAGING_DIR=%TEMP%\plainmd-archive-staging-%RANDOM%"
 
+REM Clean up staging dir if it exists from a previous run
+if exist "!STAGING_DIR!" rd /s /q "!STAGING_DIR!"
+mkdir "!STAGING_DIR!\!PREFIX!"
+
+REM Copy files from dist to staging (excluding the archive file)
+for /f "delims=" %%a in ('dir /b /a "dist\"') do (
+    if /I not "%%a"=="!OUTPUT_FILE!" (
+        if exist "dist\%%a\" (
+            xcopy "dist\%%a" "!STAGING_DIR!\!PREFIX!\%%a\" /e /i /h /q >nul 2>&1
+        ) else (
+            copy "dist\%%a" "!STAGING_DIR!\!PREFIX!\" >nul 2>&1
+        )
+    )
+)
+
+REM Create zip archive from the staging directory
+cd /d "!STAGING_DIR!"
+tar -acf "!SCRIPT_DIR!dist\!OUTPUT_FILE!" "!PREFIX!"
 if errorlevel 1 (
     echo ERROR: Failed to create archive.
+    cd /d "!SCRIPT_DIR!"
+    rd /s /q "!STAGING_DIR!"
     pause
     exit /b 1
 )
+
+REM Return to script dir and clean up staging
+cd /d "!SCRIPT_DIR!"
+rd /s /q "!STAGING_DIR!"
 
 echo.
 echo ============================================
 echo Archive created successfully!
 echo ============================================
-dir /b "!OUTPUT_FILE!"
+dir /b "dist\!OUTPUT_FILE!"
 echo.
 echo Archive contents:
-tar -tf "!OUTPUT_FILE!" | findstr /v /c:"^!OUTPUT_FILE!$"
+tar -tf "dist\!OUTPUT_FILE!" | findstr /v /c:"^!PREFIX!/$"
 echo ============================================
