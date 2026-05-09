@@ -31,10 +31,10 @@ echo.
 :: ---------------------------------------------------------------------------
 :: 1. Clean
 :: ---------------------------------------------------------------------------
-echo Step 1: Cleaning previous builds...
+echo Step 1: Cleaning previous builds..
 call clean.bat >nul 2>&1
 if errorlevel 1 (
-    echo   Warning: Clean step reported errors, continuing...
+    echo   Warning: Clean step reported errors, continuing..
 )
 
 :: ---------------------------------------------------------------------------
@@ -47,7 +47,7 @@ if not exist "!INNO_SETUP!" (
 
 if exist "!INNO_SETUP!" (
     echo.
-    echo Step 2: Building installer...
+    echo Step 2: Building installer
     call build-installer.bat
     if errorlevel 1 (
         echo   ERROR: Installer build failed.
@@ -56,10 +56,10 @@ if exist "!INNO_SETUP!" (
     )
 ) else (
     echo.
-    echo Step 2: SKIPPED — Inno Setup not found.
+    echo Step 2: SKIPPED - Inno Setup not found.
     echo   Download from: https://jrsoftware.org/isdl.php
     echo.
-    echo   Building binary only (no installer)...
+    echo   Building binary only (no installer)
     call build.bat
     if errorlevel 1 (
         echo   ERROR: Build failed.
@@ -73,14 +73,14 @@ if exist "!INNO_SETUP!" (
 :: ---------------------------------------------------------------------------
 if exist "release\plainmd.exe" (
     echo.
-    echo Step 3: Building portable ZIP...
+    echo Step 3: Building portable ZIP..
     call build-zip.bat
     if errorlevel 1 (
         echo   Warning: Portable ZIP build failed.
     )
 ) else (
     echo.
-    echo Step 3: SKIPPED — release\plainmd.exe not found.
+    echo Step 3: SKIPPED - release\plainmd.exe not found.
 )
 
 :: ---------------------------------------------------------------------------
@@ -88,14 +88,14 @@ if exist "release\plainmd.exe" (
 :: ---------------------------------------------------------------------------
 if exist "dist\" (
     echo.
-    echo Step 4: Generating checksums...
+    echo Step 4: Generating checksums..
     call make-checksums.bat
     if errorlevel 1 (
         echo   Warning: Checksum generation failed.
     )
 ) else (
     echo.
-    echo Step 4: SKIPPED — dist\ folder not found.
+    echo Step 4: SKIPPED - dist\ folder not found.
 )
 
 :: ---------------------------------------------------------------------------
@@ -103,14 +103,14 @@ if exist "dist\" (
 :: ---------------------------------------------------------------------------
 if exist "dist\" (
     echo.
-    echo Step 5: Creating release archive...
+    echo Step 5: Creating release archive..
     call archive-release.bat
     if errorlevel 1 (
         echo   Warning: Archive creation failed.
     )
 ) else (
     echo.
-    echo Step 5: SKIPPED — nothing to archive.
+    echo Step 5: SKIPPED - nothing to archive.
 )
 
 echo.

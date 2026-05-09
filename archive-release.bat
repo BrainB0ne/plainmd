@@ -109,5 +109,3 @@ echo.
 echo Archive contents:
 tar -tf "!OUTPUT_FILE!" | findstr /v /c:"^!OUTPUT_FILE!$"
 echo ============================================
-
-pause
