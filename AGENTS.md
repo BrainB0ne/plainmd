@@ -1,7 +1,7 @@
 # Agent Notes: plainmd
 
-**Generated:** 2026-05-05
-**Commit:** 7d795f2
+**Generated:** 2026-05-09
+**Commit:** 6aa93aa
 **Branch:** master
 
 ## OVERVIEW
@@ -73,6 +73,7 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 - **Auto-reload debounce**: 500ms timer + `m_fileChangeDialogOpen` flag.
 - **Search text lifecycle**: `m_lastSearchText` cleared on file switch, preserved for F3.
 - **Folder protection**: Blocks root drives and system folders. `folderHasValidFiles()` limits to 1000 files, 3 levels deep.
+- **CLI args**: `main.cpp` passes `argv[1]` to `MainWindow::openPath()` which detects directory vs file via `QFileInfo` and calls `loadFolder()` or `openFile()` accordingly. Relative paths are resolved to absolute before storing in recent folders.
 
 ## COMMANDS
 ```bash

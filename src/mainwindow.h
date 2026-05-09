@@ -52,6 +52,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     void openFile(const QString &filePath, bool loadFileFolder = true);
+    void openPath(const QString &path);
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

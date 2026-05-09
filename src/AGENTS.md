@@ -24,8 +24,9 @@ src/
 | File loading/rendering | `mainwindow.cpp` | `loadFile()`, `resolveRelativeImages()`, `resolveExternalImages()`, line endings detection |
 | Status bar | `mainwindow.cpp` | `setupStatusBar()`, 8 widgets (word count, zoom, file type, encoding, line endings, wrap, toggles) |
 | Auto-reload | `mainwindow.cpp` | `QFileSystemWatcher` with 500ms debounce |
-| Drag & drop | `mainwindow.cpp` | `dragEnterEvent()`, `dropEvent()` |
+| Drag & drop / CLI | `mainwindow.cpp` | `dragEnterEvent()`, `dropEvent()`, `openPath()` |
 | Copy code | `mainwindow.cpp` | Context menu, monospace detection |
+| CLI entry | `main.cpp` | Passes `argv[1]` to `MainWindow::openPath()` |
 | Close File | `mainwindow.cpp` | File → Close File (Ctrl+F4), `onCloseFile()` |
 | Zoom | `mainwindow.cpp` | `zoomIn(2)`/`zoomOut(2)` — Qt6 only |
 | Minimap colors | `minimap.cpp` | Catppuccin palette, content type detection |

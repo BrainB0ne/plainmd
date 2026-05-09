@@ -130,7 +130,7 @@ qmake plainmd.pro && make
 
 - **File Menu** → Open File (Ctrl+O) or Open Folder (Ctrl+Shift+O)
 - **Drag and drop** files or folders into the window
-- **Command line:** `plainmd <file.md>`
+- **Command line:** `plainmd <file.md>` or `plainmd <folder/>`
 - **Double-click** .md files (after file association on Windows)
 
 ### Navigation

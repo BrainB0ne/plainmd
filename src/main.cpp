@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     window.show();
 
     if (argc > 1) {
-        window.openFile(QString::fromLocal8Bit(argv[1]));
+        window.openPath(QString::fromLocal8Bit(argv[1]));
     }
 
     return app.exec();

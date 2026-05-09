@@ -1760,6 +1760,23 @@ void MainWindow::openFile(const QString &filePath, bool loadFileFolder)
     }
 }
 
+void MainWindow::openPath(const QString &path)
+{
+    if (!QFile::exists(path) && !QDir(path).exists()) {
+        QMessageBox::warning(this, tr("Error"),
+                             tr("Path not found:\n%1").arg(path));
+        return;
+    }
+
+    QFileInfo info(path);
+    QString absPath = info.absoluteFilePath();
+    if (info.isDir()) {
+        loadFolder(absPath);
+    } else if (info.isFile()) {
+        openFile(absPath);
+    }
+}
+
 void MainWindow::loadFile(const QString &filePath)
 {
     QFile file(filePath);
