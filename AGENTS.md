@@ -35,6 +35,9 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 | App icons | `images/*.png` | Copy from `tabler-icons/png/outline/` |
 | Windows installer | `installer.iss` | Inno Setup |
 | Windows portable ZIP | `build-zip.bat` | Creates portable distribution |
+| Release archive | `archive-release.sh`/`.bat` | Versioned zip with prefix directory |
+| Checksums | `make-checksums.sh`/`.bat` | SHA256 per package + combined |
+| All-in-one release | `build-release.sh`/`.bat` | Full pipeline: build → package → checksum → archive |
 | Build scripts | `build.bat` / `build.sh` | Full build pipelines |
 
 ## CODE MAP
@@ -98,7 +101,7 @@ build-release.bat      # All-in-one: installer + ZIP + checksums + archive
 - `.qtcreator/` has stale `.pro.user` files from historical renames.
 - `scripts/dev.ahk` is gitignored (Windows AutoHotkey dev hotkeys).
 - Portable ZIP (`build-zip.bat`) includes all Qt6 DLLs, plugins, and `README-PORTABLE.txt`.
-- Version hardcoded in: `plainmd.rc`, `build-deb.sh`, `build-appimage.sh`, `build-flatpak.sh`, `installer.iss`.
-- `archive-release.sh`/`.bat` extract version dynamically from `src/main.cpp`.
+- Version hardcoded in: `plainmd.rc`, `installer.iss`.
+- Dynamically extracted from `src/main.cpp`: `build-deb.sh`, `build-appimage.sh`, `build-flatpak.sh`, `archive-release.sh`, `archive-release.bat`, `build-release.sh`, `build-release.bat`.
 - Welcome page uses `QApplication::applicationVersion()` dynamically (not hardcoded).
 - Flatpak uses KDE Platform 6.7 runtime with Qt6, app ID: `eu.brainbytez.plainmd`.

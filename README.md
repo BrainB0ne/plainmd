@@ -128,7 +128,7 @@ qmake plainmd.pro && make
 ./build-flatpak.sh
 
 # All-in-one release build (optional)
-# Output: dist/plainmd-<version>-release.zip
+# Output: dist/plainmd-<version>-linux-release.zip
 ./build-release.sh
 ```
 
@@ -218,14 +218,25 @@ PlainMD/
 ├── plainmd.pro             # qmake project file
 ├── plainmd.qrc             # Qt resources
 ├── plainmd.rc              # Windows resources
+├── build.sh                # Linux build script
+├── clean.sh                # Linux clean script
+├── build-deb.sh            # Debian package builder (outputs to dist/)
+├── install-deb.sh          # Debian install helper
+├── uninstall-deb.sh        # Debian uninstall helper
+├── build-appimage.sh       # AppImage builder (outputs to dist/)
+├── build-flatpak.sh        # Flatpak builder (outputs to dist/)
+├── uninstall-flatpak.sh    # Remove Flatpak from system
+├── build-release.sh        # Linux all-in-one release pipeline
+├── make-checksums.sh       # Generate SHA256 checksums (Linux)
+├── archive-release.sh      # Create versioned archive of dist/ (Linux)
 ├── build.bat               # Windows build script
 ├── clean.bat               # Windows clean script
 ├── setenv.bat              # Set up MSVC environment
 ├── build-installer.bat     # Windows installer builder (outputs to dist/)
 ├── build-zip.bat           # Windows portable ZIP builder (outputs to dist/)
 ├── build-release.bat       # Windows all-in-one release pipeline
-├── make-checksums.bat      # Generate SHA256 checksums for dist packages (Windows)
-├── archive-release.bat     # Create versioned zip archive of dist/ folder (Windows)
+├── make-checksums.bat      # Generate SHA256 checksums (Windows)
+├── archive-release.bat     # Create versioned archive of dist/ (Windows)
 ├── dist/                   # Distribution packages (.exe, .zip, .deb, .AppImage, .flatpak, .sha256)
 ├── installer.iss           # Inno Setup installer script
 ├── eu.brainbytez.plainmd.yaml # Flatpak manifest
