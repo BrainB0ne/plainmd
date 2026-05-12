@@ -358,6 +358,14 @@ void MainWindow::setupMenuBar()
 
     viewMenu->addSeparator();
 
+    m_reloadAction = new QAction(QIcon(":/images/reload.png"), tr("&Reload"), this);
+    m_reloadAction->setShortcut(QKeySequence::Refresh);
+    m_reloadAction->setEnabled(false); // Disabled on welcome page
+    connect(m_reloadAction, &QAction::triggered, this, &MainWindow::onReload);
+    viewMenu->addAction(m_reloadAction);
+
+    viewMenu->addSeparator();
+
     m_showFileTreeAction = new QAction(tr("Show &File Tree"), this);
     m_showFileTreeAction->setShortcut(QKeySequence(tr("F9")));
     m_showFileTreeAction->setCheckable(true);
@@ -430,6 +438,10 @@ void MainWindow::setupToolBar()
 
     // Export to PDF action is created in setupMenuBar and stored in m_exportPdfAction
     toolBar->addAction(m_exportPdfAction);
+
+    toolBar->addSeparator();
+
+    toolBar->addAction(m_reloadAction);
 
     toolBar->addSeparator();
 
@@ -1190,6 +1202,9 @@ void MainWindow::showWelcomePage()
     if (m_closeFileAction) {
         m_closeFileAction->setEnabled(false);
     }
+    if (m_reloadAction) {
+        m_reloadAction->setEnabled(false);
+    }
 
     // Stop watching files when showing welcome page
     if (m_fileWatcher && !m_fileWatcher->files().isEmpty()) {
@@ -1724,10 +1739,20 @@ void MainWindow::onCloseFile()
     if (m_closeFileAction) {
         m_closeFileAction->setEnabled(false);
     }
+    if (m_reloadAction) {
+        m_reloadAction->setEnabled(false);
+    }
 
     // Hide minimap on welcome page
     if (m_minimap) {
         m_minimap->hide();
+    }
+}
+
+void MainWindow::onReload()
+{
+    if (!m_currentFile.isEmpty()) {
+        loadFile(m_currentFile);
     }
 }
 
@@ -1904,6 +1929,9 @@ void MainWindow::loadFile(const QString &filePath)
     }
     if (m_closeFileAction) {
         m_closeFileAction->setEnabled(true);
+    }
+    if (m_reloadAction) {
+        m_reloadAction->setEnabled(true);
     }
 
     // Select the file in the tree if visible

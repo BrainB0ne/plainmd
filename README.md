@@ -14,6 +14,7 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **Drag and drop support** - Open files and folders by dragging them into the window
 - **Recent files & folders** - Quick access to recently opened files and folders with separate history and privacy toggles
 - **Auto-reload on file change** - Detects external file modifications and prompts to reload
+- **Manual reload** - Force a refresh of the current file with F5 (useful when auto-reload is missed or you want to clear caches)
 - **File tree toggle** - Show/hide file browser with F9 or status bar button for distraction-free reading
 - **Minimap** - Document overview with color-coded content types (images, headings, lists, links, code blocks) and viewport highlight; toggle with F10 or status bar button. Plain text (.txt) and MDX files show simplified minimap without markdown-specific coloring
 - **Status bar** - Shows word count, zoom level, file type, encoding (auto-detected UTF-8 or ANSI), line endings (CRLF/LF), word wrap toggle, and quick-toggle buttons for file tree and minimap
@@ -156,6 +157,7 @@ qmake plainmd.pro && make
 | Ctrl+F | Find in document |
 | F3 | Find next |
 | Ctrl+Shift+F | Search in files |
+| F5 | Reload current file |
 | F9 | Toggle file tree |
 | F10 | Toggle minimap |
 | Ctrl+W | Toggle word wrap |
@@ -192,7 +194,7 @@ Color emoji fonts (like Segoe UI Emoji) may not render correctly when printing t
 - **Single-window desktop app** - Entry: `src/main.cpp` → `MainWindow`
 - **Qt6 native rendering** - Uses `QTextEdit::setMarkdown()` for rendering (no external parser)
 - **File system model** - `QFileSystemModel` wrapped with `FilterProxyModel` for file tree
-- **Auto-reload** - `QFileSystemWatcher` monitors loaded files for external changes
+- **Auto-reload** - `QFileSystemWatcher` monitors loaded files for external changes; manual reload via F5 unconditionally re-runs `loadFile()`
 - **Settings** - `QSettings` (IniFormat) for preferences persistence
 
 ## Project Structure

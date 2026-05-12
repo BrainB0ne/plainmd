@@ -28,6 +28,7 @@
         <file>images/copy.png</file>
         <file>images/codeblock.png</file>
         <file>images/select-all.png</file>
+        <file>images/reload.png</file>
         <file>images/LICENSE-ICONS</file>
     </qresource>
 </RCC>

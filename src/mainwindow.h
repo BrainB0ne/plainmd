@@ -87,6 +87,7 @@ private slots:
     void onPreferences();
     void onFind();
     void onFindNext();
+    void onReload();
     void onSearchInFiles();
     void onFileChanged(const QString &path);
     void onFileChangeDebounceTriggered();
@@ -135,6 +136,7 @@ private:
     QAction *m_exportHtmlSimpleAction = nullptr;
     QAction *m_exportHtmlSelfContainedAction = nullptr;
     QAction *m_closeFileAction = nullptr;
+    QAction *m_reloadAction = nullptr;
     QAction *m_findAction = nullptr;
     QAction *m_findNextAction = nullptr;
     QAction *m_showFileTreeAction = nullptr;
