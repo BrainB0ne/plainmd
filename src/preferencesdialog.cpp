@@ -79,6 +79,7 @@ void PreferencesDialog::loadSettings()
     ui->keepRecentFoldersCheck->setChecked(settings.value("privacy/keepRecentFolders", true).toBool());
     ui->rememberLastFolderCheck->setChecked(settings.value("privacy/rememberLastFolder", true).toBool());
     ui->rememberLastFileCheck->setChecked(settings.value("privacy/rememberLastFile", true).toBool());
+    ui->navHistoryCheck->setChecked(settings.value("privacy/navigationHistory", true).toBool());
 
     // Load window title format (0 = filename only, 1 = full path)
     ui->windowTitleCombo->setCurrentIndex(settings.value("view/windowTitleFormat", 0).toInt());
@@ -99,6 +100,7 @@ void PreferencesDialog::saveSettings()
     settings.setValue("privacy/keepRecentFolders", ui->keepRecentFoldersCheck->isChecked());
     settings.setValue("privacy/rememberLastFolder", ui->rememberLastFolderCheck->isChecked());
     settings.setValue("privacy/rememberLastFile", ui->rememberLastFileCheck->isChecked());
+    settings.setValue("privacy/navigationHistory", ui->navHistoryCheck->isChecked());
     settings.setValue("view/windowTitleFormat", ui->windowTitleCombo->currentIndex());
 }
 
@@ -130,6 +132,11 @@ bool PreferencesDialog::keepRecentFolders() const
 bool PreferencesDialog::rememberLastFolder() const
 {
     return ui->rememberLastFolderCheck->isChecked();
+}
+
+bool PreferencesDialog::navigationHistory() const
+{
+    return ui->navHistoryCheck->isChecked();
 }
 
 QString PreferencesDialog::externalEditor() const

@@ -10,6 +10,9 @@
         <file>images/zoom-in.png</file>
         <file>images/zoom-out.png</file>
         <file>images/zoom-reset.png</file>
+        <file>images/arrow-left.png</file>
+        <file>images/arrow-down.png</file>
+        <file>images/arrow-right.png</file>
         <file>images/binoculars.png</file>
         <file>images/exit.png</file>
         <file>images/about.png</file>
@@ -22,7 +25,6 @@
         <file>images/layout-sidebar.png</file>
         <file>images/layout-sidebar-right.png</file>
         <file>images/file-search.png</file>
-        <file>images/arrow-right.png</file>
         <file>images/text-wrap.png</file>
         <file>images/text-wrap-disabled.png</file>
         <file>images/copy.png</file>

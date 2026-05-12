@@ -30,6 +30,7 @@ src/
 | Close File | `mainwindow.cpp` | File → Close File (Ctrl+F4), `onCloseFile()` |
 | Reload | `mainwindow.cpp` | View → Reload (F5), `onReload()`, disabled on welcome page |
 | Copy Path | `mainwindow.cpp` | File tree context menu: Copy File/Folder Path, Show in Explorer/File Manager |
+| Navigation History | `mainwindow.cpp` | Back/Forward (`Alt+←`/`Alt+→`), session-only, privacy toggle |
 | Document Outline | `mainwindow.cpp` | Left `QTabWidget` (tabs at bottom), `setupOutline()`, `updateOutline()`, deferred `headingLevel()` scan |
 | Zoom | `mainwindow.cpp` | `zoomIn(2)`/`zoomOut(2)` — Qt6 only |
 | Minimap colors | `minimap.cpp` | Catppuccin palette, content type detection |

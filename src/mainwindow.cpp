@@ -387,6 +387,20 @@ void MainWindow::setupMenuBar()
 
     viewMenu->addSeparator();
 
+    m_navBackAction = new QAction(QIcon(":/images/arrow-left.png"), tr("&Back"), this);
+    m_navBackAction->setShortcut(QKeySequence(tr("Alt+Left")));
+    m_navBackAction->setEnabled(false);
+    connect(m_navBackAction, &QAction::triggered, this, &MainWindow::onNavigateBack);
+    viewMenu->addAction(m_navBackAction);
+
+    m_navForwardAction = new QAction(QIcon(":/images/arrow-right.png"), tr("&Forward"), this);
+    m_navForwardAction->setShortcut(QKeySequence(tr("Alt+Right")));
+    m_navForwardAction->setEnabled(false);
+    connect(m_navForwardAction, &QAction::triggered, this, &MainWindow::onNavigateForward);
+    viewMenu->addAction(m_navForwardAction);
+
+    viewMenu->addSeparator();
+
     m_showFileTreeAction = new QAction(tr("Show &Sidebar"), this);
     m_showFileTreeAction->setShortcut(QKeySequence(tr("F9")));
     m_showFileTreeAction->setCheckable(true);
@@ -415,7 +429,7 @@ void MainWindow::setupMenuBar()
     connect(m_findAction, &QAction::triggered, this, &MainWindow::onFind);
     viewMenu->addAction(m_findAction);
 
-    m_findNextAction = new QAction(QIcon(":/images/arrow-right.png"), tr("Find &Next"), this);
+    m_findNextAction = new QAction(QIcon(":/images/arrow-down.png"), tr("Find &Next"), this);
     m_findNextAction->setShortcut(QKeySequence(tr("F3")));
     m_findNextAction->setEnabled(false); // Disabled on welcome page
     connect(m_findNextAction, &QAction::triggered, this, &MainWindow::onFindNext);
@@ -463,6 +477,11 @@ void MainWindow::setupToolBar()
     toolBar->addSeparator();
 
     toolBar->addAction(m_reloadAction);
+
+    toolBar->addSeparator();
+
+    toolBar->addAction(m_navBackAction);
+    toolBar->addAction(m_navForwardAction);
 
     toolBar->addSeparator();
 
@@ -1149,6 +1168,11 @@ void MainWindow::onPreferences()
         }
         if (!dlg.keepRecentFolders()) {
             m_settings.setValue("recentFolders", QStringList());
+        }
+        if (!dlg.navigationHistory()) {
+            m_navHistory.clear();
+            m_navIndex = -1;
+            updateNavActions();
         }
         refreshRecentFilesMenu();
         refreshRecentFoldersMenu();
@@ -1873,6 +1897,36 @@ void MainWindow::onReload()
     }
 }
 
+void MainWindow::onNavigateBack()
+{
+    if (m_navIndex > 0) {
+        m_navigating = true;
+        m_navIndex--;
+        loadFile(m_navHistory.at(m_navIndex));
+        updateNavActions();
+    }
+}
+
+void MainWindow::onNavigateForward()
+{
+    if (m_navIndex >= 0 && m_navIndex < m_navHistory.size() - 1) {
+        m_navigating = true;
+        m_navIndex++;
+        loadFile(m_navHistory.at(m_navIndex));
+        updateNavActions();
+    }
+}
+
+void MainWindow::updateNavActions()
+{
+    if (m_navBackAction) {
+        m_navBackAction->setEnabled(m_navIndex > 0);
+    }
+    if (m_navForwardAction) {
+        m_navForwardAction->setEnabled(m_navIndex >= 0 && m_navIndex < m_navHistory.size() - 1);
+    }
+}
+
 void MainWindow::openFile(const QString &filePath, bool loadFileFolder)
 {
     if (!QFile::exists(filePath)) {
@@ -2092,6 +2146,20 @@ void MainWindow::loadFile(const QString &filePath)
             m_statusMsgTimer->start(3000);
         }
     }
+
+    // Track navigation history (session-only, not persisted)
+    if (!m_navigating && m_settings.value("privacy/navigationHistory", true).toBool()) {
+        if (m_navIndex >= 0 && m_navIndex < m_navHistory.size() - 1) {
+            // Truncate forward history when branching to a new path
+            m_navHistory = m_navHistory.mid(0, m_navIndex + 1);
+        }
+        if (m_navIndex < 0 || m_navHistory.value(m_navIndex) != filePath) {
+            m_navHistory.append(filePath);
+            m_navIndex = m_navHistory.size() - 1;
+        }
+        updateNavActions();
+    }
+    m_navigating = false;
 }
 
 void MainWindow::loadFolder(const QString &folderPath, bool rememberAsLastFolder)

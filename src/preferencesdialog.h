@@ -41,6 +41,7 @@ public:
     bool keepRecentFiles() const;
     bool keepRecentFolders() const;
     bool rememberLastFolder() const;
+    bool navigationHistory() const;
     QString externalEditor() const;
     bool useNerdFontForEmoji() const;
     QFont printEmojiFont() const;

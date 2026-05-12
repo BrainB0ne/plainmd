@@ -89,6 +89,8 @@ private slots:
     void onFind();
     void onFindNext();
     void onReload();
+    void onNavigateBack();
+    void onNavigateForward();
     void onOutlineItemClicked(QTreeWidgetItem *item, int column);
     void onSearchInFiles();
     void onFileChanged(const QString &path);
@@ -102,6 +104,7 @@ private:
     void setupEditor();
     void setupOutline();
     void updateOutline();
+    void updateNavActions();
     void loadFile(const QString &filePath);
     void loadFolder(const QString &folderPath, bool rememberAsLastFolder = true);
     void updateRecentFiles(const QString &filePath);
@@ -141,11 +144,17 @@ private:
     QAction *m_exportHtmlSelfContainedAction = nullptr;
     QAction *m_closeFileAction = nullptr;
     QAction *m_reloadAction = nullptr;
+    QAction *m_navBackAction = nullptr;
+    QAction *m_navForwardAction = nullptr;
     QAction *m_findAction = nullptr;
     QAction *m_findNextAction = nullptr;
     QAction *m_showFileTreeAction = nullptr;
     QAction *m_showMinimapAction = nullptr;
     QAction *m_wordWrapAction = nullptr;
+
+    QList<QString> m_navHistory;
+    int m_navIndex = -1;
+    bool m_navigating = false;
 
     QString m_currentFile;
     QString m_currentFolder;
