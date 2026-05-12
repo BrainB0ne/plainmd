@@ -7,7 +7,7 @@ Flat source directory — all C++ code, UI forms, and the entry point. No subdir
 ```
 src/
 ├── main.cpp              # Entry point (36 lines)
-├── mainwindow.cpp/h      # Core app window (2343/179 lines)
+├── mainwindow.cpp/h      # Core app window (2925/216 lines)
 ├── minimap.cpp/h         # Document minimap (351/63 lines)
 ├── filterproxymodel.cpp/h # File tree filter (93/47 lines)
 ├── finddialog.cpp/h/ui   # Find in document (123/58 lines)
@@ -21,7 +21,7 @@ src/
 | Task | File | Notes |
 |------|------|-------|
 | Add menu/action | `mainwindow.cpp/h` | All menus, toolbars, actions defined here |
-| File loading/rendering | `mainwindow.cpp` | `loadFile()`, `resolveRelativeImages()`, `resolveExternalImages()`, line endings detection |
+| File loading/rendering | `mainwindow.cpp` | `loadFile()`, `resolveRelativeImages()`, `resolveExternalImages()`, line endings detection, `setCurrentCharFormat()` reset for `.txt` |
 | Status bar | `mainwindow.cpp` | `setupStatusBar()`, 8 widgets (word count, zoom, file type, encoding, line endings, wrap, toggles) |
 | Auto-reload | `mainwindow.cpp` | `QFileSystemWatcher` with 500ms debounce |
 | Drag & drop / CLI | `mainwindow.cpp` | `dragEnterEvent()`, `dropEvent()`, `openPath()` |

@@ -50,7 +50,7 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 
 | Symbol | Type | File | Lines | Role |
 |--------|------|------|-------|------|
-| MainWindow | class | mainwindow.cpp/h | 2343/179 | Core orchestrator: UI, file I/O, search, print, settings |
+| MainWindow | class | mainwindow.cpp/h | 2925/216 | Core orchestrator: UI, file I/O, search, print, settings |
 | Minimap | class | minimap.cpp/h | 351/63 | Scaled document overview with color-coded content types |
 | FilterProxyModel | class | filterproxymodel.cpp/h | 93/47 | Hides non-markdown files and empty directories |
 | FindDialog | class | finddialog.cpp/h/ui | 123/58 | In-document search (Ctrl+F) |
@@ -88,6 +88,7 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 - **Search text lifecycle**: `m_lastSearchText` cleared on file switch, preserved for F3.
 - **Folder protection**: Blocks root drives and system folders. `folderHasValidFiles()` limits to 1000 files, 3 levels deep.
 - **CLI args**: `main.cpp` passes `argv[1]` to `MainWindow::openPath()` which detects directory vs file via `QFileInfo` and calls `loadFolder()` or `openFile()` accordingly. Relative paths are resolved to absolute before storing in recent folders.
+- **Plain text loading**: `QTextEdit::setPlainText()` inherits the cursor's current char format. After clicking a heading in the outline, the cursor holds bold formatting. When switching to a `.txt` file, this leaks into the plain text display. Fix: call `setCurrentCharFormat(QTextCharFormat())` before `setPlainText()` to reset the format.
 
 ## COMMANDS
 ```bash

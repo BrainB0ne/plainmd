@@ -2073,12 +2073,12 @@ void MainWindow::loadFile(const QString &filePath)
     processedContent = resolveExternalImages(processedContent, previewExternal);
     processedContent = resolveRelativeImages(processedContent, QFileInfo(filePath).absolutePath());
 
-    m_editor->clear();
-
     QString suffix = QFileInfo(filePath).suffix().toLower();
     if (suffix == "txt" || suffix == "mdx") {
         // Plain text and MDX files - preserve formatting without markdown processing
         // MDX contains JSX syntax that Qt's markdown parser doesn't handle well
+        // Reset any lingering rich-text char format before inserting plain text
+        m_editor->setCurrentCharFormat(QTextCharFormat());
         m_editor->setPlainText(content);
         if (m_minimap) {
             m_minimap->setPlainTextMode(true);  // Skip markdown detection in minimap
