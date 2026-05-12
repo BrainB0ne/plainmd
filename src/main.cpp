@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     app.setApplicationName("PlainMD");
     app.setOrganizationName("plainmd");
-    app.setApplicationVersion("1.3.2");
+    app.setApplicationVersion("1.4.0");
 
     MainWindow window;
     window.show();

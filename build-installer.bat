@@ -52,6 +52,21 @@ if errorlevel 1 (
     exit /b 1
 )
 
+:: Extract version from src\main.cpp
+:: Look for: app.setApplicationVersion("1.4.0");
+set "VERSION="
+for /f "delims=" %%a in ('findstr /r /c:"setApplicationVersion.*[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*" src\main.cpp 2^>nul') do (
+    for /f "tokens=2 delims=()" %%b in ("%%a") do (
+        set "VER_TEMP=%%b"
+        set "VERSION=!VER_TEMP:"=!"
+    )
+)
+
+if "!VERSION!"=="" (
+    echo Warning: Could not extract version from src\main.cpp
+    set "VERSION=unknown"
+)
+
 :: Clean previous build
 echo.
 echo Cleaning previous build...
@@ -113,7 +128,7 @@ echo ============================================
 echo Build and Installer Creation Successful!
 echo ============================================
 echo.
-echo Output: plainmd-setup.exe
+echo Output: dist\plainmd-!VERSION!-x64-setup.exe
 echo.
 
 endlocal
