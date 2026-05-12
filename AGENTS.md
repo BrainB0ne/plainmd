@@ -33,6 +33,7 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 | Preferences | `src/preferencesdialog.cpp/h/ui` | Ctrl+, |
 | Close File | `src/mainwindow.cpp` | File → Close File (Ctrl+F4), clears editor, keeps folder |
 | Reload | `src/mainwindow.cpp` | View → Reload (F5), `onReload()`, `loadFile()` |
+| Document Outline | `src/mainwindow.cpp` | Left panel toggle: Files ↔ Outline, `updateOutline()`, headingLevel() scan |
 | App icons | `images/*.png` | Copy from `tabler-icons/png/outline/` |
 | Windows installer | `installer.iss` | Inno Setup |
 | Windows portable ZIP | `build-zip.bat` | Creates portable distribution |
@@ -76,6 +77,7 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 - **Relative images for print**: `resolveRelativeImages()` converts to `file:///` before `setMarkdown()`.
 - **Auto-reload debounce**: 500ms timer + `m_fileChangeDialogOpen` flag.
 - **Manual reload**: View → Reload (F5) unconditionally re-runs `loadFile(m_currentFile)`. Disabled on welcome page.
+- **Document outline**: Left `QTabWidget` (tabs at bottom) with Files/Outline panes. Outline deferred via `QTimer::singleShot` after `setMarkdown()` so Qt's async heading format assignment finishes before scanning `headingLevel()`. Hierarchical QTreeWidget; click scrolls to heading via `QTextCursor::setPosition()`. Cleared on welcome page.
 - **Search text lifecycle**: `m_lastSearchText` cleared on file switch, preserved for F3.
 - **Folder protection**: Blocks root drives and system folders. `folderHasValidFiles()` limits to 1000 files, 3 levels deep.
 - **CLI args**: `main.cpp` passes `argv[1]` to `MainWindow::openPath()` which detects directory vs file via `QFileInfo` and calls `loadFolder()` or `openFile()` accordingly. Relative paths are resolved to absolute before storing in recent folders.

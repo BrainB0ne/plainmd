@@ -39,6 +39,7 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QStackedWidget>
+#include <QTreeWidget>
 #include "filterproxymodel.h"
 
 class FindDialog;
@@ -88,6 +89,7 @@ private slots:
     void onFind();
     void onFindNext();
     void onReload();
+    void onOutlineItemClicked(QTreeWidgetItem *item, int column);
     void onSearchInFiles();
     void onFileChanged(const QString &path);
     void onFileChangeDebounceTriggered();
@@ -98,6 +100,8 @@ private:
     void setupToolBar();
     void setupFileTree();
     void setupEditor();
+    void setupOutline();
+    void updateOutline();
     void loadFile(const QString &filePath);
     void loadFolder(const QString &folderPath, bool rememberAsLastFolder = true);
     void updateRecentFiles(const QString &filePath);
@@ -152,6 +156,8 @@ private:
     QFileSystemWatcher *m_fileWatcher = nullptr;
     Minimap *m_minimap = nullptr;
     QWidget *m_editorContainer = nullptr;
+    QTabWidget *m_leftTabs = nullptr;
+    QTreeWidget *m_outlineTree = nullptr;
 
     // Status bar widgets
     QLabel *m_statusFileType = nullptr;

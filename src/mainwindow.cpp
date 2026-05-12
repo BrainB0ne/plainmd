@@ -114,8 +114,8 @@ MainWindow::MainWindow(QWidget *parent)
     if (m_showFileTreeAction) {
         m_showFileTreeAction->setChecked(showTree);
     }
-    if (m_fileTree) {
-        m_fileTree->setVisible(showTree);
+    if (m_leftTabs) {
+        m_leftTabs->setVisible(showTree);
     }
     
     // Show/hide welcome label based on whether folder is loaded
@@ -167,11 +167,18 @@ void MainWindow::setupUI()
 
 void MainWindow::setupFileTree()
 {
-    // Create the file tree
+    // Create tab widget for Files / Outline
+    m_leftTabs = new QTabWidget(this);
+    m_leftTabs->setTabPosition(QTabWidget::South);
+    m_leftTabs->setDocumentMode(true);
+    m_leftTabs->setMinimumWidth(200);
+    m_leftTabs->tabBar()->setDrawBase(false);
+    m_leftTabs->tabBar()->setStyleSheet(QStringLiteral("QTabBar { alignment: center; }"));
+
+    // File tree tab
     m_fileTree = new QTreeView(this);
     m_fileTree->setSortingEnabled(true);
     m_fileTree->setAnimated(true);
-    m_fileTree->setMinimumWidth(200);
 
     m_fileModel = new QFileSystemModel(this);
     m_fileModel->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
@@ -190,8 +197,7 @@ void MainWindow::setupFileTree()
     m_fileTreeWelcome->setObjectName("fileTreeWelcome");
     m_fileTreeWelcome->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     m_fileTreeWelcome->setWordWrap(true);
-    
-    // Build rich text welcome content
+
     QString welcomeText = tr(
         "<center>"
         "<div style='margin-bottom: 20px;'><img src=':/images/folder-open.png' width='48' height='48'></div>"
@@ -208,18 +214,21 @@ void MainWindow::setupFileTree()
     m_fileTreeWelcome->setTextFormat(Qt::RichText);
     m_fileTreeWelcome->setStyleSheet("background: palette(base); padding: 20px;");
     m_fileTreeWelcome->show();
-    
-    // Install event filter on viewport to handle resize events
+
     m_fileTree->viewport()->installEventFilter(this);
-    
-    // Delay geometry update until viewport has proper size
     QTimer::singleShot(0, this, [this]() {
         if (m_fileTreeWelcome && m_fileTreeWelcome->isVisible()) {
             m_fileTreeWelcome->setGeometry(m_fileTree->viewport()->rect());
         }
     });
 
-    m_splitter->addWidget(m_fileTree);
+    m_leftTabs->addTab(m_fileTree, QIcon(":/images/files.png"), tr("Files"));
+
+    // Outline tab
+    setupOutline();
+    m_leftTabs->addTab(m_outlineTree, QIcon(":/images/list-tree.png"), tr("Outline"));
+
+    m_splitter->addWidget(m_leftTabs);
 }
 
 void MainWindow::setupEditor()
@@ -262,6 +271,18 @@ void MainWindow::setupEditor()
 
     m_splitter->addWidget(m_editorContainer);
     m_splitter->setStretchFactor(1, 1);
+}
+
+void MainWindow::setupOutline()
+{
+    m_outlineTree = new QTreeWidget(this);
+    m_outlineTree->setHeaderHidden(true);
+    m_outlineTree->setMinimumWidth(180);
+    m_outlineTree->setIndentation(14);
+    m_outlineTree->setUniformRowHeights(true);
+    m_outlineTree->setColumnCount(1);
+    m_outlineTree->setContextMenuPolicy(Qt::NoContextMenu);
+    connect(m_outlineTree, &QTreeWidget::itemClicked, this, &MainWindow::onOutlineItemClicked);
 }
 
 void MainWindow::setupMenuBar()
@@ -366,7 +387,7 @@ void MainWindow::setupMenuBar()
 
     viewMenu->addSeparator();
 
-    m_showFileTreeAction = new QAction(tr("Show &File Tree"), this);
+    m_showFileTreeAction = new QAction(tr("Show &Sidebar"), this);
     m_showFileTreeAction->setShortcut(QKeySequence(tr("F9")));
     m_showFileTreeAction->setCheckable(true);
     m_showFileTreeAction->setChecked(true);
@@ -465,7 +486,7 @@ void MainWindow::setupStatusBar()
     QStatusBar *status = statusBar();
 
     // Left side (temporary widget area)
-    // File Tree toggle button (icon only)
+    // Sidebar toggle button (icon only)
     m_toggleFileTreeBtn = new QPushButton(this);
     m_toggleFileTreeBtn->setIcon(QIcon(":/images/layout-sidebar.png"));
     m_toggleFileTreeBtn->setIconSize(QSize(20, 20));
@@ -474,7 +495,7 @@ void MainWindow::setupStatusBar()
     m_toggleFileTreeBtn->setStyleSheet(QStringLiteral("QPushButton { padding-left: 2px; padding-top: 2px; padding-bottom: 2px; padding-right: 4px; margin: 0px; }"));
     m_toggleFileTreeBtn->setCheckable(true);
     m_toggleFileTreeBtn->setChecked(m_settings.value("view/showFileTree", true).toBool());
-    m_toggleFileTreeBtn->setToolTip(tr("Toggle file tree sidebar"));
+    m_toggleFileTreeBtn->setToolTip(tr("Toggle sidebar"));
     connect(m_toggleFileTreeBtn, &QPushButton::toggled, this, &MainWindow::onToggleFileTree);
     status->addWidget(m_toggleFileTreeBtn);
 
@@ -971,10 +992,71 @@ void MainWindow::updateZoomDisplay()
     }
 }
 
+void MainWindow::onOutlineItemClicked(QTreeWidgetItem *item, int column)
+{
+    Q_UNUSED(column)
+    if (!item || !m_editor) return;
+
+    int pos = item->data(0, Qt::UserRole + 1).toInt();
+    QTextCursor cursor(m_editor->document());
+    cursor.setPosition(pos);
+    m_editor->setTextCursor(cursor);
+    m_editor->ensureCursorVisible();
+    m_editor->setFocus();
+}
+
+void MainWindow::updateOutline()
+{
+    if (!m_outlineTree) return;
+    m_outlineTree->clear();
+
+    if (m_currentFile.isEmpty() || !m_editor) return;
+
+    QTextDocument *doc = m_editor->document();
+    QHash<int, QTreeWidgetItem*> lastAtLevel;
+
+    for (QTextBlock block = doc->begin(); block != doc->end(); block = block.next()) {
+        int level = block.blockFormat().headingLevel();
+        if (level > 0 && level <= 6) {
+            QString text = block.text();
+            if (text.isEmpty()) continue;
+
+            QTreeWidgetItem *item = nullptr;
+            if (level > 1 && lastAtLevel.contains(level - 1)) {
+                item = new QTreeWidgetItem(lastAtLevel[level - 1]);
+            } else {
+                item = new QTreeWidgetItem(m_outlineTree);
+            }
+
+            item->setText(0, text);
+            item->setData(0, Qt::UserRole + 1, block.position());
+
+            if (level == 1) {
+                QFont font = item->font(0);
+                font.setBold(true);
+                item->setFont(0, font);
+            }
+
+            // Remove any deeper levels since we're starting a new branch
+            QHash<int, QTreeWidgetItem*>::iterator it = lastAtLevel.begin();
+            while (it != lastAtLevel.end()) {
+                if (it.key() >= level) {
+                    it = lastAtLevel.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+            lastAtLevel[level] = item;
+        }
+    }
+
+    m_outlineTree->expandAll();
+}
+
 void MainWindow::onToggleFileTree(bool visible)
 {
-    if (m_fileTree) {
-        m_fileTree->setVisible(visible);
+    if (m_leftTabs) {
+        m_leftTabs->setVisible(visible);
         m_settings.setValue("view/showFileTree", visible);
     }
     // Sync status bar button with menu action (avoid infinite loop by checking first)
@@ -1209,6 +1291,16 @@ void MainWindow::showWelcomePage()
     // Stop watching files when showing welcome page
     if (m_fileWatcher && !m_fileWatcher->files().isEmpty()) {
         m_fileWatcher->removePaths(m_fileWatcher->files());
+    }
+
+    // Clear outline when showing welcome page
+    if (m_outlineTree) {
+        m_outlineTree->clear();
+    }
+    // Switch back to Files tab on welcome page
+    if (m_leftTabs) {
+        m_leftTabs->setCurrentIndex(0);
+        m_leftTabs->setTabEnabled(1, false);
     }
 
     // Hide minimap and disable toggle on welcome page (no document to show)
@@ -1875,6 +1967,9 @@ void MainWindow::loadFile(const QString &filePath)
         }
     }
 
+    // Defer outline update: setMarkdown() assigns heading formats asynchronously
+    QTimer::singleShot(0, this, &MainWindow::updateOutline);
+
     // Clear last search text when switching to a different file (regular Find context)
     if (!m_currentFile.isEmpty() && m_currentFile != filePath) {
         m_lastSearchText.clear();
@@ -1932,6 +2027,13 @@ void MainWindow::loadFile(const QString &filePath)
     }
     if (m_reloadAction) {
         m_reloadAction->setEnabled(true);
+    }
+
+    // Enable outline for markdown files, disable for plain text / MDX
+    if (m_leftTabs) {
+        QString suffix = QFileInfo(filePath).suffix().toLower();
+        bool hasOutline = (suffix == "md" || suffix == "markdown");
+        m_leftTabs->setTabEnabled(1, hasOutline);
     }
 
     // Select the file in the tree if visible
@@ -2040,11 +2142,13 @@ void MainWindow::loadFolder(const QString &folderPath, bool rememberAsLastFolder
     QModelIndex proxyRoot = m_proxyModel->mapFromSource(sourceRoot);
     m_fileTree->setRootIndex(proxyRoot);
 
-    // Hide welcome page and show file tree
+    // Hide welcome page and show left tabs
     if (m_fileTreeWelcome) {
         m_fileTreeWelcome->hide();
     }
-    m_fileTree->show();
+    if (m_leftTabs) {
+        m_leftTabs->show();
+    }
 
     // Track recent folder
     if (m_settings.value("privacy/keepRecentFolders", true).toBool()) {

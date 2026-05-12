@@ -29,6 +29,8 @@
         <file>images/codeblock.png</file>
         <file>images/select-all.png</file>
         <file>images/reload.png</file>
+        <file>images/files.png</file>
+        <file>images/list-tree.png</file>
         <file>images/LICENSE-ICONS</file>
     </qresource>
 </RCC>
