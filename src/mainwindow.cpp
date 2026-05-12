@@ -401,6 +401,14 @@ void MainWindow::setupMenuBar()
 
     viewMenu->addSeparator();
 
+    m_zenModeAction = new QAction(QIcon(":/images/scan-eye.png"), tr("&Zen Mode"), this);
+    m_zenModeAction->setShortcut(QKeySequence(tr("F11")));
+    m_zenModeAction->setCheckable(true);
+    connect(m_zenModeAction, &QAction::triggered, this, &MainWindow::onToggleZenMode);
+    viewMenu->addAction(m_zenModeAction);
+
+    viewMenu->addSeparator();
+
     m_showFileTreeAction = new QAction(tr("Show &Sidebar"), this);
     m_showFileTreeAction->setShortcut(QKeySequence(tr("F9")));
     m_showFileTreeAction->setCheckable(true);
@@ -459,6 +467,7 @@ void MainWindow::setupToolBar()
 {
     QToolBar *toolBar = addToolBar(tr("Main Toolbar"));
     toolBar->setObjectName("Main Toolbar");
+    m_toolBar = toolBar;
 
     QAction *openAction = new QAction(QIcon(":/images/file-open.png"), tr("Open File"), this);
     connect(openAction, &QAction::triggered, this, &MainWindow::onOpenFile);
@@ -482,6 +491,10 @@ void MainWindow::setupToolBar()
 
     toolBar->addAction(m_navBackAction);
     toolBar->addAction(m_navForwardAction);
+
+    toolBar->addSeparator();
+
+    toolBar->addAction(m_zenModeAction);
 
     toolBar->addSeparator();
 
@@ -1897,6 +1910,41 @@ void MainWindow::onReload()
     }
 }
 
+void MainWindow::onToggleZenMode()
+{
+    if (!m_zenMode) {
+        // Enter zen mode - store current visibility states
+        m_preZenSidebar = m_leftTabs && m_leftTabs->isVisible();
+        m_preZenMinimap = m_minimap && m_minimap->isVisible();
+        m_preZenToolbar = m_toolBar && m_toolBar->isVisible();
+        m_preZenStatusBar = statusBar() && statusBar()->isVisible();
+        m_preZenMenuBar = menuBar() && menuBar()->isVisible();
+
+        if (m_leftTabs) m_leftTabs->hide();
+        if (m_minimap) m_minimap->hide();
+        if (m_toolBar) m_toolBar->hide();
+        if (statusBar()) statusBar()->hide();
+        if (menuBar()) menuBar()->hide();
+
+        m_zenMode = true;
+    } else {
+        // Exit zen mode - restore previous visibility states
+        if (m_leftTabs && m_preZenSidebar) m_leftTabs->show();
+        if (m_minimap && m_preZenMinimap) m_minimap->show();
+        if (m_toolBar && m_preZenToolbar) m_toolBar->show();
+        if (statusBar() && m_preZenStatusBar) statusBar()->show();
+        if (menuBar() && m_preZenMenuBar) menuBar()->show();
+
+        // Sync menu action checked states
+        if (m_showFileTreeAction) m_showFileTreeAction->setChecked(m_preZenSidebar);
+        if (m_showMinimapAction) m_showMinimapAction->setChecked(m_preZenMinimap);
+
+        m_zenMode = false;
+    }
+
+    if (m_zenModeAction) m_zenModeAction->setChecked(m_zenMode);
+}
+
 void MainWindow::onNavigateBack()
 {
     if (m_navIndex > 0) {
@@ -2850,6 +2898,19 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
+    // F11 toggles zen mode (fallback when QAction shortcut doesn't fire,
+    // e.g. when menu bar is hidden while in zen mode)
+    if (event->key() == Qt::Key_F11) {
+        onToggleZenMode();
+        return;
+    }
+
+    // Escape exits zen mode (takes priority over clearing selection)
+    if (event->key() == Qt::Key_Escape && m_zenMode) {
+        onToggleZenMode();
+        return;
+    }
+
     // Handle Escape key to clear search selection in editor
     if (event->key() == Qt::Key_Escape && m_editor) {
         QTextCursor cursor = m_editor->textCursor();

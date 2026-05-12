@@ -16,6 +16,7 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **Auto-reload on file change** - Detects external file modifications and prompts to reload
 - **Manual reload** - Force a refresh of the current file with F5 (useful when auto-reload is missed or you want to clear caches)
 - **File tree / Sidebar** - Show/hide sidebar with F9 or status bar button. Right-click any file to copy its path or reveal it in Explorer/File Manager. Right-click any folder to copy its path or open it in Explorer
+- **Zen Mode** - Distraction-free reading at the press of `F11`. Hides sidebar, toolbar, status bar, and menu bar for a pure document view. Press `F11` again or `Escape` to restore everything exactly as it was
 - **Navigation History** - Go back and forward through recently viewed files with `Alt+←` / `Alt+→` or toolbar buttons. Session-only (never saved to disk). Optional privacy toggle in Preferences
 - **Document Outline** - Left `QTabWidget` (tabs at bottom) with Files/Outline panes. Outline scans headings from the rendered document and shows them hierarchically; click any heading to jump to it in the document
 - **Minimap** - Document overview with color-coded content types (images, headings, lists, links, code blocks) and viewport highlight; toggle with F10 or status bar button. Plain text (.txt) and MDX files show simplified minimap without markdown-specific coloring

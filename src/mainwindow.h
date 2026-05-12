@@ -79,6 +79,7 @@ private slots:
     void onToggleFileTree(bool visible);
     void onToggleMinimap(bool visible);
     void onToggleWordWrap(bool enabled);
+    void onToggleZenMode();
     void onAbout();
     void onPrint();
     void onExportToPdf();
@@ -146,11 +147,20 @@ private:
     QAction *m_reloadAction = nullptr;
     QAction *m_navBackAction = nullptr;
     QAction *m_navForwardAction = nullptr;
+    QAction *m_zenModeAction = nullptr;
     QAction *m_findAction = nullptr;
     QAction *m_findNextAction = nullptr;
     QAction *m_showFileTreeAction = nullptr;
     QAction *m_showMinimapAction = nullptr;
     QAction *m_wordWrapAction = nullptr;
+
+    QToolBar *m_toolBar = nullptr;
+    bool m_zenMode = false;
+    bool m_preZenSidebar = false;
+    bool m_preZenMinimap = false;
+    bool m_preZenToolbar = false;
+    bool m_preZenStatusBar = false;
+    bool m_preZenMenuBar = false;
 
     QList<QString> m_navHistory;
     int m_navIndex = -1;
