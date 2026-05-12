@@ -173,7 +173,7 @@ void MainWindow::setupFileTree()
     m_leftTabs->setDocumentMode(true);
     m_leftTabs->setMinimumWidth(200);
     m_leftTabs->tabBar()->setDrawBase(false);
-    m_leftTabs->tabBar()->setStyleSheet(QStringLiteral("QTabBar { alignment: center; }"));
+    m_leftTabs->tabBar()->setExpanding(true);
 
     // File tree tab
     m_fileTree = new QTreeView(this);
@@ -222,11 +222,11 @@ void MainWindow::setupFileTree()
         }
     });
 
-    m_leftTabs->addTab(m_fileTree, QIcon(":/images/files.png"), tr("Files"));
+    m_leftTabs->addTab(m_fileTree, tr("Files"));
 
     // Outline tab
     setupOutline();
-    m_leftTabs->addTab(m_outlineTree, QIcon(":/images/list-tree.png"), tr("Outline"));
+    m_leftTabs->addTab(m_outlineTree, tr("Outline"));
 
     m_splitter->addWidget(m_leftTabs);
 }

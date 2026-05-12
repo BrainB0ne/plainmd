@@ -33,7 +33,7 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 | Preferences | `src/preferencesdialog.cpp/h/ui` | Ctrl+, |
 | Close File | `src/mainwindow.cpp` | File → Close File (Ctrl+F4), clears editor, keeps folder |
 | Reload | `src/mainwindow.cpp` | View → Reload (F5), `onReload()`, `loadFile()` |
-| Document Outline | `src/mainwindow.cpp` | Left panel toggle: Files ↔ Outline, `updateOutline()`, headingLevel() scan |
+| Document Outline | `src/mainwindow.cpp` | Left `QTabWidget` (tabs at bottom): Files/Outline, `setupOutline()`, `updateOutline()`, `headingLevel()` scan |
 | App icons | `images/*.png` | Copy from `tabler-icons/png/outline/` |
 | Windows installer | `installer.iss` | Inno Setup |
 | Windows portable ZIP | `build-zip.bat` | Creates portable distribution |
