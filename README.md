@@ -15,7 +15,7 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **Recent files & folders** - Quick access to recently opened files and folders with separate history and privacy toggles
 - **Auto-reload on file change** - Detects external file modifications and prompts to reload
 - **Manual reload** - Force a refresh of the current file with F5 (useful when auto-reload is missed or you want to clear caches)
-- **File tree toggle** - Show/hide file browser with F9 or status bar button for distraction-free reading
+- **File tree / Sidebar** - Show/hide sidebar with F9 or status bar button. Right-click any file to copy its path or reveal it in Explorer/File Manager. Right-click any folder to copy its path or open it in Explorer
 - **Document Outline** - Left `QTabWidget` (tabs at bottom) with Files/Outline panes. Outline scans headings from the rendered document and shows them hierarchically; click any heading to jump to it in the document
 - **Minimap** - Document overview with color-coded content types (images, headings, lists, links, code blocks) and viewport highlight; toggle with F10 or status bar button. Plain text (.txt) and MDX files show simplified minimap without markdown-specific coloring
 - **Status bar** - Shows word count, zoom level, file type, encoding (auto-detected UTF-8 or ANSI), line endings (CRLF/LF), word wrap toggle, and quick-toggle buttons for file tree and minimap
@@ -24,6 +24,7 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **Find/Search** - Search within documents with Ctrl+F, find next with F3
 - **Search in Files** - Search across all markdown files in the loaded folder with Ctrl+Shift+F. Shows match count per file, snippet preview, and highlights first occurrence when opened
 - **Print & Export** - Print to physical printer or export directly to PDF (with better emoji support)
+- **Copy File/Folder Path** - Right-click any file or folder in the sidebar to copy its full path to the clipboard (with native path separators)
 - **Copy Code** - Right-click on code blocks or inline code to copy to clipboard with custom context menu
 - **Customizable fonts** - Configure editor font and emoji print font
 - **Window title format** - Choose between filename only or full path in window title

@@ -743,31 +743,56 @@ void MainWindow::onFileTreeContextMenu(const QPoint &pos)
     QString filePath = m_fileModel->filePath(sourceIndex);
     QFileInfo info(filePath);
 
-    if (!info.isFile() || !isMarkdownFile(filePath)) return;
+    if (!info.exists()) return;
 
     QMenu contextMenu(this);
 
-    // Add external editor action if configured
-    QString externalEditor = m_settings.value("editor/externalEditor").toString();
-    if (!externalEditor.isEmpty()) {
-        QAction *openWithEditorAction = contextMenu.addAction(QIcon(":/images/edit.png"), tr("Open with External Editor"));
-        connect(openWithEditorAction, &QAction::triggered, this, [this, filePath]() {
-            m_settings.setValue("temp/externalEditorFile", filePath);
-            onOpenWithExternalEditor();
+    if (info.isFile() && isMarkdownFile(filePath)) {
+        // Markdown file context menu
+        QString externalEditor = m_settings.value("editor/externalEditor").toString();
+        if (!externalEditor.isEmpty()) {
+            QAction *openWithEditorAction = contextMenu.addAction(QIcon(":/images/edit.png"), tr("Open with External Editor"));
+            connect(openWithEditorAction, &QAction::triggered, this, [this, filePath]() {
+                m_settings.setValue("temp/externalEditorFile", filePath);
+                onOpenWithExternalEditor();
+            });
+            contextMenu.addSeparator();
+        }
+
+        QAction *copyFilePathAction = contextMenu.addAction(QIcon(":/images/clipboard-copy.png"), tr("Copy File Path"));
+        connect(copyFilePathAction, &QAction::triggered, this, [filePath]() {
+            QClipboard *clipboard = QApplication::clipboard();
+            clipboard->setText(QDir::toNativeSeparators(filePath));
         });
+    } else if (info.isDir()) {
+        // Folder context menu
+        QAction *copyFolderPathAction = contextMenu.addAction(QIcon(":/images/clipboard-copy.png"), tr("Copy Folder Path"));
+        connect(copyFolderPathAction, &QAction::triggered, this, [filePath]() {
+            QClipboard *clipboard = QApplication::clipboard();
+            clipboard->setText(QDir::toNativeSeparators(filePath));
+        });
+    }
+
+    if (!contextMenu.isEmpty()) {
         contextMenu.addSeparator();
     }
 
 #ifdef Q_OS_LINUX
     QAction *revealAction = contextMenu.addAction(QIcon(":/images/external-link.png"), tr("Show in File Manager"));
     connect(revealAction, &QAction::triggered, this, [filePath]() {
-        QProcess::startDetached("xdg-open", QStringList() << QFileInfo(filePath).absolutePath());
+        QFileInfo fi(filePath);
+        QString targetPath = fi.isDir() ? filePath : fi.absolutePath();
+        QProcess::startDetached("xdg-open", QStringList() << targetPath);
     });
 #else
     QAction *revealAction = contextMenu.addAction(QIcon(":/images/external-link.png"), tr("Show in Explorer"));
     connect(revealAction, &QAction::triggered, this, [filePath]() {
-        QString path = QDir::toNativeSeparators(filePath);
-        QProcess::startDetached("explorer", QStringList() << "/select," << path);
+        QFileInfo fi(filePath);
+        if (fi.isDir()) {
+            QProcess::startDetached("explorer", QStringList() << QDir::toNativeSeparators(filePath));
+        } else {
+            QProcess::startDetached("explorer", QStringList() << "/select," << QDir::toNativeSeparators(filePath));
+        }
     });
 #endif
 
