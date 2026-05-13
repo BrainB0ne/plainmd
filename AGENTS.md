@@ -36,6 +36,8 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 | Copy Path | `src/mainwindow.cpp` | File tree context menu: Copy File/Folder Path, Show in Explorer/File Manager |
 | Navigation History | `src/mainwindow.cpp` | Back/Forward (`Alt+←`/`Alt+→`), session-only, privacy toggle |
 | Zen Mode | `src/mainwindow.cpp` | `F11` toggle, hides sidebar/toolbar/statusbar/menubar, Escape to exit |
+| Enhanced Find | `src/finddialog.cpp/h/ui` | Case sensitive, whole words, regex toggle. Regex uses `QRegularExpression` on rendered plain text. Whole words disabled when regex active |
+
 
 | Document Outline | `src/mainwindow.cpp` | Left `QTabWidget` (tabs at bottom): Files/Outline, `setupOutline()`, `updateOutline()`, `headingLevel()` scan |
 | App icons | `images/*.png` | Copy from `tabler-icons/png/outline/` |
@@ -85,6 +87,7 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 - **File tree context menu**: Right-click any file → Copy File Path, Show in Explorer (Windows) / File Manager (Linux). Right-click any folder → Copy Folder Path, Show in Explorer. Uses `QDir::toNativeSeparators()` for clipboard paths.
 - **Navigation history**: Session-only back/forward stack (`Alt+←`/`Alt+→`). Toolbar buttons and View menu actions. Truncates forward history when branching. Privacy toggle in Preferences clears existing history. Never persisted to disk.
 - **Zen Mode**: `F11` toggles distraction-free view. Hides sidebar, toolbar, status bar, and menu bar. Stores pre-zen visibility states to restore exactly on exit. Explicit `F11` fallback in `keyPressEvent` because `QAction` shortcut stops working when menu bar is hidden. Escape also exits zen mode.
+- **Enhanced Find**: `Ctrl+F` dialog with case sensitive, whole words, and regular expression toggles. Regex searches use `QRegularExpression` on rendered plain text (markdown syntax is not preserved in rendered content). Whole words checkbox auto-disables when regex is active. Invalid regex shows error message. F3 "Find Next" remembers all search options including regex state.
 - **Search text lifecycle**: `m_lastSearchText` cleared on file switch, preserved for F3.
 - **Folder protection**: Blocks root drives and system folders. `folderHasValidFiles()` limits to 1000 files, 3 levels deep.
 - **CLI args**: `main.cpp` passes `argv[1]` to `MainWindow::openPath()` which detects directory vs file via `QFileInfo` and calls `loadFolder()` or `openFile()` accordingly. Relative paths are resolved to absolute before storing in recent folders.

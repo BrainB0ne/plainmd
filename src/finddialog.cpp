@@ -20,6 +20,7 @@
 
 #include <QTextDocument>
 #include <QTextEdit>
+#include <QRegularExpression>
 
 FindDialog::FindDialog(QTextEdit *editor, QWidget *parent)
     : QDialog(parent)
@@ -31,6 +32,12 @@ FindDialog::FindDialog(QTextEdit *editor, QWidget *parent)
 
     // Connect return pressed in search field to find next
     connect(ui->searchEdit, &QLineEdit::returnPressed, this, &FindDialog::on_findNextButton_clicked);
+
+    // Disable whole-word checkbox when regex is active (regex uses \b for word boundaries)
+    connect(ui->regexCheck, &QCheckBox::toggled, this, [this](bool checked) {
+        ui->wholeWordCheck->setEnabled(!checked);
+        if (checked) ui->wholeWordCheck->setChecked(false);
+    });
 }
 
 FindDialog::~FindDialog()
@@ -41,6 +48,21 @@ FindDialog::~FindDialog()
 QString FindDialog::searchText() const
 {
     return ui->searchEdit->text();
+}
+
+bool FindDialog::caseSensitive() const
+{
+    return ui->caseSensitiveCheck->isChecked();
+}
+
+bool FindDialog::wholeWords() const
+{
+    return ui->wholeWordCheck->isChecked();
+}
+
+bool FindDialog::regex() const
+{
+    return ui->regexCheck->isChecked();
 }
 
 void FindDialog::showEvent(QShowEvent *event)
@@ -73,6 +95,12 @@ void FindDialog::on_closeButton_clicked()
     hide();
 }
 
+bool FindDialog::findNext()
+{
+    // Perform search from current cursor position (for F3 from MainWindow)
+    return performFind(false);
+}
+
 bool FindDialog::performFind(bool fromStart)
 {
     if (!m_editor) return false;
@@ -83,10 +111,18 @@ bool FindDialog::performFind(bool fromStart)
     // Emit signal to notify MainWindow of search text (for F3 support)
     emit searchPerformed(text);
 
+    bool caseSensitive = ui->caseSensitiveCheck->isChecked();
+    bool wholeWords = ui->wholeWordCheck->isChecked();
+    bool useRegex = ui->regexCheck->isChecked();
+
+    if (useRegex) {
+        return performRegexFind(text, caseSensitive, fromStart);
+    }
+
     QTextDocument::FindFlags flags;
-    if (ui->caseSensitiveCheck->isChecked())
+    if (caseSensitive)
         flags |= QTextDocument::FindCaseSensitively;
-    if (ui->wholeWordCheck->isChecked())
+    if (wholeWords)
         flags |= QTextDocument::FindWholeWords;
 
     if (fromStart) {
@@ -113,11 +149,50 @@ bool FindDialog::performFind(bool fromStart)
     return found;
 }
 
+bool FindDialog::performRegexFind(const QString &pattern, bool caseSensitive, bool fromStart)
+{
+    if (!m_editor) return false;
+
+    QString documentText = m_editor->toPlainText();
+    QRegularExpression::PatternOptions options = QRegularExpression::MultilineOption;
+    if (!caseSensitive)
+        options |= QRegularExpression::CaseInsensitiveOption;
+
+    QRegularExpression regex(pattern, options);
+    if (!regex.isValid()) {
+        ui->statusLabel->setText(tr("Invalid regular expression: %1").arg(regex.errorString()));
+        return false;
+    }
+
+    int startPos = fromStart ? 0 : m_editor->textCursor().position();
+
+    // Search from startPos to end
+    QRegularExpressionMatch match = regex.match(documentText, startPos);
+
+    if (!match.hasMatch() || match.capturedStart() < startPos) {
+        // Wrap around: search from beginning
+        match = regex.match(documentText, 0);
+    }
+
+    if (match.hasMatch()) {
+        QTextCursor cursor = m_editor->textCursor();
+        cursor.setPosition(match.capturedStart());
+        cursor.setPosition(match.capturedEnd(), QTextCursor::KeepAnchor);
+        m_editor->setTextCursor(cursor);
+        m_editor->setFocus();
+        return true;
+    }
+
+    return false;
+}
+
 void FindDialog::updateStatus(bool found)
 {
-    if (!found) {
-        ui->statusLabel->setText(tr("Text not found."));
-    } else {
+    if (found) {
         ui->statusLabel->clear();
+    } else if (ui->statusLabel->text().isEmpty()) {
+        // Only show "not found" if no error message is already displayed
+        // (e.g. invalid regex error set by performRegexFind)
+        ui->statusLabel->setText(tr("Text not found."));
     }
 }

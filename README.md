@@ -23,7 +23,7 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 - **Status bar** - Shows word count, zoom level, file type, encoding (auto-detected UTF-8 or ANSI), line endings (CRLF/LF), word wrap toggle, and quick-toggle buttons for file tree and minimap
 - **Zoom controls** - Zoom in/out with Ctrl++ and Ctrl+-
 - **Word wrap toggle** - Toggle line wrapping with Ctrl+W or status bar button
-- **Find/Search** - Search within documents with Ctrl+F, find next with F3
+- **Enhanced Find** - Search within documents with `Ctrl+F`. Supports case sensitive, whole words, and regular expression modes. F3 repeats the last search with all options preserved
 - **Search in Files** - Search across all markdown files in the loaded folder with Ctrl+Shift+F. Shows match count per file, snippet preview, and highlights first occurrence when opened
 - **Print & Export** - Print to physical printer or export directly to PDF (with better emoji support)
 - **Copy File/Folder Path** - Right-click any file or folder in the sidebar to copy its full path to the clipboard (with native path separators)

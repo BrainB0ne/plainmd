@@ -58,6 +58,24 @@
     </layout>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="regexLayout">
+     <item>
+      <widget class="QCheckBox" name="regexCheck">
+       <property name="text">
+        <string>Regular expression</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacerRegex">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="QLabel" name="statusLabel">
      <property name="styleSheet">
       <string notr="true">QLabel { color: #e74c3c; }</string>

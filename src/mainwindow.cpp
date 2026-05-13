@@ -1199,9 +1199,12 @@ void MainWindow::onFind()
 {
     if (!m_findDialog) {
         m_findDialog = new FindDialog(m_editor, this);
-        // Connect to update last search text for F3 "Find Next" support
+        // Connect to update last search state for F3 "Find Next" support
         connect(m_findDialog, &FindDialog::searchPerformed, this, [this](const QString &text) {
             m_lastSearchText = text;
+            m_lastSearchCaseSensitive = m_findDialog->caseSensitive();
+            m_lastSearchWholeWords = m_findDialog->wholeWords();
+            m_lastSearchRegex = m_findDialog->regex();
         });
     }
     m_findDialog->show();
@@ -1215,18 +1218,9 @@ void MainWindow::onFindNext()
         return;
     }
 
-    // Try to find next occurrence
-    bool found = m_editor->find(m_lastSearchText);
-
-    // If not found, wrap around to beginning
-    if (!found) {
-        QTextCursor cursor = m_editor->textCursor();
-        cursor.movePosition(QTextCursor::Start);
-        m_editor->setTextCursor(cursor);
-
-        // Search from beginning
-        found = m_editor->find(m_lastSearchText);
-
+    // If FindDialog exists, delegate to it (handles regex and all options)
+    if (m_findDialog) {
+        bool found = m_findDialog->findNext();
         if (found) {
             // Brief feedback that we wrapped around
             if (m_statusFileMsg) {
@@ -1235,11 +1229,59 @@ void MainWindow::onFindNext()
                     m_statusMsgTimer->start(1500);
                 }
             }
+            m_editor->setFocus();
+        }
+        return;
+    }
+
+    // Fallback: manual search using stored options (FindDialog was never opened)
+    bool found = false;
+
+    if (m_lastSearchRegex) {
+        // Manual regex search
+        QString documentText = m_editor->toPlainText();
+        QRegularExpression::PatternOptions options = QRegularExpression::MultilineOption;
+        if (!m_lastSearchCaseSensitive)
+            options |= QRegularExpression::CaseInsensitiveOption;
+
+        QRegularExpression regex(m_lastSearchText, options);
+        if (regex.isValid()) {
+            int startPos = m_editor->textCursor().position();
+            QRegularExpressionMatch match = regex.match(documentText, startPos);
+            if (!match.hasMatch() || match.capturedStart() < startPos) {
+                match = regex.match(documentText, 0);
+            }
+            if (match.hasMatch()) {
+                QTextCursor cursor = m_editor->textCursor();
+                cursor.setPosition(match.capturedStart());
+                cursor.setPosition(match.capturedEnd(), QTextCursor::KeepAnchor);
+                m_editor->setTextCursor(cursor);
+                found = true;
+            }
+        }
+    } else {
+        QTextDocument::FindFlags flags;
+        if (m_lastSearchCaseSensitive)
+            flags |= QTextDocument::FindCaseSensitively;
+        if (m_lastSearchWholeWords)
+            flags |= QTextDocument::FindWholeWords;
+
+        found = m_editor->find(m_lastSearchText, flags);
+        if (!found) {
+            QTextCursor cursor = m_editor->textCursor();
+            cursor.movePosition(QTextCursor::Start);
+            m_editor->setTextCursor(cursor);
+            found = m_editor->find(m_lastSearchText, flags);
         }
     }
 
-    // Set focus so the selection is shown in color (not grey)
     if (found) {
+        if (m_statusFileMsg) {
+            m_statusFileMsg->setText(tr("Wrapped to beginning"));
+            if (m_statusMsgTimer) {
+                m_statusMsgTimer->start(1500);
+            }
+        }
         m_editor->setFocus();
     }
 }

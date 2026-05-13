@@ -205,6 +205,9 @@ private:
 
     // Last search text (from "Search in Files" or Find dialog) for F3 "Find Next"
     QString m_lastSearchText;
+    bool m_lastSearchCaseSensitive = false;
+    bool m_lastSearchWholeWords = false;
+    bool m_lastSearchRegex = false;
 
     void setupStatusBar();
     void updateStatusBar();

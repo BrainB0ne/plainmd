@@ -35,6 +35,10 @@ public:
     ~FindDialog();
 
     QString searchText() const;
+    bool caseSensitive() const;
+    bool wholeWords() const;
+    bool regex() const;
+    bool findNext();  // Perform next search (for F3 from MainWindow)
 
 protected:
     void showEvent(QShowEvent *event) override;
@@ -49,6 +53,7 @@ private slots:
 
 private:
     bool performFind(bool fromStart);
+    bool performRegexFind(const QString &pattern, bool caseSensitive, bool fromStart);
     void updateStatus(bool found);
 
     Ui::FindDialog *ui;
