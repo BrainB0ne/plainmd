@@ -162,8 +162,11 @@ qmake plainmd.pro && make
 | F3 | Find next |
 | Ctrl+Shift+F | Search in files |
 | F5 | Reload current file |
-| F9 | Toggle file tree |
+| Alt+Left | Navigate back |
+| Alt+Right | Navigate forward |
+| F9 | Toggle sidebar |
 | F10 | Toggle minimap |
+| F11 | Toggle zen mode |
 | Ctrl+W | Toggle word wrap |
 | Ctrl+P | Print |
 | Ctrl+Shift+P | Export to PDF |
@@ -171,7 +174,7 @@ qmake plainmd.pro && make
 | Ctrl++ | Zoom in |
 | Ctrl+- | Zoom out |
 | Ctrl+0 | Reset zoom |
-| Esc | Clear search highlight |
+| Esc | Clear search highlight / Exit zen mode |
 
 ## Configuration
 
