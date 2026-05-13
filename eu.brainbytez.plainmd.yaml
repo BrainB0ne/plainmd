@@ -25,6 +25,8 @@ modules:
       - qmake PREFIX=/app plainmd.pro
       - make -j$(nproc)
       - make install
+      - install -Dm644 eu.brainbytez.plainmd.desktop /app/share/applications/eu.brainbytez.plainmd.desktop
+      - install -Dm644 icon.png /app/share/icons/hicolor/256x256/apps/eu.brainbytez.plainmd.png
     sources:
       - type: dir
         path: .
