@@ -48,6 +48,12 @@ A simple and elegant **Markdown Viewer** built with **Qt6**.
 
 **Note:** If PlainMD fails to start with a missing DLL error, install the Visual C++ Redistributable from the link above. This is a one-time system requirement.
 
+**Portable version note:** The portable ZIP runs without installation, but settings and cached data are still saved to the host machine's standard locations:
+- **Settings:** `%APPDATA%\plainmd\PlainMD.ini`
+- **Cached external images:** `%TEMP%\plainmd_images\`
+
+To keep the app fully self-contained, place the portable ZIP contents on a USB drive — the executable will run from any location, though your settings will follow you only if you move the above folders manually.
+
 ### Linux
 - Qt 6.x runtime libraries
 - Standard desktop environment (X11 or Wayland)
