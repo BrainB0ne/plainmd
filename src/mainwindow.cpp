@@ -31,7 +31,9 @@
 #include <QDir>
 #include <QDragEnterEvent>
 #include <QDropEvent>
+#include <QCoreApplication>
 #include <QEventLoop>
+#include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QHeaderView>
@@ -75,11 +77,13 @@ bool MainWindow::isPortable()
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , m_settings(isPortable()
-                 ? QSettings(QCoreApplication::applicationDirPath() + "/Data/settings.ini", QSettings::IniFormat)
-                 : QSettings(QSettings::IniFormat, QSettings::UserScope,
-                             QApplication::organizationName(), QApplication::applicationName()))
 {
+    if (isPortable()) {
+        m_settings = std::make_unique<QSettings>(QCoreApplication::applicationDirPath() + "/Data/settings.ini", QSettings::IniFormat);
+    } else {
+        m_settings = std::make_unique<QSettings>(QSettings::IniFormat, QSettings::UserScope,
+                                                  QApplication::organizationName(), QApplication::applicationName());
+    }
     setupUI();
     setupMenuBar();
     setupToolBar();
@@ -93,8 +97,8 @@ MainWindow::MainWindow(QWidget *parent)
     bool folderLoadedNoFile = false;
 
     // Restore last opened folder if privacy setting allows (do this first)
-    if (m_settings.value("privacy/rememberLastFolder", true).toBool()) {
-        QString lastFolder = m_settings.value("lastFolder").toString();
+    if (m_settings->value("privacy/rememberLastFolder", true).toBool()) {
+        QString lastFolder = m_settings->value("lastFolder").toString();
         if (!lastFolder.isEmpty() && QDir(lastFolder).exists()) {
             loadFolder(lastFolder);
             folderLoadedNoFile = true;  // Folder loaded, but no file yet
@@ -102,8 +106,8 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     // Restore last opened file if privacy setting allows (loads file's folder only if no lastFolder)
-    if (m_settings.value("privacy/rememberLastFile", true).toBool()) {
-        QString lastFile = m_settings.value("lastFile").toString();
+    if (m_settings->value("privacy/rememberLastFile", true).toBool()) {
+        QString lastFile = m_settings->value("lastFile").toString();
         if (!lastFile.isEmpty() && QFile::exists(lastFile)) {
             // If no folder was loaded, openFile will load the file's folder
             // If a folder was already loaded, don't load the file's folder (keep lastFolder)
@@ -123,7 +127,7 @@ MainWindow::MainWindow(QWidget *parent)
     refreshRecentFoldersMenu();
 
     // Restore file tree visibility (default to visible)
-    bool showTree = m_settings.value("view/showFileTree", true).toBool();
+    bool showTree = m_settings->value("view/showFileTree", true).toBool();
     if (m_showFileTreeAction) {
         m_showFileTreeAction->setChecked(showTree);
     }
@@ -137,7 +141,7 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     // Restore minimap action state (but keep it hidden on welcome page until a file is loaded)
-    bool showMinimap = m_settings.value("view/showMinimap", false).toBool();
+    bool showMinimap = m_settings->value("view/showMinimap", false).toBool();
     if (m_showMinimapAction) {
         m_showMinimapAction->blockSignals(true);
         m_showMinimapAction->setChecked(showMinimap);
@@ -146,7 +150,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Minimap stays hidden on welcome page - will be shown when a file is loaded in loadFile()
 
     // Restore word wrap setting (default: enabled)
-    bool wordWrap = m_settings.value("view/wordWrap", true).toBool();
+    bool wordWrap = m_settings->value("view/wordWrap", true).toBool();
     if (m_wordWrapAction) {
         m_wordWrapAction->blockSignals(true);
         m_wordWrapAction->setChecked(wordWrap);
@@ -259,7 +263,7 @@ void MainWindow::setupEditor()
     connect(m_editor, &QTextEdit::customContextMenuRequested, this, &MainWindow::onEditorContextMenu);
 
     // Apply word wrap setting (default: enabled)
-    bool wordWrap = m_settings.value("view/wordWrap", true).toBool();
+    bool wordWrap = m_settings->value("view/wordWrap", true).toBool();
     m_editor->setLineWrapMode(wordWrap ? QTextEdit::WidgetWidth : QTextEdit::NoWrap);
 
     applyEditorFont();
@@ -539,7 +543,7 @@ void MainWindow::setupStatusBar()
     m_toggleFileTreeBtn->setFixedSize(24, 24);
     m_toggleFileTreeBtn->setStyleSheet(QStringLiteral("QPushButton { padding-left: 2px; padding-top: 2px; padding-bottom: 2px; padding-right: 4px; margin: 0px; }"));
     m_toggleFileTreeBtn->setCheckable(true);
-    m_toggleFileTreeBtn->setChecked(m_settings.value("view/showFileTree", true).toBool());
+    m_toggleFileTreeBtn->setChecked(m_settings->value("view/showFileTree", true).toBool());
     m_toggleFileTreeBtn->setToolTip(tr("Toggle sidebar"));
     connect(m_toggleFileTreeBtn, &QPushButton::toggled, this, &MainWindow::onToggleFileTree);
     status->addWidget(m_toggleFileTreeBtn);
@@ -607,7 +611,7 @@ void MainWindow::setupStatusBar()
 
     // Word wrap toggle button (icon only)
     m_statusWrapBtn = new QPushButton(this);
-    bool wordWrapDefault = m_settings.value("view/wordWrap", true).toBool();
+    bool wordWrapDefault = m_settings->value("view/wordWrap", true).toBool();
     m_statusWrapBtn->setIcon(QIcon(wordWrapDefault ? ":/images/text-wrap.png" : ":/images/text-wrap-disabled.png"));
     m_statusWrapBtn->setIconSize(QSize(20, 20));
     m_statusWrapBtn->setFlat(true);
@@ -631,7 +635,7 @@ void MainWindow::setupStatusBar()
     m_toggleMinimapBtn->setFixedSize(24, 24);
     m_toggleMinimapBtn->setStyleSheet(QStringLiteral("QPushButton { padding-left: 2px; padding-top: 2px; padding-bottom: 2px; padding-right: 4px; margin: 0px; }"));
     m_toggleMinimapBtn->setCheckable(true);
-    m_toggleMinimapBtn->setChecked(m_settings.value("view/showMinimap", false).toBool());
+    m_toggleMinimapBtn->setChecked(m_settings->value("view/showMinimap", false).toBool());
     m_toggleMinimapBtn->setToolTip(tr("Toggle minimap"));
     // Initially disabled on welcome page - will be enabled when file is loaded
     m_toggleMinimapBtn->setEnabled(!m_currentFile.isEmpty());
@@ -756,7 +760,7 @@ void MainWindow::onOpenFile()
 void MainWindow::onOpenFolder()
 {
     QString folderPath = QFileDialog::getExistingDirectory(
-        this, tr("Open Folder"), m_settings.value("lastFolder").toString());
+        this, tr("Open Folder"), m_settings->value("lastFolder").toString());
 
     if (!folderPath.isEmpty()) {
         loadFolder(folderPath);
@@ -773,7 +777,7 @@ void MainWindow::onFileTreeClicked(const QModelIndex &index)
 
     if (info.isFile() && isMarkdownFile(filePath)) {
         loadFile(filePath);
-        if (m_settings.value("privacy/keepRecentFiles", true).toBool()) {
+        if (m_settings->value("privacy/keepRecentFiles", true).toBool()) {
             updateRecentFiles(filePath);
         }
     }
@@ -794,11 +798,11 @@ void MainWindow::onFileTreeContextMenu(const QPoint &pos)
 
     if (info.isFile() && isMarkdownFile(filePath)) {
         // Markdown file context menu
-        QString externalEditor = m_settings.value("editor/externalEditor").toString();
+        QString externalEditor = m_settings->value("editor/externalEditor").toString();
         if (!externalEditor.isEmpty()) {
             QAction *openWithEditorAction = contextMenu.addAction(QIcon(":/images/edit.png"), tr("Open with External Editor"));
             connect(openWithEditorAction, &QAction::triggered, this, [this, filePath]() {
-                m_settings.setValue("temp/externalEditorFile", filePath);
+                m_settings->setValue("temp/externalEditorFile", filePath);
                 onOpenWithExternalEditor();
             });
             contextMenu.addSeparator();
@@ -961,9 +965,9 @@ void MainWindow::onEditorContextMenu(const QPoint &pos)
 
 void MainWindow::onOpenWithExternalEditor()
 {
-    QString externalEditor = m_settings.value("editor/externalEditor").toString();
-    QString filePath = m_settings.value("temp/externalEditorFile").toString();
-    m_settings.remove("temp/externalEditorFile");
+    QString externalEditor = m_settings->value("editor/externalEditor").toString();
+    QString filePath = m_settings->value("temp/externalEditorFile").toString();
+    m_settings->remove("temp/externalEditorFile");
 
     if (externalEditor.isEmpty() || filePath.isEmpty()) return;
 
@@ -1012,13 +1016,13 @@ void MainWindow::onRecentFolderTriggered()
 
 void MainWindow::onClearRecent()
 {
-    m_settings.setValue("recentFiles", QStringList());
+    m_settings->setValue("recentFiles", QStringList());
     refreshRecentFilesMenu();
 }
 
 void MainWindow::onClearRecentFolders()
 {
-    m_settings.setValue("recentFolders", QStringList());
+    m_settings->setValue("recentFolders", QStringList());
     refreshRecentFoldersMenu();
 }
 
@@ -1127,7 +1131,7 @@ void MainWindow::onToggleFileTree(bool visible)
 {
     if (m_leftTabs) {
         m_leftTabs->setVisible(visible);
-        m_settings.setValue("view/showFileTree", visible);
+        m_settings->setValue("view/showFileTree", visible);
     }
     // Sync status bar button with menu action (avoid infinite loop by checking first)
     if (m_toggleFileTreeBtn && m_toggleFileTreeBtn->isChecked() != visible) {
@@ -1142,7 +1146,7 @@ void MainWindow::onToggleMinimap(bool visible)
 {
     if (m_minimap) {
         m_minimap->setVisible(visible);
-        m_settings.setValue("view/showMinimap", visible);
+        m_settings->setValue("view/showMinimap", visible);
         if (visible) {
             m_minimap->updateContent();
         }
@@ -1161,7 +1165,7 @@ void MainWindow::onToggleWordWrap(bool enabled)
     if (m_editor) {
         m_editor->setLineWrapMode(enabled ? QTextEdit::WidgetWidth : QTextEdit::NoWrap);
     }
-    m_settings.setValue("view/wordWrap", enabled);
+    m_settings->setValue("view/wordWrap", enabled);
     // Sync menu action with button (avoid infinite loop by checking first)
     if (m_wordWrapAction && m_wordWrapAction->isChecked() != enabled) {
         m_wordWrapAction->setChecked(enabled);
@@ -1190,10 +1194,10 @@ void MainWindow::onPreferences()
         applyEditorFont();
         // Use default Qt markdown styling (no custom CSS)
         if (!dlg.keepRecentFiles()) {
-            m_settings.setValue("recentFiles", QStringList());
+            m_settings->setValue("recentFiles", QStringList());
         }
         if (!dlg.keepRecentFolders()) {
-            m_settings.setValue("recentFolders", QStringList());
+            m_settings->setValue("recentFolders", QStringList());
         }
         if (!dlg.navigationHistory()) {
             m_navHistory.clear();
@@ -1371,8 +1375,8 @@ void MainWindow::applyEditorFont()
 #else
     const QString defaultFontFamily = QStringLiteral("Segoe UI");
 #endif
-    QString family = m_settings.value("editor/fontFamily", defaultFontFamily).toString();
-    int size = m_settings.value("editor/fontSize", 11).toInt();
+    QString family = m_settings->value("editor/fontFamily", defaultFontFamily).toString();
+    int size = m_settings->value("editor/fontSize", 11).toInt();
     m_baseFontSize = size;  // Store base size for zoom calculations
     QFont font(family);
     font.setPointSize(size);
@@ -1537,14 +1541,14 @@ void MainWindow::onPrint()
         printDoc.setHtml(m_editor->toHtml());
 
         // Check if Nerd Font is configured for emoji printing
-        bool useNerdFont = m_settings.value("editor/useNerdFontForEmoji", false).toBool();
+        bool useNerdFont = m_settings->value("editor/useNerdFontForEmoji", false).toBool();
 #ifdef Q_OS_LINUX
         QString defaultEmojiFont = QStringLiteral("Noto Sans");
 #else
         QString defaultEmojiFont = QStringLiteral("Segoe UI");
 #endif
-        QString emojiFontFamily = m_settings.value("editor/printEmojiFont", defaultEmojiFont).toString();
-        int emojiFontSize = m_settings.value("editor/printEmojiFontSize", 11).toInt();
+        QString emojiFontFamily = m_settings->value("editor/printEmojiFont", defaultEmojiFont).toString();
+        int emojiFontSize = m_settings->value("editor/printEmojiFontSize", 11).toInt();
 
         QString printCss;
         QFont printFont;
@@ -1610,7 +1614,7 @@ void MainWindow::onExportToPdf()
     printDoc.setHtml(m_editor->toHtml());
 
     // Check if Nerd Font is configured for emoji printing
-    bool useNerdFont = m_settings.value("editor/useNerdFontForEmoji", false).toBool();
+    bool useNerdFont = m_settings->value("editor/useNerdFontForEmoji", false).toBool();
 #ifdef Q_OS_LINUX
     QString defaultEmojiFont = QStringLiteral("Noto Sans");
     QString fallbackEmojiFonts = QStringLiteral("'Noto Sans', 'Noto Color Emoji', sans-serif");
@@ -1618,8 +1622,8 @@ void MainWindow::onExportToPdf()
     QString defaultEmojiFont = QStringLiteral("Segoe UI");
     QString fallbackEmojiFonts = QStringLiteral("'Segoe UI', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif");
 #endif
-    QString emojiFontFamily = m_settings.value("editor/printEmojiFont", defaultEmojiFont).toString();
-    int emojiFontSize = m_settings.value("editor/printEmojiFontSize", 11).toInt();
+    QString emojiFontFamily = m_settings->value("editor/printEmojiFont", defaultEmojiFont).toString();
+    int emojiFontSize = m_settings->value("editor/printEmojiFontSize", 11).toInt();
 
     QString printCss;
     QFont printFont;
@@ -2054,7 +2058,7 @@ void MainWindow::openFile(const QString &filePath, bool loadFileFolder)
         }
     }
 
-    if (m_settings.value("privacy/keepRecentFiles", true).toBool()) {
+    if (m_settings->value("privacy/keepRecentFiles", true).toBool()) {
         updateRecentFiles(filePath);
     }
 }
@@ -2123,7 +2127,7 @@ void MainWindow::loadFile(const QString &filePath)
 
     m_imageUrlMap.clear();
 
-    bool previewExternal = m_settings.value("privacy/previewExternalImages", true).toBool();
+    bool previewExternal = m_settings->value("privacy/previewExternalImages", true).toBool();
     QString processedContent = resolveFrontMatter(content);
     processedContent = resolveExternalImages(processedContent, previewExternal);
     processedContent = resolveRelativeImages(processedContent, QFileInfo(filePath).absolutePath());
@@ -2160,12 +2164,12 @@ void MainWindow::loadFile(const QString &filePath)
     m_currentFile = filePath;
 
     // Save last opened file if privacy setting allows
-    if (m_settings.value("privacy/rememberLastFile", true).toBool()) {
-        m_settings.setValue("lastFile", filePath);
+    if (m_settings->value("privacy/rememberLastFile", true).toBool()) {
+        m_settings->setValue("lastFile", filePath);
     }
 
     // Format window title based on user preference
-    int titleFormat = m_settings.value("view/windowTitleFormat", 0).toInt();
+    int titleFormat = m_settings->value("view/windowTitleFormat", 0).toInt();
     if (titleFormat == 1) {
         // Full path format: "PlainMD - E:\\path\\to\\file.md"
         setWindowTitle(tr("PlainMD - %1").arg(QDir::toNativeSeparators(filePath)));
@@ -2229,7 +2233,7 @@ void MainWindow::loadFile(const QString &filePath)
     }
 
     // Show minimap when a file is loaded (if enabled in settings)
-    if (m_minimap && m_settings.value("view/showMinimap", false).toBool()) {
+    if (m_minimap && m_settings->value("view/showMinimap", false).toBool()) {
         m_minimap->show();
         m_minimap->updateContent();
     }
@@ -2251,7 +2255,7 @@ void MainWindow::loadFile(const QString &filePath)
     }
 
     // Track navigation history (session-only, not persisted)
-    if (!m_navigating && m_settings.value("privacy/navigationHistory", true).toBool()) {
+    if (!m_navigating && m_settings->value("privacy/navigationHistory", true).toBool()) {
         if (m_navIndex >= 0 && m_navIndex < m_navHistory.size() - 1) {
             // Truncate forward history when branching to a new path
             m_navHistory = m_navHistory.mid(0, m_navIndex + 1);
@@ -2330,8 +2334,8 @@ void MainWindow::loadFolder(const QString &folderPath, bool rememberAsLastFolder
     m_currentFolder = folderPath;
     m_proxyModel->setExemptPath(folderPath);
     m_fileModel->setRootPath(folderPath);
-    if (rememberAsLastFolder && m_settings.value("privacy/rememberLastFolder", true).toBool()) {
-        m_settings.setValue("lastFolder", folderPath);
+    if (rememberAsLastFolder && m_settings->value("privacy/rememberLastFolder", true).toBool()) {
+        m_settings->setValue("lastFolder", folderPath);
     }
 
     QModelIndex sourceRoot = m_fileModel->index(folderPath);
@@ -2347,18 +2351,18 @@ void MainWindow::loadFolder(const QString &folderPath, bool rememberAsLastFolder
     }
 
     // Track recent folder
-    if (m_settings.value("privacy/keepRecentFolders", true).toBool()) {
+    if (m_settings->value("privacy/keepRecentFolders", true).toBool()) {
         updateRecentFolders(folderPath);
     }
 }
 
 void MainWindow::updateRecentFiles(const QString &filePath)
 {
-    if (!m_settings.value("privacy/keepRecentFiles", true).toBool()) {
+    if (!m_settings->value("privacy/keepRecentFiles", true).toBool()) {
         return;
     }
 
-    QStringList recentFiles = m_settings.value("recentFiles").toStringList();
+    QStringList recentFiles = m_settings->value("recentFiles").toStringList();
 
     if (!filePath.isEmpty()) {
         recentFiles.removeAll(filePath);
@@ -2366,14 +2370,14 @@ void MainWindow::updateRecentFiles(const QString &filePath)
         while (recentFiles.size() > 10) {
             recentFiles.removeLast();
         }
-        m_settings.setValue("recentFiles", recentFiles);
+        m_settings->setValue("recentFiles", recentFiles);
     } else {
         // Remove non-existent files
         QStringList validFiles;
         for (const QString &f : recentFiles) {
             if (QFile::exists(f)) validFiles.append(f);
         }
-        m_settings.setValue("recentFiles", validFiles);
+        m_settings->setValue("recentFiles", validFiles);
     }
 
     refreshRecentFilesMenu();
@@ -2386,8 +2390,8 @@ void MainWindow::refreshRecentFilesMenu()
     m_recentMenu->clear();
     m_recentActions.clear();
 
-    bool keepRecent = m_settings.value("privacy/keepRecentFiles", true).toBool();
-    QStringList recentFiles = keepRecent ? m_settings.value("recentFiles").toStringList() : QStringList();
+    bool keepRecent = m_settings->value("privacy/keepRecentFiles", true).toBool();
+    QStringList recentFiles = keepRecent ? m_settings->value("recentFiles").toStringList() : QStringList();
 
     if (recentFiles.isEmpty()) {
         QAction *emptyAction = new QAction(tr("No Recent Files"), this);
@@ -2415,11 +2419,11 @@ void MainWindow::refreshRecentFilesMenu()
 
 void MainWindow::updateRecentFolders(const QString &folderPath)
 {
-    if (!m_settings.value("privacy/keepRecentFolders", true).toBool()) {
+    if (!m_settings->value("privacy/keepRecentFolders", true).toBool()) {
         return;
     }
 
-    QStringList recentFolders = m_settings.value("recentFolders").toStringList();
+    QStringList recentFolders = m_settings->value("recentFolders").toStringList();
 
     if (!folderPath.isEmpty()) {
         recentFolders.removeAll(folderPath);
@@ -2427,14 +2431,14 @@ void MainWindow::updateRecentFolders(const QString &folderPath)
         while (recentFolders.size() > 10) {
             recentFolders.removeLast();
         }
-        m_settings.setValue("recentFolders", recentFolders);
+        m_settings->setValue("recentFolders", recentFolders);
     } else {
         // Remove non-existent folders
         QStringList validFolders;
         for (const QString &f : recentFolders) {
             if (QDir(f).exists()) validFolders.append(f);
         }
-        m_settings.setValue("recentFolders", validFolders);
+        m_settings->setValue("recentFolders", validFolders);
     }
 
     refreshRecentFoldersMenu();
@@ -2447,8 +2451,8 @@ void MainWindow::refreshRecentFoldersMenu()
     m_recentFoldersMenu->clear();
     m_recentFolderActions.clear();
 
-    bool keepRecent = m_settings.value("privacy/keepRecentFolders", true).toBool();
-    QStringList recentFolders = keepRecent ? m_settings.value("recentFolders").toStringList() : QStringList();
+    bool keepRecent = m_settings->value("privacy/keepRecentFolders", true).toBool();
+    QStringList recentFolders = keepRecent ? m_settings->value("recentFolders").toStringList() : QStringList();
 
     if (recentFolders.isEmpty()) {
         QAction *emptyAction = new QAction(tr("No Recent Folders"), this);
@@ -2818,9 +2822,9 @@ void MainWindow::dropEvent(QDropEvent *event)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    m_settings.setValue("geometry", saveGeometry());
-    m_settings.setValue("windowState", saveState());
-    m_settings.setValue("splitterState", m_splitter->saveState());
+    m_settings->setValue("geometry", saveGeometry());
+    m_settings->setValue("windowState", saveState());
+    m_settings->setValue("splitterState", m_splitter->saveState());
     event->accept();
 }
 

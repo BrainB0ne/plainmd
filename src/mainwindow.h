@@ -20,6 +20,7 @@
 
 #include <QMainWindow>
 #include <QTextEdit>
+#include <memory>
 #include <QMenuBar>
 #include <QMenu>
 #include <QToolBar>
@@ -169,7 +170,7 @@ private:
 
     QString m_currentFile;
     QString m_currentFolder;
-    QSettings m_settings;
+    std::unique_ptr<QSettings> m_settings;
     QHash<QString, QString> m_imageUrlMap; // localPath -> originalUrl
     FindDialog *m_findDialog = nullptr;
     SearchInDialog *m_searchInDialog = nullptr;

@@ -26,6 +26,7 @@
 #include <QDir>
 #include <QMouseEvent>
 #include <QCoreApplication>
+#include <memory>
 
 PreferencesDialog::PreferencesDialog(QWidget *parent)
     : QDialog(parent)
@@ -45,10 +46,14 @@ PreferencesDialog::~PreferencesDialog()
 
 void PreferencesDialog::loadSettings()
 {
-    QSettings settings(MainWindow::isPortable()
-                     ? QSettings(QCoreApplication::applicationDirPath() + "/Data/settings.ini", QSettings::IniFormat)
-                     : QSettings(QSettings::IniFormat, QSettings::UserScope,
-                                 QApplication::organizationName(), QApplication::applicationName()));
+    std::unique_ptr<QSettings> settingsPtr;
+    if (MainWindow::isPortable()) {
+        settingsPtr = std::make_unique<QSettings>(QCoreApplication::applicationDirPath() + "/Data/settings.ini", QSettings::IniFormat);
+    } else {
+        settingsPtr = std::make_unique<QSettings>(QSettings::IniFormat, QSettings::UserScope,
+                                                   QApplication::organizationName(), QApplication::applicationName());
+    }
+    QSettings &settings = *settingsPtr;
 
 #ifdef Q_OS_LINUX
     const QString defaultFontFamily = QStringLiteral("DejaVu Sans");
@@ -91,10 +96,14 @@ void PreferencesDialog::loadSettings()
 
 void PreferencesDialog::saveSettings()
 {
-    QSettings settings(MainWindow::isPortable()
-                       ? QSettings(QCoreApplication::applicationDirPath() + "/Data/settings.ini", QSettings::IniFormat)
-                       : QSettings(QSettings::IniFormat, QSettings::UserScope,
-                                   QApplication::organizationName(), QApplication::applicationName()));
+    std::unique_ptr<QSettings> settingsPtr;
+    if (MainWindow::isPortable()) {
+        settingsPtr = std::make_unique<QSettings>(QCoreApplication::applicationDirPath() + "/Data/settings.ini", QSettings::IniFormat);
+    } else {
+        settingsPtr = std::make_unique<QSettings>(QSettings::IniFormat, QSettings::UserScope,
+                                                   QApplication::organizationName(), QApplication::applicationName());
+    }
+    QSettings &settings = *settingsPtr;
     settings.setValue("editor/fontFamily", m_currentFont.family());
     settings.setValue("editor/fontSize", m_currentFont.pointSize());
     settings.setValue("editor/externalEditor", QDir::fromNativeSeparators(ui->externalEditorEdit->text()));
