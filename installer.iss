@@ -3,16 +3,16 @@
 
 [Setup]
 AppName=PlainMD
-AppVersion=1.4.0
-AppVerName=PlainMD 1.4.0
-VersionInfoVersion=1.4.0.0
-VersionInfoTextVersion=1.4.0
+AppVersion=1.4.1
+AppVerName=PlainMD 1.4.1
+VersionInfoVersion=1.4.1.0
+VersionInfoTextVersion=1.4.1
 AppCopyright=Copyright (C) 2026 BrainByteZ
 AppPublisher=BrainByteZ
 DefaultDirName={autopf64}\PlainMD
 DefaultGroupName=PlainMD
 OutputDir=dist
-OutputBaseFilename=plainmd-1.4.0-x64-setup
+OutputBaseFilename=plainmd-1.4.1-x64-setup
 SetupIconFile=icon.ico
 UninstallDisplayIcon={app}\plainmd.exe
 Compression=lzma2

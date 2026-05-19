@@ -23,7 +23,7 @@ if not exist "release\plainmd.exe" (
 )
 
 REM Extract version from src\main.cpp
-REM Look for: app.setApplicationVersion("1.3.2");
+REM Look for: app.setApplicationVersion("1.4.1");
 set "VERSION="
 for /f "delims=" %%a in ('findstr /r /c:"setApplicationVersion.*[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*" src\main.cpp 2^>nul') do (
     set "LINE=%%a"
