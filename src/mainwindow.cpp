@@ -62,10 +62,23 @@
 #include <QStackedWidget>
 #include <QSizePolicy>
 
+bool MainWindow::isPortable()
+{
+    static bool checked = false;
+    static bool portable = false;
+    if (!checked) {
+        portable = QFile::exists(QCoreApplication::applicationDirPath() + "/portable");
+        checked = true;
+    }
+    return portable;
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , m_settings(QSettings::IniFormat, QSettings::UserScope,
-                 QApplication::organizationName(), QApplication::applicationName())
+    , m_settings(isPortable()
+                 ? QSettings(QCoreApplication::applicationDirPath() + "/Data/settings.ini", QSettings::IniFormat)
+                 : QSettings(QSettings::IniFormat, QSettings::UserScope,
+                             QApplication::organizationName(), QApplication::applicationName()))
 {
     setupUI();
     setupMenuBar();
@@ -2624,10 +2637,13 @@ QString MainWindow::resolveExternalImages(const QString &markdownContent, bool p
         if (ext.isEmpty()) ext = "png";
 
         QByteArray hash = QCryptographicHash::hash(urlStr.toUtf8(), QCryptographicHash::Md5).toHex();
-        QString localPath = QDir::tempPath() + "/plainmd_images/" + QString::fromLatin1(hash) + "." + ext;
+        QString cacheDir = isPortable()
+            ? QCoreApplication::applicationDirPath() + "/Data/images"
+            : QDir::tempPath() + "/plainmd_images";
+        QString localPath = cacheDir + "/" + QString::fromLatin1(hash) + "." + ext;
 
         if (!QFile::exists(localPath)) {
-            QDir().mkpath(QDir::tempPath() + "/plainmd_images");
+            QDir().mkpath(cacheDir);
             QNetworkAccessManager nam;
             QUrl imgUrl(urlStr);
             QNetworkRequest req(imgUrl);

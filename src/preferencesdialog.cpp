@@ -17,6 +17,7 @@
 
 #include "preferencesdialog.h"
 #include "ui_preferencesdialog.h"
+#include "mainwindow.h"
 
 #include <QSettings>
 #include <QApplication>
@@ -24,6 +25,7 @@
 #include <QFileDialog>
 #include <QDir>
 #include <QMouseEvent>
+#include <QCoreApplication>
 
 PreferencesDialog::PreferencesDialog(QWidget *parent)
     : QDialog(parent)
@@ -43,8 +45,10 @@ PreferencesDialog::~PreferencesDialog()
 
 void PreferencesDialog::loadSettings()
 {
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
-                       QApplication::organizationName(), QApplication::applicationName());
+    QSettings settings(MainWindow::isPortable()
+                     ? QSettings(QCoreApplication::applicationDirPath() + "/Data/settings.ini", QSettings::IniFormat)
+                     : QSettings(QSettings::IniFormat, QSettings::UserScope,
+                                 QApplication::organizationName(), QApplication::applicationName()));
 
 #ifdef Q_OS_LINUX
     const QString defaultFontFamily = QStringLiteral("DejaVu Sans");
@@ -87,8 +91,10 @@ void PreferencesDialog::loadSettings()
 
 void PreferencesDialog::saveSettings()
 {
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
-                       QApplication::organizationName(), QApplication::applicationName());
+    QSettings settings(MainWindow::isPortable()
+                       ? QSettings(QCoreApplication::applicationDirPath() + "/Data/settings.ini", QSettings::IniFormat)
+                       : QSettings(QSettings::IniFormat, QSettings::UserScope,
+                                   QApplication::organizationName(), QApplication::applicationName()));
     settings.setValue("editor/fontFamily", m_currentFont.family());
     settings.setValue("editor/fontSize", m_currentFont.pointSize());
     settings.setValue("editor/externalEditor", QDir::fromNativeSeparators(ui->externalEditorEdit->text()));

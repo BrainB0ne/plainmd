@@ -42,7 +42,7 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 | Document Outline | `src/mainwindow.cpp` | Left `QTabWidget` (tabs at bottom): Files/Outline, `setupOutline()`, `updateOutline()`, `headingLevel()` scan |
 | App icons | `images/*.png` | Copy from `tabler-icons/png/outline/` |
 | Windows installer | `installer.iss` | Inno Setup |
-| Windows portable ZIP | `build-zip.bat` | Creates portable distribution |
+| Windows portable ZIP | `build-zip.bat` | Creates portable distribution with `portable` marker |
 | Release archive | `archive-release.sh`/`.bat` | Versioned zip with prefix directory |
 | Checksums | `make-checksums.sh`/`.bat` | SHA256 per package + combined |
 | All-in-one release | `build-release.sh`/`.bat` | Full pipeline: build → package → checksum → archive |
@@ -92,6 +92,7 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 - **Folder protection**: Blocks root drives and system folders. `folderHasValidFiles()` limits to 1000 files, 3 levels deep.
 - **CLI args**: `main.cpp` passes `argv[1]` to `MainWindow::openPath()` which detects directory vs file via `QFileInfo` and calls `loadFolder()` or `openFile()` accordingly. Relative paths are resolved to absolute before storing in recent folders.
 - **Plain text loading**: `QTextEdit::setPlainText()` inherits the cursor's current char format. After clicking a heading in the outline, the cursor holds bold formatting. When switching to a `.txt` file, this leaks into the plain text display. Fix: call `setCurrentCharFormat(QTextCharFormat())` before `setPlainText()` to reset the format.
+- **Portable mode** (Windows): A `portable` file next to the executable triggers self-contained mode. `MainWindow::isPortable()` checks for this marker. When active: `QSettings` uses `Data/settings.ini` in the app directory; external image cache goes to `Data/images/`. The portable ZIP builder (`build-zip.bat`) includes the `portable` marker automatically.
 
 ## COMMANDS
 ```bash

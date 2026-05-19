@@ -54,6 +54,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     void openFile(const QString &filePath, bool loadFileFolder = true);
     void openPath(const QString &path);
+    static bool isPortable();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

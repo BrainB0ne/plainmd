@@ -140,12 +140,15 @@ echo Features:>>"%TEMP_DIR%\README-PORTABLE.txt"
 echo - Markdown Viewer with file tree sidebar>>"%TEMP_DIR%\README-PORTABLE.txt"
 echo - Portable - runs from any location>>"%TEMP_DIR%\README-PORTABLE.txt"
 echo - No registry entries or system modifications>>"%TEMP_DIR%\README-PORTABLE.txt"
-echo - Settings stored in %%APPDATA%%\plainmd\>>"%TEMP_DIR%\README-PORTABLE.txt"
+echo - Settings and cached images stored in the application folder>>"%TEMP_DIR%\README-PORTABLE.txt"
 echo.>>"%TEMP_DIR%\README-PORTABLE.txt"
 echo For more information: https://github.com/BrainB0ne/PlainMD>>"%TEMP_DIR%\README-PORTABLE.txt"
 echo.>>"%TEMP_DIR%\README-PORTABLE.txt"
 echo Copyright (C) 2026 BrainByteZ>>"%TEMP_DIR%\README-PORTABLE.txt"
 echo Licensed under GPLv3>>"%TEMP_DIR%\README-PORTABLE.txt"
+
+REM Create portable marker file
+ echo.>"%TEMP_DIR%\portable"
 
 REM Create the ZIP file
 echo.

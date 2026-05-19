@@ -34,6 +34,7 @@ src/
 | Zen Mode | `mainwindow.cpp` | `F11` toggle, hides sidebar/toolbar/statusbar/menubar, Escape to exit |
 | Enhanced Find | `finddialog.cpp/h/ui` | Case sensitive, whole words, regex toggle. Regex uses `QRegularExpression` on rendered plain text. Whole words disabled when regex active |
 | Document Outline | `mainwindow.cpp` | Left `QTabWidget` (tabs at bottom), `setupOutline()`, `updateOutline()`, deferred `headingLevel()` scan |
+| Portable mode | `mainwindow.cpp` | `isPortable()` checks for `portable` marker next to exe |
 | Zoom | `mainwindow.cpp` | `zoomIn(2)`/`zoomOut(2)` — Qt6 only |
 | Minimap colors | `minimap.cpp` | Catppuccin palette, content type detection |
 | Minimap click/scroll | `minimap.cpp` | `mousePressEvent()`, `mouseMoveEvent()` |
