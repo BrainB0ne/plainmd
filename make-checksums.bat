@@ -63,27 +63,31 @@ del /f /q SHA256SUMS 2>nul
 
 REM Generate individual .sha256 files for each package
 for %%f in (*.*) do (
-    REM Skip directories and existing checksum files
+    REM Skip directories, existing checksum files, and release archives
     if /I not "%%~xf"==".sha256" (
         if /I not "%%~xf"==".sha256sum" (
             if /I not "%%~xf"==".tmp" (
                 if "%%f" NEQ "SHA256SUMS" (
-                    echo Processing: %%f
-                    certutil -hashfile "%%f" SHA256 > "%%f.sha256.tmp" 2>nul
-                    if errorlevel 1 (
-                        echo   ERROR: Failed to generate hash for %%f
-                        del "%%f.sha256.tmp" 2>nul
-                    ) else (
-                        REM Extract just the hash (certutil outputs extra lines)
-                        set "HASH_LINE="
-                        for /f "skip=1 tokens=*" %%a in (%%f.sha256.tmp) do (
-                            if not defined HASH_LINE (
-                                set "HASH_LINE=%%a"
-                                echo %%a  %%f > "%%f.sha256"
+                    echo "%%f" | findstr /I /R /C:"-release\.zip$" /C:"-release\.tar\.gz$" >nul && (
+                        echo   Skipping release archive: %%f
+                    ) || (
+                        echo Processing: %%f
+                        certutil -hashfile "%%f" SHA256 > "%%f.sha256.tmp" 2>nul
+                        if errorlevel 1 (
+                            echo   ERROR: Failed to generate hash for %%f
+                            del "%%f.sha256.tmp" 2>nul
+                        ) else (
+                            REM Extract just the hash (certutil outputs extra lines)
+                            set "HASH_LINE="
+                            for /f "skip=1 tokens=*" %%a in (%%f.sha256.tmp) do (
+                                if not defined HASH_LINE (
+                                    set "HASH_LINE=%%a"
+                                    echo %%a  %%f > "%%f.sha256"
+                                )
                             )
+                            del "%%f.sha256.tmp" 2>nul
+                            echo   Created: %%f.sha256
                         )
-                        del "%%f.sha256.tmp" 2>nul
-                        echo   Created: %%f.sha256
                     )
                 )
             )

@@ -25,8 +25,8 @@ rm -f *.sha256 SHA256SUMS
 
 # Generate individual .sha256 files for each package
 for file in *; do
-    # Skip directories and existing checksum files
-    if [ -f "$file" ] && [[ ! "$file" =~ \.sha256$ ]]; then
+    # Skip directories, existing checksum files, and release archives
+    if [ -f "$file" ] && [[ ! "$file" =~ \.sha256$ ]] && [[ ! "$file" =~ -release\.(zip|tar\.gz)$ ]]; then
         sha256sum "$file" > "${file}.sha256"
         echo "  ${file}.sha256"
     fi
