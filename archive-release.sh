@@ -46,13 +46,13 @@ echo ""
 
 # Create archive inside dist folder
 cd dist
-# Remove old archive if exists
-rm -f "${OUTPUT_FILE}"
+TAR_FILE="${OUTPUT_FILE%.zip}.tar.gz"
+# Remove old archive outputs if they exist
+rm -f "${OUTPUT_FILE}" "${TAR_FILE}"
 
 # Stage files in a versioned prefix directory for clean archive root
 PREFIX="plainmd-${VERSION}"
 STAGING_DIR="${SCRIPT_DIR}/.archive-staging-$$"
-TAR_FILE="${OUTPUT_FILE%.zip}.tar.gz"
 
 trap 'rm -rf "${STAGING_DIR}"' EXIT INT TERM
 mkdir -p "${STAGING_DIR}/${PREFIX}"
