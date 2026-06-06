@@ -17,6 +17,7 @@
 
 #include "filterproxymodel.h"
 #include <QRegularExpression>
+#include <functional>
 
 FilterProxyModel::FilterProxyModel(QObject *parent)
     : QSortFilterProxyModel(parent)
@@ -61,14 +62,36 @@ bool FilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &source
 
 bool FilterProxyModel::hasMatchingFiles(const QString &folderPath) const
 {
-    QDirIterator it(folderPath, QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        it.next();
-        if (it.fileInfo().isFile() && fileMatches(it.fileName())) {
-            return true;
+    const int maxDepth = 3;
+    const int maxEntries = 1000;
+    int entriesVisited = 0;
+
+    std::function<bool(const QString&, int)> checkDirectory;
+    checkDirectory = [&](const QString &path, int depth) -> bool {
+        if (depth > maxDepth || entriesVisited >= maxEntries) {
+            return false;
         }
-    }
-    return false;
+
+        QDir dir(path);
+        const QFileInfoList entries = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+        for (const QFileInfo &entry : entries) {
+            if (++entriesVisited > maxEntries) {
+                return false;
+            }
+
+            if (entry.isFile() && fileMatches(entry.fileName())) {
+                return true;
+            }
+
+            if (entry.isDir() && checkDirectory(entry.filePath(), depth + 1)) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    return checkDirectory(folderPath, 0);
 }
 
 bool FilterProxyModel::fileMatches(const QString &fileName) const
