@@ -51,6 +51,8 @@ if exist "!INNO_SETUP!" (
     call build-installer.bat
     if errorlevel 1 (
         echo   ERROR: Installer build failed.
+        pause
+        exit /b 1
     ) else (
         echo   Installer built successfully.
     )
