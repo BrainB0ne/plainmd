@@ -1,5 +1,18 @@
 from PIL import Image, ImageDraw
 
+
+def create_svg_icon():
+    svg = '''<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <rect x="16" y="16" width="224" height="224" rx="36" fill="#1e5f91"/>
+  <rect x="26" y="26" width="204" height="204" rx="31" fill="#3498db"/>
+  <path d="M 83 148 L 83 51 L 128 140 L 173 51 L 173 166 L 128 166 L 128 191" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="butt" stroke-linejoin="round"/>
+  <polygon points="108,190 148,190 128,212" fill="#ffffff"/>
+</svg>
+'''
+    with open('icon.svg', 'w', encoding='utf-8') as f:
+        f.write(svg)
+
+
 def create_md_icon():
     size = 256
     supersample = 4
@@ -81,9 +94,14 @@ def create_md_icon():
     # Create a 96x96 version specifically for the welcome page (smooth scaling)
     img_96 = img.resize((96, 96), resample)
     img_96.save('icon_96.png', format='PNG')
+    create_svg_icon()
     
     import os
-    print(f"Created icon.ico ({os.path.getsize('icon.ico')} bytes) and icon.png ({os.path.getsize('icon.png')} bytes)")
+    print(
+        f"Created icon.ico ({os.path.getsize('icon.ico')} bytes), "
+        f"icon.png ({os.path.getsize('icon.png')} bytes), and "
+        f"icon.svg ({os.path.getsize('icon.svg')} bytes)"
+    )
 
 if __name__ == "__main__":
     create_md_icon()
