@@ -68,7 +68,7 @@ for %%f in (*.*) do (
         if /I not "%%~xf"==".sha256sum" (
             if /I not "%%~xf"==".tmp" (
                 if "%%f" NEQ "SHA256SUMS" (
-                    echo "%%f" | findstr /I /R /C:"-release\.zip$" /C:"-release\.tar\.gz$" >nul && (
+                    echo(%%f| findstr /I /R /C:"-release\.zip$" /C:"-release\.tar\.gz$" >nul && (
                         echo   Skipping release archive: %%f
                     ) || (
                         echo Processing: %%f
