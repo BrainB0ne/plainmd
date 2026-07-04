@@ -93,6 +93,11 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowIcon(QIcon(":/icon.png"));
     resize(1200, 800);
 
+    // Restore window state
+    restoreGeometry(m_settings->value("geometry").toByteArray());
+    restoreState(m_settings->value("windowState").toByteArray());
+    m_splitter->restoreState(m_settings->value("splitterState").toByteArray());
+
     // Track if we should show welcome page (folder loaded but no file opened)
     bool folderLoadedNoFile = false;
 
