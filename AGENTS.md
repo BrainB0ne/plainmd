@@ -37,8 +37,6 @@ Qt6/C++17 single-window markdown viewer. qmake-only build. No tests, no CI.
 | Navigation History | `src/mainwindow.cpp` | Back/Forward (`Alt+←`/`Alt+→`), session-only, privacy toggle |
 | Zen Mode | `src/mainwindow.cpp` | `F11` toggle, hides sidebar/toolbar/statusbar/menubar, Escape to exit |
 | Enhanced Find | `src/finddialog.cpp/h/ui` | Case sensitive, whole words, regex toggle. Regex uses `QRegularExpression` on rendered plain text. Whole words disabled when regex active |
-
-
 | Document Outline | `src/mainwindow.cpp` | Left `QTabWidget` (tabs at bottom): Files/Outline, `setupOutline()`, `updateOutline()`, `headingLevel()` scan |
 | App icons | `images/*.png` | Copy from `tabler-icons/png/outline/` |
 | Windows installer | `installer.iss` | Inno Setup |
