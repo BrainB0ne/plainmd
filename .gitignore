@@ -61,3 +61,4 @@ scripts/*.exe
 
 # OMO
 .sisyphus/
+build
