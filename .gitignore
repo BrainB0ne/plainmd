@@ -1,6 +1,7 @@
 # Build artifacts
 release/
 debug/
+build/
 Makefile*
 .qmake.stash
 *.exe
@@ -61,4 +62,3 @@ scripts/*.exe
 
 # OMO
 .sisyphus/
-build
