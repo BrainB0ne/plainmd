@@ -62,7 +62,7 @@ if errorlevel 1 (
 )
 
 :: Extract version from src\main.cpp
-:: Look for: app.setApplicationVersion("1.4.2");
+:: Look for: app.setApplicationVersion("1.4.3");
 set "VERSION="
 for /f "delims=" %%a in ('findstr /r /c:"setApplicationVersion.*[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*" src\main.cpp 2^>nul') do (
     for /f "tokens=2 delims=()" %%b in ("%%a") do (
