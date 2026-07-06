@@ -13,10 +13,19 @@ echo ============================================
 echo.
 
 :: Check for Visual Studio 2022
-set "VSVARS=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat"
-if not exist "%VSVARS%" (
-    echo ERROR: Visual Studio 2022 not found at expected location.
-    echo Please install VS2022 Community edition or update this script with your VS path.
+set "VSVARS="
+for %%p in (Community Professional Enterprise) do (
+    if not defined VSVARS (
+        if exist "C:\Program Files\Microsoft Visual Studio\2022\%%p\VC\Auxiliary\Build\vcvarsall.bat" (
+            set "VSVARS=C:\Program Files\Microsoft Visual Studio\2022\%%p\VC\Auxiliary\Build\vcvarsall.bat"
+        )
+    )
+)
+
+if not defined VSVARS (
+    echo ERROR: Visual Studio 2022 not found at expected locations.
+    echo Please install VS2022 or update this script with your installation path.
+    pause
     exit /b 1
 )
 
